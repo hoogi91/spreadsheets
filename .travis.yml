@@ -26,7 +26,7 @@ install:
       composer require typo3/cms-core:"@dev" --no-update;
     fi
   - composer require nimut/typo3-complete:"$TYPO3"
-  - export TYPO3_PATH_ROOT=$PWD/.Build/public
+  - export TYPO3_PATH_ROOT=$PWD/.Build/web
   - export typo3DatabaseName=typo3
   - export typo3DatabaseHost=localhost
   - export typo3DatabaseUsername=root
