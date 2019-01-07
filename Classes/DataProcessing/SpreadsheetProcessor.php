@@ -53,12 +53,23 @@ class SpreadsheetProcessor implements DataProcessorInterface
         $ignoreStyles = (bool)$cObj->stdWrapValue('ignoreStyles', $processorConfiguration['options.'] ?: [], false);
         if (!$ignoreStyles) {
             $htmlIdentifier = $cObj->stdWrapValue('htmlIdentifier', $processorConfiguration['options.'] ?: [], 'sheet');
-            $this->getPageRenderer()->addCssFile(
-                PageGenerator::inline2TempFile($extractorService->getStyles($htmlIdentifier), 'css')
-            );
+            $this->addStyleSheetContentToPageRenderer($extractorService->getStyles($htmlIdentifier));
         }
 
         return $processedData;
+    }
+
+    /**
+     * @param string $content
+     */
+    protected function addStyleSheetContentToPageRenderer($content)
+    {
+        if (version_compare(TYPO3_version, '9.4', '>=')) {
+            $tempFile = GeneralUtility::writeStyleSheetContentToTemporaryFile($content);
+        } else {
+            $tempFile = PageGenerator::inline2TempFile($content, 'css');
+        }
+        $this->getPageRenderer()->addCssFile($tempFile);
     }
 
     /**
