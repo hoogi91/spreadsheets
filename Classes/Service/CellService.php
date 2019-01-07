@@ -148,5 +148,4 @@ class CellService
 
         return NumberFormat::toFormattedString($value, NumberFormat::FORMAT_GENERAL, $callback);
     }
-
 }

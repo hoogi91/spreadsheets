@@ -118,7 +118,9 @@ class SpreadsheetValue
         }
 
         try {
-            static::$fileReferences[$this->fileReferenceUid] = $this->fileRepository->findFileReferenceByUid($this->fileReferenceUid);
+            static::$fileReferences[$this->fileReferenceUid] = $this->fileRepository->findFileReferenceByUid(
+                $this->fileReferenceUid
+            );
         } catch (ResourceDoesNotExistException $e) {
             return null;
         }

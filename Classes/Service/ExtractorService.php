@@ -157,7 +157,7 @@ class ExtractorService
      * Create array from a range of cells.
      *
      * @param string $range             Range of cells (i.e. "A1:B10"), or just one cell (i.e. "A1")
-     * @param bool   $returnCellRef     False - Return a simple array of rows and columns indexed by number counting from zero
+     * @param bool   $returnCellRef     False - Return array of rows/columns indexed by number counting from zero
      *                                  True - Return rows and columns indexed by their actual row and column IDs
      * @param bool   $calculate
      * @param bool   $format

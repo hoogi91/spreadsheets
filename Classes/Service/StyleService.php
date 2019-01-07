@@ -271,9 +271,16 @@ class StyleService
         foreach ($styles as $styleName => $styleDefinition) {
             if ($styleName != 'html') {
                 if (!empty($htmlIdentifier)) {
-                    $content .= '#' . $htmlIdentifier . ' ' . $styleName . ' { ' . $this->assembleStyles($styleDefinition) . ' }' . PHP_EOL;
+                    $content .= vsprintf('#%s %s {%s}' . PHP_EOL, [
+                        $htmlIdentifier,
+                        $styleName,
+                        $this->assembleStyles($styleDefinition),
+                    ]);
                 } else {
-                    $content .= $styleName . ' { ' . $this->assembleStyles($styleDefinition) . ' }' . PHP_EOL;
+                    $content .= vsprintf('%s {%s}' . PHP_EOL, [
+                        $styleName,
+                        $this->assembleStyles($styleDefinition),
+                    ]);
                 }
             }
         }

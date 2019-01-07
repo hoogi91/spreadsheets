@@ -18,10 +18,12 @@ class SpreadsheetProcessor implements DataProcessorInterface
 {
 
     /**
-     * @param ContentObjectRenderer $cObj                       The content object renderer, which contains data of the content element
+     * @param ContentObjectRenderer $cObj                       The content object renderer,
+     *                                                          which contains data of the content element
      * @param array                 $contentObjectConfiguration The configuration of Content Object
      * @param array                 $processorConfiguration     The configuration of this processor
-     * @param array                 $processedData              Key/value store of processed data (e.g. to be passed to a Fluid View)
+     * @param array                 $processedData              Key/value store of processed data
+     *                                                          (e.g. to be passed to a Fluid View)
      *
      * @return array the processed data as key/value store
      */

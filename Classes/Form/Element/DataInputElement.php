@@ -134,7 +134,9 @@ class DataInputElement extends AbstractFormElement
     {
         // add own requireJS module that uses above dependency and addtional styling for handsontable
         $resultArray['requireJsModules'] = ['TYPO3/CMS/Spreadsheets/SpreadsheetDataInput'];
-        $resultArray['stylesheetFiles'] = ['EXT:spreadsheets/Resources/Public/Css/HandsOnTable/handsontable.full.min.css'];
+        $resultArray['stylesheetFiles'] = [
+            'EXT:spreadsheets/Resources/Public/Css/HandsOnTable/handsontable.full.min.css',
+        ];
     }
 
     /**
@@ -263,11 +265,14 @@ class DataInputElement extends AbstractFormElement
             list($cells) = Coordinate::splitRange($cells);
             list($startColumn, $startRow) = Coordinate::coordinateFromString($cells[0]);
             list($endColumn, $endRow) = Coordinate::coordinateFromString($cells[1]);
+
+            $startIndex = Coordinate::columnIndexFromString($startColumn);
+            $endIndex = Coordinate::columnIndexFromString($endColumn);
             return [
                 'row'     => (int)$startRow - 1,
-                'col'     => Coordinate::columnIndexFromString($startColumn) - 1,
+                'col'     => $startIndex - 1,
                 'rowspan' => (int)$endRow - $startRow + 1,
-                'colspan' => Coordinate::columnIndexFromString($endColumn) - Coordinate::columnIndexFromString($startColumn) + 1,
+                'colspan' => $endIndex - $startIndex + 1,
             ];
         }, $sheet->getMergeCells()));
     }

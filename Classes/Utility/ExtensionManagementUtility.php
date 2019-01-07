@@ -12,13 +12,17 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class ExtensionManagementUtility extends \TYPO3\CMS\Core\Utility\ExtensionManagementUtility
 {
     /**
-     * @param array  $itemArray Numerical array: [0] => Plugin label, [1] => Underscored plugin name, [2] => Path to plugin icon relative to TYPO3_mainDir (optional use icon registry)
+     * @param array  $itemArray Numerical array:
+     *                          [0] => Plugin label
+     *                          [1] => Underscored plugin name
+     *                          [2] => Path to plugin icon relative to TYPO3_mainDir (optional use icon registry)
      * @param string $position  before or after an underscored plugin name
      */
     public static function addItemToCTypeList(array $itemArray, string $position = '')
     {
-        if (is_array($GLOBALS['TCA']['tt_content']['columns']) && is_array($GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'])) {
-            $items = &$GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'];
+        $columnConfig = &$GLOBALS['TCA']['tt_content']['columns'];
+        if (is_array($columnConfig) && is_array($columnConfig['CType']['config']['items'])) {
+            $items = &$columnConfig['CType']['config']['items'];
 
             foreach ($items as $k => $v) {
                 // remove plugin if it was added before
