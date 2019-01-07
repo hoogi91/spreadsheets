@@ -1,0 +1,10 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+
+<f:section name="Main">
+	<f:for each="{data}" key="column" as="value" iteration="columnIterator">
+		<f:render partial="Cell" section="Main"
+				  arguments="{cell: value, row: row, column: column, rowIterator: rowIterator, columnIterator: columnIterator}"/>
+	</f:for>
+</f:section>
+
+</html>

@@ -1,0 +1,8 @@
+# cat=spreadsheets/file; type=string; label=Path to template root (FE)
+plugin.tx_spreadsheets.view.templateRootPath =
+
+# cat=spreadsheets/file; type=string; label=Path to template partials (FE)
+plugin.tx_spreadsheets.view.partialRootPath =
+
+# cat=spreadsheets/file; type=string; label=Path to template layouts (FE)
+plugin.tx_spreadsheets.view.layoutRootPath =

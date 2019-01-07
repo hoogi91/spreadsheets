@@ -1,0 +1,14 @@
+mod.wizards.newContentElement.wizardItems.common {
+    elements {
+        spreadsheets_table {
+            iconIdentifier = mimetypes-open-document-spreadsheet
+            title = LLL:EXT:spreadsheets/Resources/Private/Language/locallang.xlf:wizards.spreadsheets_table.title
+            description = LLL:EXT:spreadsheets/Resources/Private/Language/locallang.xlf:wizards.spreadsheets_table.description
+            tt_content_defValues {
+                CType = spreadsheets_table
+            }
+        }
+    }
+
+    show := addToList(spreadsheets_table)
+}

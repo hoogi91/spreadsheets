@@ -1,0 +1,34 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+
+<f:section name="Main">
+	<f:spaceless>
+		<f:if condition="{cell.superscript}">
+			<f:then>
+				<sup>
+					<f:render section="Raw" arguments="{cell: cell}"/>
+				</sup>
+			</f:then>
+			<f:else if="{cell.subscript}">
+				<sub>
+					<f:render section="Raw" arguments="{cell: cell}"/>
+				</sub>
+			</f:else>
+			<f:else>
+				<f:render section="Raw" arguments="{cell: cell}"/>
+			</f:else>
+		</f:if>
+	</f:spaceless>
+</f:section>
+
+<f:section name="Raw">
+	<f:if condition="{cell.isRichText}">
+		<f:then>
+			{cell.value -> f:format.raw() -> f:format.nl2br()}
+		</f:then>
+		<f:else>
+			{cell.value -> f:format.htmlspecialchars() -> f:format.nl2br()}
+		</f:else>
+	</f:if>
+</f:section>
+
+</html>

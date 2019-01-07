@@ -1,0 +1,30 @@
+tt_content.spreadsheets_table =< lib.contentElement
+tt_content.spreadsheets_table {
+	layoutRootPaths {
+		200 = EXT:spreadsheets/Resources/Private/Layouts/
+		210 = {$plugin.tx_spreadsheets.view.layoutRootPath}
+	}
+
+	partialRootPaths {
+		200 = EXT:spreadsheets/Resources/Private/Partials/
+		210 = {$plugin.tx_spreadsheets.view.partialRootPath}
+	}
+
+	templateRootPaths {
+		200 = EXT:spreadsheets/Resources/Private/Templates/
+		210 = {$plugin.tx_spreadsheets.view.templateRootPath}
+	}
+
+	templateName = Table
+
+	dataProcessing {
+		10 = Hoogi91\Spreadsheets\DataProcessing\SpreadsheetProcessor
+		10 {
+			value.field = bodytext
+			options {
+				htmlIdentifier.dataWrap = sheet{field:uid}
+				ignoreStyles.field = tx_spreadsheets_ignore_styles
+			}
+		}
+	}
+}

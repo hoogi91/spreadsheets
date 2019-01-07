@@ -1,0 +1,105 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+	  xmlns:c="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+	  data-namespace-typo3-fluid="true">
+
+<f:if condition="{missingUploadField}">
+	<f:then>
+		<f:render section="Alert" arguments="{severity: 'danger', icon: 'times'}" contentAs="content">
+			<b>
+				<f:translate key="formengine.spreadsheet.input.missing-upload.title"
+							 extensionName="spreadsheets"/>
+			</b>
+			<div>
+				<f:translate key="formengine.spreadsheet.input.missing-upload.message"
+							 extensionName="spreadsheets"/>
+			</div>
+		</f:render>
+	</f:then>
+	<f:else if="{nonValidReferences}">
+		<f:render section="Alert" arguments="{severity: 'warning', icon: 'exclamation'}" contentAs="content">
+			<b>
+				<f:translate key="formengine.spreadsheet.input.non-valid-upload.title"
+							 extensionName="spreadsheets"/>
+			</b>
+			<div>
+				<f:translate key="formengine.spreadsheet.input.non-valid-upload.message"
+							 extensionName="spreadsheets"/>
+			</div>
+		</f:render>
+	</f:else>
+	<f:else>
+		<f:render section="DataInput" arguments="{_all}"/>
+	</f:else>
+</f:if>
+
+<f:section name="Alert">
+	<div class="alert alert-{f:if(condition: severity, then: severity, else: 'danger')}">
+		<div class="media">
+			<div class="media-left">
+				<span class="fa-stack fa-lg callout-icon">
+					<i class="fa fa-circle fa-stack-2x"></i>
+					<i class="fa fa-{f:if(condition: icon, then: icon, else: 'times')} fa-stack-1x"></i>
+				</span>
+			</div>
+			<div class="media-body">
+				<f:format.raw>{content}</f:format.raw>
+			</div>
+		</div>
+	</div>
+</f:section>
+
+<f:section name="DataInput">
+	<div class="form-control-wrap spreadsheet-input-wrap" data-spreadsheet="{sheetData}">
+		<div class="input-group" style="{f:if(condition: inputSize, then: 'width:{inputSize}%')}">
+			<span class="input-group-addon">
+				<c:icon identifier="mimetypes-open-document-spreadsheet"/>
+			</span>
+
+			<f:form.hidden name="currentDatabaseValue" class="spreadsheet-input-original"
+						   value="{valueObject.databaseValue}"/>
+			<f:form.hidden name="currentFormattedvalue" class="spreadsheet-input-original-formatted"
+						   value="{valueObject.formattedValue}"/>
+			<f:form.hidden name="{inputName}" class="spreadsheet-input-database"
+						   value="{valueObject.databaseValue}"/>
+
+			<f:form.select name="file" class="form-control form-control-adapt spreadsheet-file-select"
+						   value="{valueObject.fileReferenceUid}">
+				<f:for each="{items}" key="key" as="item">
+					<f:form.select.option value="{key}">{item.nameWithoutExtension}</f:form.select.option>
+				</f:for>
+			</f:form.select>
+
+			<span class="input-group-btn">
+				<f:form.textfield name="formattedValue" class="form-control spreadsheet-input-formatted" type="text"
+								  value="{valueObject.formattedValue}" readonly="readonly"/>
+			</span>
+			<span class="input-group-btn">
+				<button class="btn btn-default spreadsheet-select-button" type="button">
+					<span class="open-icon">
+						<c:icon identifier="actions-open"/>
+					</span>
+					<span class="close-icon" style="display:none;">
+						<c:icon identifier="actions-close"/>
+					</span>
+				</button>
+				<button class="btn btn-default spreadsheet-reset-button" type="button">
+					<c:icon identifier="actions-edit-undo"/>
+				</button>
+			</span>
+		</div>
+		<div class="help-block">
+			<div class="btn-group spreadsheet-sheets" role="group" style="display:none;"></div>
+		</div>
+
+		<f:if condition="{sheetsOnly}">
+			<f:else>
+				<div class="spreadsheet-table"
+					 style="position:relative;width:100%;min-height:150px;max-height:300px;overflow:hidden;display:none;">
+					<div class="handsontable"></div>
+				</div>
+			</f:else>
+		</f:if>
+	</div>
+</f:section>
+
+</html>

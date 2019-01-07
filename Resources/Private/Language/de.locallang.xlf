@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0" xmlns:t3="http://typo3.org/schemas/xliff">
+	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2018-01-01T00:00:00Z"
+		  product-name="spreadsheets">
+		<body>
+			<trans-unit id="formengine.spreadsheet.input.missing-upload.title" xml:space="preserve">
+				<source>Missing Spreadsheet Input Field</source>
+				<target>Tabellen Upload-Feld ist nicht vorhanden</target>
+			</trans-unit>
+			<trans-unit id="formengine.spreadsheet.input.missing-upload.message" xml:space="preserve">
+				<source>Das benötigte Upload-Feld der Tabelle scheint im TCA zu fehlen oder existiert nicht!</source>
+			</trans-unit>
+			<trans-unit id="formengine.spreadsheet.input.non-valid-upload.title" xml:space="preserve">
+				<source>No valid Spreadsheet has been uploaded</source>
+				<target>Keine valide Kalkulationstabelle vorhanden</target>
+			</trans-unit>
+			<trans-unit id="formengine.spreadsheet.input.non-valid-upload.message" xml:space="preserve">
+				<source>Es wurde keine validate Kalkulationstabelle gefunden, bitte lade eine valide Datei hoch!</source>
+			</trans-unit>
+			<trans-unit id="backend.preview.spreadsheets_table.config" xml:space="preserve">
+				<source>Configuration</source>
+				<target>Konfiguration</target>
+			</trans-unit>
+			<trans-unit id="backend.preview.spreadsheets_table.file" xml:space="preserve">
+				<source>File:</source>
+				<target>Datei:</target>
+			</trans-unit>
+			<trans-unit id="backend.preview.spreadsheets_table.sheet" xml:space="preserve">
+				<source>Sheet:</source>
+				<target>Arbeitsblatt:</target>
+			</trans-unit>
+			<trans-unit id="backend.preview.spreadsheets_table.selection" xml:space="preserve">
+				<source>Selection:</source>
+				<target>Selektion:</target>
+			</trans-unit>
+			<trans-unit id="wizards.spreadsheets_table.title" xml:space="preserve">
+				<source>Table (Spreadsheets)</source>
+				<target>Tabelle (Kalkulationstabellen)</target>
+			</trans-unit>
+			<trans-unit id="wizards.spreadsheets_table.description" xml:space="preserve">
+				<source>Adds table by spreadsheet file</source>
+				<target>Fügt eine Kalkulationstabelle anhand einer hochgeladenen Datei hinzu</target>
+			</trans-unit>
+			<trans-unit id="tca.assets" xml:space="preserve">
+				<source>Spreadsheet elements</source>
+				<target>Kalkulationstabellen</target>
+			</trans-unit>
+			<trans-unit id="tca.bodytext" xml:space="preserve">
+				<source>Spreadsheet Selection</source>
+				<target>Selektion der Kalkulationstabelle</target>
+			</trans-unit>
+			<trans-unit id="tca.tx_spreadsheets_ignore_styles" xml:space="preserve">
+				<source>Spreadsheet Styling</source>
+				<target>Styling der Kalkulationstabelle</target>
+			</trans-unit>
+			<trans-unit id="tca.tx_spreadsheets_ignore_styles.label" xml:space="preserve">
+				<source>Disable</source>
+				<target>Deaktivieren</target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

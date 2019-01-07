@@ -1,0 +1,32 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+<f:layout name="Default"/>
+
+<f:section name="Main">
+	<f:spaceless>
+		<f:if condition="{spreadsheet}">
+			<table id="sheet{data.uid}" border="0" cellpadding="0" cellspacing="0"
+				   class="table{f:if(condition: '{data.tx_spreadsheets_ignore_styles} && {data.table_class}', then: ' table-{data.table_class}')}">
+				<f:if condition="{spreadsheet.headData}">
+					<thead>
+					<f:for each="{spreadsheet.headData}" key="row" as="rowData" iteration="rowIterator">
+						<th>
+							<f:render partial="Columns" section="Main"
+									  arguments="{data: rowData, row: row, rowIterator: rowIterator}"/>
+						</th>
+					</f:for>
+					</thead>
+				</f:if>
+				<f:if condition="{spreadsheet.bodyData}">
+					<tbody>
+					<f:for each="{spreadsheet.bodyData}" key="row" as="rowData" iteration="rowIterator">
+						<tr>
+							<f:render partial="Columns" section="Main"
+									  arguments="{data: rowData, row: row, rowIterator: rowIterator}"/>
+						</tr>
+					</f:for>
+					</tbody>
+				</f:if>
+			</table>
+		</f:if>
+	</f:spaceless>
+</f:section>

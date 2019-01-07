@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0" xmlns:t3="http://typo3.org/schemas/xliff">
+	<file source-language="en" datatype="plaintext" original="messages" date="2018-01-01T00:00:00Z"
+		  product-name="spreadsheets">
+		<body>
+			<trans-unit id="formengine.spreadsheet.input.missing-upload.title" xml:space="preserve">
+				<source>Missing Spreadsheet Input Field</source>
+			</trans-unit>
+			<trans-unit id="formengine.spreadsheet.input.missing-upload.message" xml:space="preserve">
+				<source>The required upload field for spreadsheet is missing in TCA configuration or doesn't exists!</source>
+			</trans-unit>
+			<trans-unit id="formengine.spreadsheet.input.non-valid-upload.title" xml:space="preserve">
+				<source>No valid Spreadsheet has been uploaded</source>
+			</trans-unit>
+			<trans-unit id="formengine.spreadsheet.input.non-valid-upload.message" xml:space="preserve">
+				<source>The upload field doesn't contain any valid spreadsheet, please upload a valid file!</source>
+			</trans-unit>
+			<trans-unit id="backend.preview.spreadsheets_table.config" xml:space="preserve">
+				<source>Configuration</source>
+			</trans-unit>
+			<trans-unit id="backend.preview.spreadsheets_table.file" xml:space="preserve">
+				<source>File:</source>
+			</trans-unit>
+			<trans-unit id="backend.preview.spreadsheets_table.sheet" xml:space="preserve">
+				<source>Sheet:</source>
+			</trans-unit>
+			<trans-unit id="backend.preview.spreadsheets_table.selection" xml:space="preserve">
+				<source>Selection:</source>
+			</trans-unit>
+			<trans-unit id="wizards.spreadsheets_table.title" xml:space="preserve">
+				<source>Table (Excel Spreadsheets)</source>
+			</trans-unit>
+			<trans-unit id="wizards.spreadsheets_table.description" xml:space="preserve">
+				<source>Adds table by spreadsheet file</source>
+			</trans-unit>
+			<trans-unit id="tca.assets" xml:space="preserve">
+				<source>Spreadsheet elements</source>
+			</trans-unit>
+			<trans-unit id="tca.bodytext" xml:space="preserve">
+				<source>Spreadsheet Selection</source>
+			</trans-unit>
+			<trans-unit id="tca.tx_spreadsheets_ignore_styles" xml:space="preserve">
+				<source>Spreadsheet Styling</source>
+			</trans-unit>
+			<trans-unit id="tca.tx_spreadsheets_ignore_styles.label" xml:space="preserve">
+				<source>Disable</source>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

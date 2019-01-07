@@ -1,0 +1,51 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+	  xmlns:s="http://typo3.org/ns/Hoogi91/Spreadsheets/ViewHelpers"
+	  data-namespace-typo3-fluid="true">
+
+<f:if condition="{header}">
+	<f:else>
+		<p>
+			<strong>
+				<f:translate key="wizards.spreadsheets_table.title" extensionName="spreadsheets"/>
+			</strong>
+		</p>
+	</f:else>
+</f:if>
+
+<strong>
+	<f:translate key="backend.preview.spreadsheets_table.config" extensionName="spreadsheets"/>
+</strong>
+
+<f:alias map="{value: '{bodytext -> s:value.get()}'}">
+	<ul>
+		<li>
+			<i>
+				<f:translate key="backend.preview.spreadsheets_table.file" extensionName="spreadsheets"/>
+			</i>
+			{value.fileReference.name}
+		</li>
+
+		<f:alias map="{title: '{value.fileReference -> s:reader.sheet.title(index: value.sheetIndex)}'}">
+			<f:if condition="{title}">
+				<li>
+					<i>
+						<f:translate key="backend.preview.spreadsheets_table.sheet"
+									 extensionName="spreadsheets"/>
+					</i>
+					{title}
+				</li>
+			</f:if>
+		</f:alias>
+
+		<f:if condition="{value.selection}">
+			<li>
+				<i>
+					<f:translate key="backend.preview.spreadsheets_table.selection"
+								 extensionName="spreadsheets"/>
+				</i>
+				{value.selection}
+			</li>
+		</f:if>
+	</ul>
+</f:alias>
+</html>
