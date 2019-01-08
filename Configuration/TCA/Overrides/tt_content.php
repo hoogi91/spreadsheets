@@ -11,8 +11,8 @@ call_user_func(function ($extKey, $table) {
 
     // add own assets upload field
     $allowedFileExtensions = \Hoogi91\Spreadsheets\Service\ReaderService::ALLOWED_EXTENSTIONS;
-    \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns($table, array(
-        'tx_spreadsheets_assets'        => array(
+    \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns($table, [
+        'tx_spreadsheets_assets'        => [
             'config' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getFileFieldTCAConfig(
                 'tx_spreadsheets_assets',
                 [
@@ -29,7 +29,7 @@ call_user_func(function ($extKey, $table) {
                 ],
                 implode(',', $allowedFileExtensions)
             ),
-        ),
+        ],
         'tx_spreadsheets_ignore_styles' => [
             'config' => [
                 'type'    => 'check',
@@ -42,7 +42,7 @@ call_user_func(function ($extKey, $table) {
                 'default' => false,
             ],
         ],
-    ));
+    ]);
 
 
     // add own palettes
@@ -51,7 +51,7 @@ call_user_func(function ($extKey, $table) {
     ];
 
     // Configure the default backend fields for the content element
-    $GLOBALS['TCA'][$table]['types']['spreadsheets_table'] = array(
+    $GLOBALS['TCA'][$table]['types']['spreadsheets_table'] = [
         'showitem' => '
             --div--;LLL:EXT:core/Resources/Private/Language/Form/locallang_tabs.xlf:general,
                 --palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:palette.general;general,
@@ -87,5 +87,5 @@ call_user_func(function ($extKey, $table) {
                 'displayCond' => 'FIELD:tx_spreadsheets_ignore_styles:>:0',
             ],
         ],
-    );
+    ];
 }, 'spreadsheets', 'tt_content');
