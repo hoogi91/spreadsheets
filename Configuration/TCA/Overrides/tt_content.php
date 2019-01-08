@@ -1,7 +1,7 @@
 <?php
 defined('TYPO3_MODE') or die();
 
-call_user_func(function ($extKey, $table) {
+(function ($extKey, $table) {
     // Adds the content element to the "Type" dropdown
     \Hoogi91\Spreadsheets\Utility\ExtensionManagementUtility::addItemToCTypeList([
         'LLL:EXT:' . $extKey . '/Resources/Private/Language/locallang.xlf:wizards.spreadsheets_table.title',
@@ -88,4 +88,4 @@ call_user_func(function ($extKey, $table) {
             ],
         ],
     ];
-}, 'spreadsheets', 'tt_content');
+})('spreadsheets', 'tt_content');

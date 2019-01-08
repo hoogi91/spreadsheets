@@ -1,7 +1,7 @@
 <?php
 defined('TYPO3_MODE') or die();
 
-call_user_func(function ($extKey) {
+(function ($extKey) {
     if (TYPO3_MODE === 'BE') {
         // add content element to insert tables in content element wizard
         \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPageTSConfig(
@@ -35,4 +35,4 @@ call_user_func(function ($extKey) {
             ],
         ]);
     }
-}, 'spreadsheets');
+})('spreadsheets');
