@@ -39,7 +39,7 @@ defined('TYPO3_MODE') or die();
                         '',
                     ],
                 ],
-                'default' => false,
+                'default' => 0,
             ],
         ],
     ]);
