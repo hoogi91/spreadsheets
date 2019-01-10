@@ -24,7 +24,7 @@ defined('TYPO3_MODE') or die();
         $pageRenderer = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Page\PageRenderer::class);
         $pageRenderer->addRequireJsConfiguration([
             'paths' => [
-                'jquery'       => 'sysext/core/Resources/Public/JavaScript/Contrib/jquery/',
+                'jquery'       => 'sysext/core/Resources/Public/JavaScript/Contrib/jquery/jquery',
                 'Handsontable' => '../typo3conf/ext/spreadsheets/Resources/Public/JavaScript/HandsOnTable/handsontable.full.min',
             ],
             'shim'  => [
