@@ -12,5 +12,10 @@ $EM_CONF[$_EXTKEY] = [
             'typo3' => '8.7.0-9.99.99',
         ],
     ],
+    'autoload'     => [
+        'psr-4' => [
+            'Hoogi91\\Spreadsheets\\' => 'Classes',
+        ],
+    ],
 ];
 
