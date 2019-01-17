@@ -2,6 +2,14 @@
 defined('TYPO3_MODE') or die();
 
 (function ($extKey) {
+    if (class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet') === false) {
+        /** @noinspection PhpIncludeInspection */
+        include(\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath(
+            $extKey,
+            'Resources/Private/Composer/vendor/autoload.php'
+        ));
+    }
+
     if (TYPO3_MODE === 'BE') {
         // add content element to insert tables in content element wizard
         \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPageTSConfig(

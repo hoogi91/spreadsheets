@@ -48,7 +48,13 @@
       "mkdir -p .Build/web/typo3conf/ext/",
       "[ -L .Build/web/typo3conf/ext/spreadsheets ] || ln -snvf ../../../../. .Build/web/typo3conf/ext/spreadsheets"
     ],
+    "extension-spreadsheet-fallback": [
+      "mkdir -p Resources/Private/Composer",
+      "if [ -f Resources/Private/Composer/composer.json ]; then cd Resources/Private/Composer/ && composer update; fi",
+      "if [ ! -f Resources/Private/Composer/composer.json ]; then cd Resources/Private/Composer/ && composer require phpoffice/phpspreadsheet=^1.0 && composer config classmap-authoritative true && composer config prepend-autoloader true && composer dump-autoload -o; fi"
+    ],
     "extension-cleanup-for-release": [
+      "@extension-spreadsheet-fallback",
       "rm -rf Tests/",
       "rm -f .gitattributes",
       "rm -f .gitignore",

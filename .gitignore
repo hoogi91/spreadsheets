@@ -4,6 +4,7 @@
 ansible/
 vendor/
 var/
+Resources/Private/Composer/
 composer.phar
 composer.lock
 Vagrantfile
