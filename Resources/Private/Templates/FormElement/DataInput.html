@@ -75,7 +75,8 @@
 							  value="{valueObject.formattedValue}" readonly="readonly"/>
 
 			<span class="input-group-btn">
-				<button class="btn btn-default spreadsheet-select-button" type="button" title="Edit/Close Selection">
+				<button class="btn btn-default spreadsheet-select-button" type="button"
+						title="{f:translate(key: 'formengine.spreadsheet.button.selection.title', extensionName: 'spreadsheets')}">
 					<span class="open-icon">
 						<c:icon identifier="actions-open"/>
 					</span>
@@ -86,7 +87,8 @@
 			</span>
 
 			<span class="input-group-btn">
-				<button class="btn btn-default spreadsheet-reset-button" type="button" title="Revert Changes">
+				<button class="btn btn-default spreadsheet-reset-button" type="button"
+						title="{f:translate(key: 'formengine.spreadsheet.button.reset.title', extensionName: 'spreadsheets')}">
 					<c:icon identifier="actions-edit-undo"/>
 				</button>
 			</span>
@@ -110,13 +112,19 @@
 								   value="{valueObject.directionOfSelection}"/>
 
 							<label class="checkbox-label" for="{inputNameHash}-direction">
-								<span class="checkbox-label-text spreadsheet-label-direction-column">Column-based Extraction</span>
-								<span class="checkbox-label-text spreadsheet-label-direction-row" style="display:none">Row-based Extraction (default)</span>
+								<span class="checkbox-label-text spreadsheet-label-direction-column" style="display:none">
+									<f:translate key="formengine.spreadsheet.label.direction.column-based"
+												 extensionName="spreadsheets"/>
+								</span>
+								<span class="checkbox-label-text spreadsheet-label-direction-row">
+									<f:translate key="formengine.spreadsheet.label.direction.row-based"
+												 extensionName="spreadsheets"/>
+								</span>
 							</label>
 						</div>
 					</f:if>
 					<div class="handsontable"></div>
-					
+
 				</div>
 			</f:else>
 		</f:if>

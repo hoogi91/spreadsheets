@@ -15,6 +15,18 @@
 			<trans-unit id="formengine.spreadsheet.input.non-valid-upload.message" xml:space="preserve">
 				<source>The upload field doesn't contain any valid spreadsheet, please upload a valid file!</source>
 			</trans-unit>
+			<trans-unit id="formengine.spreadsheet.button.selection.title" xml:space="preserve">
+				<source>Edit/Close Selection</source>
+			</trans-unit>
+			<trans-unit id="formengine.spreadsheet.button.reset.title" xml:space="preserve">
+				<source>Revert Changes</source>
+			</trans-unit>
+			<trans-unit id="formengine.spreadsheet.label.direction.row-based" xml:space="preserve">
+				<source>Row-based Extraction (Default)</source>
+			</trans-unit>
+			<trans-unit id="formengine.spreadsheet.label.direction.column-based" xml:space="preserve">
+				<source>Column-based Extraction</source>
+			</trans-unit>
 			<trans-unit id="backend.preview.spreadsheets_table.config" xml:space="preserve">
 				<source>Configuration</source>
 			</trans-unit>
