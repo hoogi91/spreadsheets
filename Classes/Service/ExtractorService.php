@@ -3,10 +3,13 @@ declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Service;
 
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Worksheet\CellIterator;
+use PhpOffice\PhpSpreadsheet\Worksheet\ColumnCellIterator;
+use PhpOffice\PhpSpreadsheet\Worksheet\ColumnIterator;
+use PhpOffice\PhpSpreadsheet\Worksheet\RowCellIterator;
 use PhpOffice\PhpSpreadsheet\Worksheet\RowIterator;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use TYPO3\CMS\Core\Resource\FileReference;
@@ -184,52 +187,102 @@ class ExtractorService
             $range
         ));
 
+        // get calculated and formatted value from cell service
+        $cellValueCallback = function ($cell) use ($calculate, $format) {
+            return $this->cellService->getValue($cell, $calculate, $format);
+        };
+
+        // set ignored cells, cell iterator range and iterator type to use (column or row)
         if ($direction === self::EXTRACT_DIRECTION_VERTICAL) {
-            $iterator = $this->getSpreadsheet()->getActiveSheet()->getColumnIterator(
+            $cellArray = $this->extractColumnBasedRange(
                 Coordinate::stringFromColumnIndex($rangeStart[0]),
-                Coordinate::stringFromColumnIndex($rangeEnd[0])
+                Coordinate::stringFromColumnIndex($rangeEnd[0]),
+                (int)$rangeStart[1],
+                (int)$rangeEnd[1],
+                $cellValueCallback
             );
         } else {
-            $iterator = $this->getSpreadsheet()->getActiveSheet()->getRowIterator($rangeStart[1], $rangeEnd[1]);
+            $cellArray = $this->extractRowBasedRange(
+                (int)$rangeStart[1],
+                (int)$rangeEnd[1],
+                Coordinate::stringFromColumnIndex($rangeStart[0]),
+                Coordinate::stringFromColumnIndex($rangeEnd[0]),
+                $cellValueCallback
+            );
         }
-
-        $cellArray = $this->iterateCellsWithCallback($iterator, function ($cell, $mergeInfo) use ($calculate, $format) {
-            /** @var CellValue $cellValue */
-            $cellValue = GeneralUtility::makeInstance(CellValue::class, $cell);
-            $cellValue->setValue($this->cellService->getValue($cell, $calculate, $format));
-
-            // add merge informations to cell value if available
-            if (!empty($mergeInfo)) {
-                $cellValue->setRowspan($mergeInfo['rowspan'] ?: 0);
-                $cellValue->setColspan($mergeInfo['colspan'] ?: 0);
-                $cellValue->setAdditionalStyleIndexes($mergeInfo['additionalStyleIndexes'] ?: []);
-            }
-            return $cellValue;
-        });
 
         if ($returnCellRef === true) {
             $cellArray = $this->updateColumnIndexesFromString($cellArray, $direction);
         }
-
         return $cellArray;
     }
 
     /**
-     * @param RowIterator|CellIterator $iterator
-     * @param callable                 $callback
+     * @param int           $startRow
+     * @param int           $endRow
+     * @param string        $startColumn
+     * @param string        $endColumn
+     * @param callable|null $callback
      *
      * @return array
      * @throws SpreadsheetException
      */
-    protected function iterateCellsWithCallback(\Iterator $iterator, callable $callback)
-    {
-        // get ignored cell lines depending on iterator type
-        if ($iterator instanceof CellIterator) {
-            $ignoredCellLines = $this->spanService->getIgnoredColumns();
-        } else {
-            $ignoredCellLines = $this->spanService->getIgnoredRows();
-        }
+    protected function extractRowBasedRange(
+        int $startRow,
+        int $endRow,
+        string $startColumn,
+        string $endColumn,
+        callable $callback = null
+    ) {
+        return $this->processIteratorCellsWithCallback(
+            $this->getSpreadsheet()->getActiveSheet()->getRowIterator($startRow, $endRow),
+            [$startColumn, $endColumn],
+            $this->spanService->getIgnoredRows(),
+            $callback
+        );
+    }
 
+    /**
+     * @param string        $startColumn
+     * @param string        $endColumn
+     * @param int           $startRow
+     * @param int           $endRow
+     * @param callable|null $callback
+     *
+     * @return array
+     * @throws SpreadsheetException
+     */
+    protected function extractColumnBasedRange(
+        string $startColumn,
+        string $endColumn,
+        int $startRow,
+        int $endRow,
+        callable $callback = null
+    ) {
+
+        return $this->processIteratorCellsWithCallback(
+            $this->getSpreadsheet()->getActiveSheet()->getColumnIterator($startColumn, $endColumn),
+            [$startRow, $endRow],
+            $this->spanService->getIgnoredColumns(),
+            $callback
+        );
+    }
+
+    /**
+     * @param RowIterator|ColumnIterator $iterator
+     * @param array                      $cellIteratorArgs
+     * @param array                      $ignoredCellLines
+     * @param callable|null              $callback
+     *
+     * @return array
+     * @throws SpreadsheetException
+     */
+    protected function processIteratorCellsWithCallback(
+        \Iterator $iterator,
+        array $cellIteratorArgs = [],
+        array $ignoredCellLines = [],
+        callable $callback = null
+    ) {
         // get ignored and merged cells
         $ignoreCells = $this->spanService->getIgnoredCells();
         $mergedCells = $this->spanService->getMergedCells();
@@ -237,36 +290,57 @@ class ExtractorService
         $returnValue = [];
         foreach ($iterator as $line => $cells) {
             if (in_array($line, $ignoredCellLines)) {
-                // this row/column can be completely ignored
-                continue;
+                continue; // this row/column can be completely ignored
             }
 
-            $cellIterator = $cells->getCellIterator();
+            /** @var RowCellIterator|ColumnCellIterator $cellIterator */
+            $cellIterator = $cells->getCellIterator(...$cellIteratorArgs);
             $cellIterator->setIterateOnlyExistingCells(false); // loop all cells ;)
+
             foreach ($cellIterator as $cellIndex => $cell) {
-                $cellReference = $iterator instanceof CellIterator ? ($line . $cellIndex) : ($cellIndex . $line);
+                $cellReference = $cellIterator instanceof ColumnCellIterator ? ($line . $cellIndex) : ($cellIndex . $line);
                 if (in_array($cellReference, $ignoreCells)) {
-                    // ignore processing of this cell
-                    continue;
+                    continue; // ignore processing of this cell
                 }
 
-                // get merge information to cell value if available
-                $mergeInfo = [];
-                if (array_key_exists($cellReference, $mergedCells)) {
-                    $mergeInfo = $mergedCells[$cellReference];
-                }
-
-                if ($iterator instanceof CellIterator) {
+                $getCellArgs = [$cell, $mergedCells[$cellReference] ?? [], $callback];
+                if ($cellIterator instanceof ColumnCellIterator) {
                     // column-based $line should be string and cellIndex is row integer
-                    $returnValue[$line][(int)$cellIndex] = call_user_func($callback, $cell, $mergeInfo);
+                    $returnValue[$line][(int)$cellIndex] = $this->getCellValueForRangeToCellIterator(...$getCellArgs);
                 } else {
                     // row-based $line is integer and cellIndex should be column string
-                    $returnValue[(int)$line][$cellIndex] = call_user_func($callback, $cell, $mergeInfo);
+                    $returnValue[(int)$line][$cellIndex] = $this->getCellValueForRangeToCellIterator(...$getCellArgs);
                 }
             }
         }
-
         return $returnValue;
+    }
+
+    /**
+     * @param Cell          $cell
+     * @param array         $mergeInformation
+     * @param callable|null $valueCallback
+     *
+     * @return CellValue
+     */
+    protected function getCellValueForRangeToCellIterator(
+        Cell $cell,
+        array $mergeInformation = [],
+        callable $valueCallback = null
+    ) {
+        /** @var CellValue $cellValue */
+        $cellValue = GeneralUtility::makeInstance(CellValue::class, $cell);
+        if (is_callable($valueCallback) === true) {
+            $cellValue->setValue(call_user_func($valueCallback, $cell));
+        }
+
+        // add merge informations to cell value if available
+        if (!empty($mergeInformation)) {
+            $cellValue->setRowspan($mergeInformation['rowspan'] ?: 0);
+            $cellValue->setColspan($mergeInformation['colspan'] ?: 0);
+            $cellValue->setAdditionalStyleIndexes($mergeInformation['additionalStyleIndexes'] ?: []);
+        }
+        return $cellValue;
     }
 
     /**
