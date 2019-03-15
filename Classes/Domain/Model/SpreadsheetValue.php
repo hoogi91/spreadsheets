@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Domain\Model;
 
+use Hoogi91\Spreadsheets\Service\ExtractorService;
 use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
 
 /**
  * Class SpreadsheetValue
@@ -47,6 +47,11 @@ class SpreadsheetValue
     protected $selection = '';
 
     /**
+     * @var string
+     */
+    protected $directionOfSelection = ExtractorService::EXTRACT_DIRECTION_HORIZONTAL;
+
+    /**
      * SpreadsheetValue constructor.
      *
      * @param FileRepository $fileRepository
@@ -60,6 +65,10 @@ class SpreadsheetValue
     }
 
     /**
+     * TODO: add DSN-like format in next major version 2.0 to parse out spreadsheet value with more elegance
+     * e.g. spreadsheet://123?index=1&range=A2:B5&direction=vertical
+     * IMPORTANT! add update script for database :)
+     *
      * @param string $string
      * @param array  $sheetData
      *
@@ -77,9 +86,16 @@ class SpreadsheetValue
             $object->fileReferenceUid = (int)$file;
         }
         if (isset($fullSelection) && strlen((string)$fullSelection) > 0) {
-            list($sheetIndex, $selection) = GeneralUtility::trimExplode('!', $fullSelection, false, 2);
+            list($sheetIndex, $selection, $directionOfSelection) = GeneralUtility::trimExplode(
+                '!',
+                $fullSelection,
+                false,
+                3
+            );
+
             $object->sheetIndex = (int)$sheetIndex;
             $object->selection = $selection ?: '';
+            $object->directionOfSelection = $directionOfSelection ?: ExtractorService::EXTRACT_DIRECTION_HORIZONTAL;
 
             if (isset($sheetData[$object->fileReferenceUid][$object->sheetIndex]['name'])) {
                 $object->sheetName = $sheetData[$object->fileReferenceUid][$object->sheetIndex]['name'];
@@ -178,14 +194,35 @@ class SpreadsheetValue
     /**
      * @return string
      */
+    public function getDirectionOfSelection(): string
+    {
+        return $this->directionOfSelection;
+    }
+
+    /**
+     * @param string $directionOfSelection
+     */
+    public function setDirectionOfSelection(string $directionOfSelection)
+    {
+        $this->directionOfSelection = $directionOfSelection;
+    }
+
+    /**
+     * @return string
+     */
     public function getFormattedValue(): string
     {
-        if (empty($this->getSheetName())) {
-            return $this->getSelection();
-        } elseif (empty($this->getSelection())) {
-            return $this->getSheetName();
+        if (empty($this->getSheetName()) || empty($this->getSelection())) {
+            return vsprintf('%s!%s', [
+                $this->getSheetName() ?: $this->getSelection(),
+                $this->getDirectionOfSelection(),
+            ]);
         }
-        return $this->getSheetName() . '!' . $this->getSelection();
+        return vsprintf('%s!%s!%s', [
+            $this->getSheetName(),
+            $this->getSelection(),
+            $this->getDirectionOfSelection(),
+        ]);
     }
 
     /**
@@ -193,7 +230,12 @@ class SpreadsheetValue
      */
     public function getDatabaseValue(): string
     {
-        return 'file:' . $this->getFileReferenceUid() . '|' . $this->getSheetIndex() . '!' . $this->getSelection();
+        return vsprintf('file:%d|%d!%s!%s', [
+            $this->getFileReferenceUid(),
+            $this->getSheetIndex(),
+            $this->getSelection(),
+            $this->getDirectionOfSelection(),
+        ]);
     }
 
     /**

@@ -62,19 +62,20 @@
 			<f:form.hidden name="{inputName}" class="spreadsheet-input-database"
 						   value="{valueObject.databaseValue}"/>
 
-			<f:form.select name="file" class="form-control form-control-adapt spreadsheet-file-select"
-						   value="{valueObject.fileReferenceUid}">
-				<f:for each="{items}" key="key" as="item">
-					<f:form.select.option value="{key}">{item.nameWithoutExtension}</f:form.select.option>
-				</f:for>
-			</f:form.select>
+			<span class="input-group-btn">
+				<f:form.select name="file" class="form-control form-control-adapt spreadsheet-file-select"
+							   value="{valueObject.fileReferenceUid}">
+					<f:for each="{items}" key="key" as="item">
+						<f:form.select.option value="{key}">{item.nameWithoutExtension}</f:form.select.option>
+					</f:for>
+				</f:form.select>
+			</span>
+
+			<f:form.textfield name="formattedValue" class="form-control spreadsheet-input-formatted" type="text"
+							  value="{valueObject.formattedValue}" readonly="readonly"/>
 
 			<span class="input-group-btn">
-				<f:form.textfield name="formattedValue" class="form-control spreadsheet-input-formatted" type="text"
-								  value="{valueObject.formattedValue}" readonly="readonly"/>
-			</span>
-			<span class="input-group-btn">
-				<button class="btn btn-default spreadsheet-select-button" type="button">
+				<button class="btn btn-default spreadsheet-select-button" type="button" title="Edit/Close Selection">
 					<span class="open-icon">
 						<c:icon identifier="actions-open"/>
 					</span>
@@ -82,11 +83,15 @@
 						<c:icon identifier="actions-close"/>
 					</span>
 				</button>
-				<button class="btn btn-default spreadsheet-reset-button" type="button">
+			</span>
+
+			<span class="input-group-btn">
+				<button class="btn btn-default spreadsheet-reset-button" type="button" title="Revert Changes">
 					<c:icon identifier="actions-edit-undo"/>
 				</button>
 			</span>
 		</div>
+
 		<div class="help-block">
 			<div class="btn-group spreadsheet-sheets" role="group" style="display:none;"></div>
 		</div>
@@ -95,6 +100,20 @@
 			<f:else>
 				<div class="spreadsheet-table"
 					 style="position:relative;width:100%;min-height:150px;max-height:300px;overflow:hidden;display:none;">
+
+					<f:if condition="{allowColumnExtraction}">
+						<div class="checkbox checkbox-type-toggle">
+							<input type="checkbox"
+								   id="{inputNameHash}-direction"
+								   name="{inputNameHash}-direction"
+								   class="checkbox-input spreadsheet-input-direction"
+								   value="{valueObject.directionOfSelection}"/>
+
+							<label class="checkbox-label" for="{inputNameHash}-direction">
+								<span class="checkbox-label-text">Column-based extraction (Default: extracting row by row)</span>
+							</label>
+						</div>
+					</f:if>
 					<div class="handsontable"></div>
 				</div>
 			</f:else>
