@@ -191,14 +191,21 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'Handsontable'], function ($, Modal
 
     SpreadsheetDataInput.prototype.setDirectionOfSelection = function (direction) {
         var checkbox = this.$inputWrapper.find('.spreadsheet-input-direction').get(0);
-        if (typeof checkbox !== 'undefined' && checkbox.length > 0) {
-            checkbox.value = direction;
-            checkbox.checked = direction !== 'horizontal';
-            this.directionOfSelection = direction;
+        if (typeof checkbox !== 'undefined') {
+            this.directionOfSelection = checkbox.value = direction;
+            if (this.directionOfSelection !== 'horizontal') {
+                checkbox.checked = true;
+                this.$inputWrapper.find('.spreadsheet-label-direction-row').hide();
+                this.$inputWrapper.find('.spreadsheet-label-direction-column').show();
+            } else {
+                checkbox.checked = false;
+                this.$inputWrapper.find('.spreadsheet-label-direction-column').hide();
+                this.$inputWrapper.find('.spreadsheet-label-direction-row').show();
+            }
         } else {
             this.directionOfSelection = '';
-            this.updateInputValues();
         }
+        this.updateInputValues();
     };
 
     SpreadsheetDataInput.prototype.getCurrentFileSheets = function () {
@@ -425,9 +432,11 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'Handsontable'], function ($, Modal
             this.$inputWrapper.find('input.spreadsheet-input-database').val('file:' + this.selectedFileUid + '|' + this.selectedSheetIndex);
             this.$inputWrapper.find('input.spreadsheet-input-formatted').val(this.selectedSheetName);
         } else if (this.$inputWrapper.find('.spreadsheet-table .spreadsheet-input-direction').length !== 0) {
+            // cell selection and direction selction are enabled
             this.$inputWrapper.find('input.spreadsheet-input-database').val('file:' + this.selectedFileUid + '|' + this.selectedSheetIndex + '!' + this.selectedSheetCells + '!' + this.directionOfSelection);
             this.$inputWrapper.find('input.spreadsheet-input-formatted').val(this.selectedSheetName + '!' + this.selectedSheetCells + '!' + this.directionOfSelection);
         } else {
+            // only cell selection is enabled
             this.$inputWrapper.find('input.spreadsheet-input-database').val('file:' + this.selectedFileUid + '|' + this.selectedSheetIndex + '!' + this.selectedSheetCells);
             this.$inputWrapper.find('input.spreadsheet-input-formatted').val(this.selectedSheetName + '!' + this.selectedSheetCells);
         }

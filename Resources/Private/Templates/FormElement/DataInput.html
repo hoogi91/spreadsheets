@@ -110,11 +110,13 @@
 								   value="{valueObject.directionOfSelection}"/>
 
 							<label class="checkbox-label" for="{inputNameHash}-direction">
-								<span class="checkbox-label-text">Column-based extraction (Default: extracting row by row)</span>
+								<span class="checkbox-label-text spreadsheet-label-direction-column">Column-based Extraction</span>
+								<span class="checkbox-label-text spreadsheet-label-direction-row" style="display:none">Row-based Extraction (default)</span>
 							</label>
 						</div>
 					</f:if>
 					<div class="handsontable"></div>
+					
 				</div>
 			</f:else>
 		</f:if>
