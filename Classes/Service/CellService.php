@@ -140,7 +140,7 @@ class CellService
 
             // check for scientific format and do better formatting than NumberFormat class
             preg_match('/(0+)(\\.?)(0*)E[+-]0/i', $formatCode, $matches);
-            if (isset($matches[3]) && !empty($matches[3])) {
+            if (isset($matches[3]) && $matches[3] !== '') {
                 // extract count of decimals and use it in sprintf argument
                 $value = sprintf('%5.' . strlen($matches[3]) . 'E', $value);
             } else {
