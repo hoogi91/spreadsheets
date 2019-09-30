@@ -3,9 +3,14 @@ declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Service;
 
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\ColumnCellIterator;
+use PhpOffice\PhpSpreadsheet\Worksheet\ColumnIterator;
+use PhpOffice\PhpSpreadsheet\Worksheet\RowCellIterator;
+use PhpOffice\PhpSpreadsheet\Worksheet\RowIterator;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -20,6 +25,9 @@ use Hoogi91\Spreadsheets\Traits\SheetIndexTrait;
 class ExtractorService
 {
     use SheetIndexTrait;
+
+    const EXTRACT_DIRECTION_HORIZONTAL = 'horizontal';
+    const EXTRACT_DIRECTION_VERTICAL = 'vertical';
 
     /**
      * @var CellService
@@ -161,6 +169,7 @@ class ExtractorService
      *                                  True - Return rows and columns indexed by their actual row and column IDs
      * @param bool   $calculate
      * @param bool   $format
+     * @param string $direction
      *
      * @return array
      * @throws SpreadsheetException
@@ -169,7 +178,8 @@ class ExtractorService
         string $range,
         bool $returnCellRef = false,
         $calculate = true,
-        $format = true
+        $format = true,
+        $direction = self::EXTRACT_DIRECTION_HORIZONTAL
     ): array {
         // Identify the range that we need to extract from the worksheet
         list($rangeStart, $rangeEnd) = Coordinate::rangeBoundaries($this->rangeService->convert(
@@ -177,51 +187,186 @@ class ExtractorService
             $range
         ));
 
-        // get span informations for current worksheet
-        $ignoreRows = $this->spanService->getIgnoredRows();
+        // get calculated and formatted value from cell service
+        $cellValueCallback = function ($cell) use ($calculate, $format) {
+            return $this->cellService->getValue($cell, $calculate, $format);
+        };
+
+        // set ignored cells, cell iterator range and iterator type to use (column or row)
+        if ($direction === self::EXTRACT_DIRECTION_VERTICAL) {
+            $cellArray = $this->extractColumnBasedRange(
+                Coordinate::stringFromColumnIndex($rangeStart[0]),
+                Coordinate::stringFromColumnIndex($rangeEnd[0]),
+                (int)$rangeStart[1],
+                (int)$rangeEnd[1],
+                $cellValueCallback
+            );
+        } else {
+            $cellArray = $this->extractRowBasedRange(
+                (int)$rangeStart[1],
+                (int)$rangeEnd[1],
+                Coordinate::stringFromColumnIndex($rangeStart[0]),
+                Coordinate::stringFromColumnIndex($rangeEnd[0]),
+                $cellValueCallback
+            );
+        }
+
+        if ($returnCellRef === true) {
+            $cellArray = $this->updateColumnIndexesFromString($cellArray, $direction);
+        }
+        return $cellArray;
+    }
+
+    /**
+     * @param int           $startRow
+     * @param int           $endRow
+     * @param string        $startColumn
+     * @param string        $endColumn
+     * @param callable|null $callback
+     *
+     * @return array
+     * @throws SpreadsheetException
+     */
+    protected function extractRowBasedRange(
+        int $startRow,
+        int $endRow,
+        string $startColumn,
+        string $endColumn,
+        callable $callback = null
+    ) {
+        return $this->processIteratorCellsWithCallback(
+            $this->getSpreadsheet()->getActiveSheet()->getRowIterator($startRow, $endRow),
+            [$startColumn, $endColumn],
+            $this->spanService->getIgnoredRows(),
+            $callback
+        );
+    }
+
+    /**
+     * @param string        $startColumn
+     * @param string        $endColumn
+     * @param int           $startRow
+     * @param int           $endRow
+     * @param callable|null $callback
+     *
+     * @return array
+     * @throws SpreadsheetException
+     */
+    protected function extractColumnBasedRange(
+        string $startColumn,
+        string $endColumn,
+        int $startRow,
+        int $endRow,
+        callable $callback = null
+    ) {
+
+        return $this->processIteratorCellsWithCallback(
+            $this->getSpreadsheet()->getActiveSheet()->getColumnIterator($startColumn, $endColumn),
+            [$startRow, $endRow],
+            $this->spanService->getIgnoredColumns(),
+            $callback
+        );
+    }
+
+    /**
+     * @param RowIterator|ColumnIterator $iterator
+     * @param array                      $cellIteratorArgs
+     * @param array                      $ignoredCellLines
+     * @param callable|null              $callback
+     *
+     * @return array
+     * @throws SpreadsheetException
+     */
+    protected function processIteratorCellsWithCallback(
+        \Iterator $iterator,
+        array $cellIteratorArgs = [],
+        array $ignoredCellLines = [],
+        callable $callback = null
+    ) {
+        // get ignored and merged cells
         $ignoreCells = $this->spanService->getIgnoredCells();
         $mergedCells = $this->spanService->getMergedCells();
 
         $returnValue = [];
-        $rowIterator = $this->getSpreadsheet()->getActiveSheet()->getRowIterator($rangeStart[1], $rangeEnd[1]);
-        foreach ($rowIterator as $r => $row) {
-            if (in_array($r, $ignoreRows)) {
-                // this row can completly be ignored
-                continue;
+        foreach ($iterator as $line => $cells) {
+            if (in_array($line, $ignoredCellLines)) {
+                continue; // this row/column can be completely ignored
             }
 
-            $cellIterator = $row->getCellIterator(
-                Coordinate::stringFromColumnIndex($rangeStart[0]),
-                Coordinate::stringFromColumnIndex($rangeEnd[0])
-            );
+            /** @var RowCellIterator|ColumnCellIterator $cellIterator */
+            $cellIterator = $cells->getCellIterator(...$cellIteratorArgs);
             $cellIterator->setIterateOnlyExistingCells(false); // loop all cells ;)
-            foreach ($cellIterator as $c => $cell) {
-                $cellReference = $c . $r;
+
+            foreach ($cellIterator as $cellIndex => $cell) {
+                $cellReference = $cellIterator instanceof ColumnCellIterator ? ($line . $cellIndex) : ($cellIndex . $line);
                 if (in_array($cellReference, $ignoreCells)) {
-                    // ignore processing of this column
-                    continue;
+                    continue; // ignore processing of this cell
                 }
 
-                /** @var CellValue $cellValue */
-                $cellValue = GeneralUtility::makeInstance(CellValue::class, $cell);
-                $cellValue->setValue($this->cellService->getValue($cell, $calculate, $format));
-
-                // add merge informations to cell value if available
-                if (array_key_exists($cellReference, $mergedCells)) {
-                    $cellValue->setRowspan($mergedCells[$cellReference]['rowspan'] ?: 0);
-                    $cellValue->setColspan($mergedCells[$cellReference]['colspan'] ?: 0);
-                    $cellValue->setAdditionalStyleIndexes($mergedCells[$cellReference]['additionalStyleIndexes'] ?: []);
-                }
-
-                if ($returnCellRef === true) {
-                    $returnValue[(int)$r][Coordinate::columnIndexFromString($c)] = $cellValue;
+                $getCellArgs = [$cell, $mergedCells[$cellReference] ?? [], $callback];
+                if ($cellIterator instanceof ColumnCellIterator) {
+                    // column-based $line should be string and cellIndex is row integer
+                    $returnValue[$line][(int)$cellIndex] = $this->getCellValueForRangeToCellIterator(...$getCellArgs);
                 } else {
-                    $returnValue[(int)$r][$c] = $cellValue;
+                    // row-based $line is integer and cellIndex should be column string
+                    $returnValue[(int)$line][$cellIndex] = $this->getCellValueForRangeToCellIterator(...$getCellArgs);
                 }
             }
         }
-
         return $returnValue;
+    }
+
+    /**
+     * @param Cell          $cell
+     * @param array         $mergeInformation
+     * @param callable|null $valueCallback
+     *
+     * @return CellValue
+     */
+    protected function getCellValueForRangeToCellIterator(
+        Cell $cell,
+        array $mergeInformation = [],
+        callable $valueCallback = null
+    ) {
+        /** @var CellValue $cellValue */
+        $cellValue = GeneralUtility::makeInstance(CellValue::class, $cell);
+        if (is_callable($valueCallback) === true) {
+            $cellValue->setValue(call_user_func($valueCallback, $cell));
+        }
+
+        // add merge informations to cell value if available
+        if (!empty($mergeInformation)) {
+            $cellValue->setRowspan($mergeInformation['rowspan'] ?: 0);
+            $cellValue->setColspan($mergeInformation['colspan'] ?: 0);
+            $cellValue->setAdditionalStyleIndexes($mergeInformation['additionalStyleIndexes'] ?: []);
+        }
+        return $cellValue;
+    }
+
+    /**
+     * @param array  $cellArray
+     * @param string $direction
+     *
+     * @return array
+     */
+    protected function updateColumnIndexesFromString(array $cellArray, $direction = self::EXTRACT_DIRECTION_HORIZONTAL)
+    {
+        if ($direction === self::EXTRACT_DIRECTION_VERTICAL) {
+            // just get all keys and values for array combine
+            // before combine map all keys to get column index from string
+            return array_combine(array_map(function ($key) {
+                return Coordinate::columnIndexFromString($key);
+            }, array_keys($cellArray)), array_values($cellArray));
+        }
+
+        // iterate all rows and do same column conversion as above
+        foreach ($cellArray as $row => $columns) {
+            $cellArray[$row] = array_combine(array_map(function ($key) {
+                return Coordinate::columnIndexFromString($key);
+            }, array_keys($columns)), array_values($columns));
+        }
+
+        return $cellArray;
     }
 
     /**

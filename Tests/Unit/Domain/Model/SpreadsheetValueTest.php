@@ -3,6 +3,7 @@
 namespace Hoogi91\Spreadsheets\Tests\Domain\Model;
 
 use GeorgRinger\News\Domain\Model\FileReference;
+use Hoogi91\Spreadsheets\Service\ExtractorService;
 use Nimut\TestingFramework\TestCase\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use TYPO3\CMS\Core\Resource\FileRepository;
@@ -45,7 +46,7 @@ class SpreadsheetValueTest extends UnitTestCase
      */
     public function testCreationFromDatabaseString()
     {
-        $databaseString = 'file:5|1!D2:G5';
+        $databaseString = 'file:5|1!D2:G5!vertical';
         $value = SpreadsheetValue::createFromDatabaseString($databaseString, $this->sheetData);
 
         // assert data from value
@@ -53,7 +54,7 @@ class SpreadsheetValueTest extends UnitTestCase
         $this->assertEquals(1, $value->getSheetIndex());
         $this->assertEquals('D2:G5', $value->getSelection());
         $this->assertEquals('Worksheet Name 1', $value->getSheetName());
-        $this->assertEquals('Worksheet Name 1!D2:G5', $value->getFormattedValue());
+        $this->assertEquals('Worksheet Name 1!D2:G5!vertical', $value->getFormattedValue());
         $this->assertEquals($databaseString, $value->getDatabaseValue());
     }
 
@@ -70,8 +71,8 @@ class SpreadsheetValueTest extends UnitTestCase
         $this->assertEquals(2, $value->getSheetIndex());
         $this->assertEquals('A2:B5', $value->getSelection());
         $this->assertEquals('Worksheet Finance', $value->getSheetName());
-        $this->assertEquals('Worksheet Finance!A2:B5', $value->getFormattedValue());
-        $this->assertEquals($databaseString, $value->getDatabaseValue());
+        $this->assertEquals('Worksheet Finance!A2:B5!horizontal', $value->getFormattedValue());
+        $this->assertEquals($databaseString . '!horizontal', $value->getDatabaseValue());
     }
 
     /**
@@ -79,7 +80,7 @@ class SpreadsheetValueTest extends UnitTestCase
      */
     public function testCreationFromDatabaseStringWithoutFilePrefix()
     {
-        $databaseString = '5|1!D2:G5';
+        $databaseString = '5|1!D2:G5!vertical';
         $value = SpreadsheetValue::createFromDatabaseString($databaseString, $this->sheetData);
 
         // assert data from value
@@ -87,7 +88,7 @@ class SpreadsheetValueTest extends UnitTestCase
         $this->assertEquals(1, $value->getSheetIndex());
         $this->assertEquals('D2:G5', $value->getSelection());
         $this->assertEquals('Worksheet Name 1', $value->getSheetName());
-        $this->assertEquals('Worksheet Name 1!D2:G5', $value->getFormattedValue());
+        $this->assertEquals('Worksheet Name 1!D2:G5!vertical', $value->getFormattedValue());
         $this->assertEquals('file:' . $databaseString, $value->getDatabaseValue());
     }
 
@@ -104,8 +105,8 @@ class SpreadsheetValueTest extends UnitTestCase
         $this->assertEquals(99, $value->getSheetIndex());
         $this->assertEquals('A1:B2', $value->getSelection());
         $this->assertEquals('', $value->getSheetName());
-        $this->assertEquals('A1:B2', $value->getFormattedValue());
-        $this->assertEquals($databaseString, $value->getDatabaseValue());
+        $this->assertEquals('A1:B2!horizontal', $value->getFormattedValue());
+        $this->assertEquals($databaseString . '!horizontal', $value->getDatabaseValue());
     }
 
     /**
@@ -130,23 +131,27 @@ class SpreadsheetValueTest extends UnitTestCase
         $value->setSelection('A3:X25');
         $this->assertEquals('A3:X25', $value->getSelection());
 
+        $value->setDirectionOfSelection(ExtractorService::EXTRACT_DIRECTION_VERTICAL);
+        $this->assertEquals(ExtractorService::EXTRACT_DIRECTION_VERTICAL, $value->getDirectionOfSelection());
+
         // assert default formatted value
-        $this->assertEquals('Lorem ipsum!A3:X25', $value->getFormattedValue());
+        $this->assertEquals('Lorem ipsum!A3:X25!vertical', $value->getFormattedValue());
 
         // assert formatted value without sheet name
         $value->setSelection('B5:Y10');
         $value->setSheetName('');
-        $this->assertEquals('B5:Y10', $value->getFormattedValue());
+        $this->assertEquals('B5:Y10!vertical', $value->getFormattedValue());
 
         // assert formatted value without selection
         $value->setSelection('');
         $value->setSheetName('Lorem ipsum dolor sit amet');
-        $this->assertEquals('Lorem ipsum dolor sit amet', $value->getFormattedValue());
+        $value->setDirectionOfSelection(ExtractorService::EXTRACT_DIRECTION_HORIZONTAL);
+        $this->assertEquals('Lorem ipsum dolor sit amet!horizontal', $value->getFormattedValue());
 
         // assert formatted on magic __toString method
         $value->setSelection('D5:Q10');
         $value->setSheetName('Worksheet 1');
-        $this->assertEquals('Worksheet 1!D5:Q10', (string)$value);
+        $this->assertEquals('Worksheet 1!D5:Q10!horizontal', (string)$value);
     }
 
     /**

@@ -135,8 +135,18 @@ class CellService
                 setlocale(LC_NUMERIC, ...$availableLocales);
             }
 
-            // format number in respoect of current locale
-            $value = NumberFormat::toFormattedString($value, $style->getNumberFormat()->getFormatCode(), $callback);
+            // remove escaped whitespaces from format code to get correct formatted numbers
+            $formatCode = str_replace('\\ ', ' ', $style->getNumberFormat()->getFormatCode());
+
+            // check for scientific format and do better formatting than NumberFormat class
+            preg_match('/(0+)(\\.?)(0*)E[+-]0/i', $formatCode, $matches);
+            if (isset($matches[3]) && $matches[3] !== '') {
+                // extract count of decimals and use it in sprintf argument
+                $value = sprintf('%5.' . strlen($matches[3]) . 'E', $value);
+            } else {
+                // otherwise do normal format logic with given format code
+                $value = NumberFormat::toFormattedString($value, $formatCode, $callback);
+            }
 
             // reset locale to previous state
             if (!empty($this->currentLocales) && isset($currentLocale)) {

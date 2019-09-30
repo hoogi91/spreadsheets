@@ -109,11 +109,13 @@ class DataInputElement extends AbstractFormElement
             $sheetData = $this->getFileReferencesSpreadsheetData($references);
 
             $this->view->assignMultiple([
-                'items'       => $references,
-                'sheetData'   => json_encode($sheetData),
-                'sheetsOnly'  => (bool)$this->config['sheetsOnly'],
-                'inputName'   => $this->params['itemFormElName'],
-                'valueObject' => SpreadsheetValue::createFromDatabaseString(
+                'items'                 => $references,
+                'sheetData'             => json_encode($sheetData),
+                'sheetsOnly'            => (bool)$this->config['sheetsOnly'],
+                'allowColumnExtraction' => (bool)$this->config['allowColumnExtraction'],
+                'inputName'             => $this->params['itemFormElName'],
+                'inputNameHash'         => md5($this->params['itemFormElName']),
+                'valueObject'           => SpreadsheetValue::createFromDatabaseString(
                     $this->params['itemFormElValue'],
                     $sheetData
                 ),
