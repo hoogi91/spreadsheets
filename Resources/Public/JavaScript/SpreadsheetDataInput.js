@@ -12,9 +12,11 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'Handsontable'], function ($, Modal
         this.selectedSheetIndex = 0;
         this.selectedSheetName = '';
         this.selectedSheetCells = '';
+        this.directionOfSelection = '';
         this.originalSelectedSheetFileUid = 0;
         this.originalSelectedSheetIndex = 0;
         this.originalSelectedSheetCells = '';
+        this.originalDirectionOfSelection = '';
         this.handsOnTableInstance = null;
     };
 
@@ -32,9 +34,11 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'Handsontable'], function ($, Modal
         this.originalSelectedSheetFileUid = originalDatabaseValue['file'];
         this.originalSelectedSheetIndex = originalDatabaseValue['sheet'];
         this.originalSelectedSheetCells = originalDatabaseValue['selection'];
+        this.originalDirectionOfSelection = originalDatabaseValue['direction'];
         this.selectedSheetCells = currentDatabaseValue['selection'];
         this.setFileUid(currentDatabaseValue['file']);
         this.setSheetIndex(currentDatabaseValue['sheet']);
+        this.setDirectionOfSelection(currentDatabaseValue['direction']);
 
         // hide select button if current file sheet has only one sheet
         if (this.getCurrentFileSheets().length <= 0) {
@@ -47,6 +51,7 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'Handsontable'], function ($, Modal
             _this.triggerOpenEditButton(function () {
                 var sheetData = _this.getCurrentFileSheets();
                 _this.setSheetIndex(0);
+                _this.setDirectionOfSelection('');
                 _this.buildSheetTabs(sheetData);
                 _this.buildHandsOnTable(sheetData);
                 _this.updateInputValues();
@@ -84,6 +89,7 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'Handsontable'], function ($, Modal
                 _this.selectedSheetCells = _this.originalSelectedSheetCells;
                 _this.setFileUid(_this.originalSelectedSheetFileUid); // includes update of select
                 _this.setSheetIndex(_this.originalSelectedSheetIndex);
+                _this.setDirectionOfSelection(_this.originalDirectionOfSelection);
             });
         });
 
@@ -101,16 +107,24 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'Handsontable'], function ($, Modal
                 _this.updateInputValues();
             });
         });
+
+        // bind click on column based extraction toggle
+        this.$inputWrapper.on('click', '.spreadsheet-input-direction', function () {
+            _this.setDirectionOfSelection(this.value === 'horizontal' ? 'vertical' : 'horizontal');
+            _this.updateInputValues();
+        });
     };
 
     SpreadsheetDataInput.prototype.splitDatabaseSpreadsheetValue = function (value) {
         var result = [],
             fileAndFullSelection = value.split('|', 2),
-            sheetAndCellSelection = fileAndFullSelection[1].split('!', 2);
+            sheetAndCellSelection = fileAndFullSelection[1].split('!', 3);
 
         result['file'] = fileAndFullSelection[0].substr(5);
         result['sheet'] = sheetAndCellSelection[0];
         result['selection'] = sheetAndCellSelection[1] || '';
+        result['direction'] = sheetAndCellSelection[2] || 'horizontal';
+
         return result;
     };
 
@@ -173,6 +187,25 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'Handsontable'], function ($, Modal
 
         var sheetData = this.getCurrentFileSheets();
         this.selectedSheetName = this.getSheetName(sheetData, index);
+    };
+
+    SpreadsheetDataInput.prototype.setDirectionOfSelection = function (direction) {
+        var checkbox = this.$inputWrapper.find('.spreadsheet-input-direction').get(0);
+        if (typeof checkbox !== 'undefined') {
+            this.directionOfSelection = checkbox.value = direction;
+            if (this.directionOfSelection !== 'horizontal') {
+                checkbox.checked = true;
+                this.$inputWrapper.find('.spreadsheet-label-direction-row').hide();
+                this.$inputWrapper.find('.spreadsheet-label-direction-column').show();
+            } else {
+                checkbox.checked = false;
+                this.$inputWrapper.find('.spreadsheet-label-direction-column').hide();
+                this.$inputWrapper.find('.spreadsheet-label-direction-row').show();
+            }
+        } else {
+            this.directionOfSelection = '';
+        }
+        this.updateInputValues();
     };
 
     SpreadsheetDataInput.prototype.getCurrentFileSheets = function () {
@@ -398,7 +431,12 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'Handsontable'], function ($, Modal
             // table cell selection is disabled => sheets only
             this.$inputWrapper.find('input.spreadsheet-input-database').val('file:' + this.selectedFileUid + '|' + this.selectedSheetIndex);
             this.$inputWrapper.find('input.spreadsheet-input-formatted').val(this.selectedSheetName);
+        } else if (this.$inputWrapper.find('.spreadsheet-table .spreadsheet-input-direction').length !== 0) {
+            // cell selection and direction selction are enabled
+            this.$inputWrapper.find('input.spreadsheet-input-database').val('file:' + this.selectedFileUid + '|' + this.selectedSheetIndex + '!' + this.selectedSheetCells + '!' + this.directionOfSelection);
+            this.$inputWrapper.find('input.spreadsheet-input-formatted').val(this.selectedSheetName + '!' + this.selectedSheetCells + '!' + this.directionOfSelection);
         } else {
+            // only cell selection is enabled
             this.$inputWrapper.find('input.spreadsheet-input-database').val('file:' + this.selectedFileUid + '|' + this.selectedSheetIndex + '!' + this.selectedSheetCells);
             this.$inputWrapper.find('input.spreadsheet-input-formatted').val(this.selectedSheetName + '!' + this.selectedSheetCells);
         }

@@ -38,9 +38,10 @@ In this representation it is possible to select single cells, rows (incl. multip
 Using the features of this extension is pretty simple. Just use the following configuration in a TCA field of type "text" or "input":
 ```php
 'config' => [
-	'renderType'  => 'spreadsheetInput',
-	'uploadField' => 'tx_spreadsheets_assets',
-	'sheetsOnly'  => true,
+    'renderType'            => 'spreadsheetInput',
+    'uploadField'           => 'tx_spreadsheets_assets',
+    'sheetsOnly'            => false,
+    'allowColumnExtraction' => true,
 ],
 ``` 
 
@@ -64,3 +65,8 @@ On default (value `false`) the user is able to select one file which was previou
 After selecting the file the user gets a list of worksheets to select. After selecting the right worksheet the user sees simplified table data and can select the cells he wants ;)
 
 If field value is `true` the user can only select a worksheet and the exact cell selecting is disabled.  
+
+#### Field "allowColumnExtraction"
+This field can be set to `true` or `false`. Default value is `false`!
+
+If field value is `true` the user can choose whether his selection should be extract by columns or by rows.  
