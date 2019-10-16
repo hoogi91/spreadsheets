@@ -17,6 +17,7 @@ jdk:
 
 before_install:
   - if php -i | grep -q xdebug; then phpenv config-rm xdebug.ini; fi
+  - composer config github-oauth.github.com ${GITHUB_OAUTH_TOKEN};
 
 install:
   - >
@@ -67,21 +68,21 @@ jobs:
       php: 7.3
       env: TYPO3="dev-master"
 
-    - stage: test
-      php: 7.4snapshot
-      env: TYPO3=^10.1
+#    - stage: test
+#      php: 7.4snapshot
+#      env: TYPO3=^10.0
 
     - stage: test
       php: 7.3
-      env: TYPO3=^10.1
+      env: TYPO3=^10.0
 
     - stage: test
       php: 7.2
-      env: TYPO3=^10.1
+      env: TYPO3=^10.0
 
-    - stage: test
-      php: 7.4snapshot
-      env: TYPO3=^9.5
+#    - stage: test
+#      php: 7.4snapshot
+#      env: TYPO3=^9.5
 
     - stage: test
       php: 7.3
@@ -93,7 +94,7 @@ jobs:
 
     - stage: 🚢 to ter
       if: tag IS present AND env(TYPO3_ORG_USERNAME) IS present AND env(TYPO3_ORG_PASSWORD) IS present
-      php: 7.0
+      php: 7.2
       before_install: skip
       install: skip
       before_script: skip
