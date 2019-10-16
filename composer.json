@@ -1,7 +1,7 @@
 {
   "type": "typo3-cms-extension",
   "name": "hoogi91/spreadsheets",
-  "description": "Extension to add field definition and plugin to show and select informations from spreadsheets",
+  "description": "Extension to add field definition and plugin to show and select information from spreadsheets",
   "license": "GPL-3.0-or-later",
   "authors": [
     {
@@ -13,21 +13,28 @@
       "email": "typo3-mainz@udg.de"
     }
   ],
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/bnf/nimut-testing-framework"
+    }
+  ],
   "require": {
-    "php": ">=7.0",
-    "typo3/cms-core": "^8.7 || ^9.5",
-    "typo3/cms-backend": "^8.7 || ^9.5",
-    "typo3/cms-frontend": "^8.7 || ^9.5",
-    "typo3/cms-extbase": "^8.7 || ^9.5",
-    "typo3/cms-fluid": "^8.7 || ^9.5",
-    "typo3/cms-fluid-styled-content": "^8.7 || ^9.5",
-    "phpoffice/phpspreadsheet": "^1.0"
+    "php": ">=7.2",
+    "phpoffice/phpspreadsheet": "^1.9",
+    "typo3/cms-backend": "^9.5 || ^10.0",
+    "typo3/cms-core": "^9.5 || ^10.0",
+    "typo3/cms-extbase": "^9.5 || ^10.0",
+    "typo3/cms-fluid": "^9.5 || ^10.0",
+    "typo3/cms-fluid-styled-content": "^9.5 || ^10.0",
+    "typo3/cms-frontend": "^9.5 || ^10.0"
   },
   "require-dev": {
-    "typo3/minimal": "^8.7 || ^9.5",
-    "squizlabs/php_codesniffer": "^3.0",
-    "phpunit/phpunit": "^6.0",
-    "nimut/testing-framework": "^4.0"
+    "nimut/testing-framework": "v10.x-dev as 4.1.6",
+    "phpunit/phpunit": "^7.0",
+    "roave/security-advisories": "dev-master",
+    "squizlabs/php_codesniffer": "^3.5",
+    "typo3/minimal": "^9.5 || ^10.0"
   },
   "autoload": {
     "psr-4": {
@@ -40,6 +47,7 @@
     }
   },
   "config": {
+    "sort-packages": true,
     "vendor-dir": ".Build/vendor",
     "bin-dir": ".Build/bin"
   },

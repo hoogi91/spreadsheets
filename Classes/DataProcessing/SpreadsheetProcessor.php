@@ -64,12 +64,7 @@ class SpreadsheetProcessor implements DataProcessorInterface
      */
     protected function addStyleSheetContentToPageRenderer($content)
     {
-        if (version_compare(TYPO3_version, '9.4', '>=')) {
-            $tempFile = GeneralUtility::writeStyleSheetContentToTemporaryFile($content);
-        } else {
-            $tempFile = PageGenerator::inline2TempFile($content, 'css');
-        }
-        $this->getPageRenderer()->addCssFile($tempFile);
+        $this->getPageRenderer()->addCssFile(GeneralUtility::writeStyleSheetContentToTemporaryFile($content));
     }
 
     /**
