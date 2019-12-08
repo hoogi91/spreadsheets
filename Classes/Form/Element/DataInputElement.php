@@ -8,7 +8,7 @@ use Hoogi91\Spreadsheets\Service\ReaderService;
 use Hoogi91\Spreadsheets\Service\ValueMappingService;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
-use Phpoffice\PhpSpreadsheet\Exception as SpreadsheetException;
+use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
 use PhpOffice\PhpSpreadsheet\Style\Style;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -284,17 +284,17 @@ class DataInputElement extends AbstractFormElement
      */
     private function getMergeCells(Worksheet $sheet): array
     {
-        return array_values(array_map(static function ($cells) {
-            [$cells] = Coordinate::splitRange($cells);
-            [$startColumn, $startRow] = Coordinate::coordinateFromString($cells[0]);
-            [$endColumn, $endRow] = Coordinate::coordinateFromString($cells[1]);
+        return array_values(array_map(static function (string $cells) {
+            $coordinates = Coordinate::splitRange($cells);
+            [$startColumn, $startRow] = Coordinate::coordinateFromString($coordinates[0]);
+            [$endColumn, $endRow] = Coordinate::coordinateFromString($coordinates[1]);
 
             $startIndex = Coordinate::columnIndexFromString($startColumn);
             $endIndex = Coordinate::columnIndexFromString($endColumn);
             return [
                 'row' => (int)$startRow - 1,
                 'col' => $startIndex - 1,
-                'rowspan' => (int)$endRow - $startRow + 1,
+                'rowspan' => (int)$endRow - (int)$startRow + 1,
                 'colspan' => $endIndex - $startIndex + 1,
             ];
         }, $sheet->getMergeCells()));

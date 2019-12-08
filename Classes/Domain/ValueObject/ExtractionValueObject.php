@@ -18,12 +18,12 @@ class ExtractionValueObject
     private $spreadsheet;
 
     /**
-     * @var CellDataValueObject[]
+     * @var CellDataValueObject[][]
      */
     private $bodyData;
 
     /**
-     * @var CellDataValueObject[]
+     * @var CellDataValueObject[][]
      */
     private $headData;
 

@@ -26,7 +26,7 @@ class CellDataValueObject
     private $type;
 
     /**
-     * @var mixed|string
+     * @var string
      */
     private $value;
 
@@ -80,13 +80,13 @@ class CellDataValueObject
      *
      * @param Cell $cell
      *
-     * @param $value
+     * @param string $value
      * @param int $rowspan
      * @param int $colspan
      * @param array $additionalStyles
      * @throws SpreadsheetException
      */
-    public function __construct(Cell $cell, $value, int $rowspan = 0, int $colspan = 0, array $additionalStyles = [])
+    public function __construct(Cell $cell, string $value, int $rowspan = 0, int $colspan = 0, array $additionalStyles = [])
     {
         $this->cell = $cell;
         $this->type = $cell->getDataType();
@@ -114,14 +114,14 @@ class CellDataValueObject
 
     /**
      * @param Cell $cell
-     * @param $value
+     * @param string $value
      * @param int $rowspan
      * @param int $colspan
      * @param array $additionalStyles
      * @return CellDataValueObject
      * @throws SpreadsheetException
      */
-    public static function create(Cell $cell, $value, int $rowspan = 0, int $colspan = 0, array $additionalStyles = []): CellDataValueObject
+    public static function create(Cell $cell, string $value, int $rowspan = 0, int $colspan = 0, array $additionalStyles = []): CellDataValueObject
     {
         return new self($cell, $value, $rowspan, $colspan, $additionalStyles);
     }
@@ -143,9 +143,9 @@ class CellDataValueObject
     }
 
     /**
-     * @return string|int|float
+     * @return string
      */
-    public function getValue()
+    public function getValue(): string
     {
         return $this->value;
     }

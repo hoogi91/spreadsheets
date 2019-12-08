@@ -32,13 +32,13 @@ class GetViewHelper extends AbstractViewHelper
      * @param Closure $renderChildrenClosure
      * @param RenderingContextInterface $renderingContext
      *
-     * @return DsnValueObject
+     * @return DsnValueObject|null
      */
     public static function renderStatic(
         array $arguments,
         Closure $renderChildrenClosure,
         RenderingContextInterface $renderingContext
-    ): DsnValueObject
+    ): ?DsnValueObject
     {
         if (empty($arguments['subject'])) {
             $arguments['subject'] = $renderChildrenClosure();
@@ -47,10 +47,6 @@ class GetViewHelper extends AbstractViewHelper
             return null;
         }
 
-        $value = DsnValueObject::createFromDSN($arguments['subject']);
-        if ($value->getFileReference() instanceof FileReference === false) {
-            return null;
-        }
-        return $value;
+        return DsnValueObject::createFromDSN($arguments['subject']);
     }
 }

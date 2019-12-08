@@ -41,9 +41,9 @@ class CellService
      * @param Cell $cell
      * @param callable $formatCallback
      *
-     * @return string|int|float
+     * @return string
      */
-    public function getValue(Cell $cell, callable $formatCallback = null)
+    public function getValue(Cell $cell, callable $formatCallback = null): string
     {
         if ($cell->getValue() === null) {
             return '';
@@ -102,9 +102,9 @@ class CellService
      * @param Cell $cell
      * @param callable $callback
      *
-     * @return string|int|float
+     * @return string
      */
-    private function formatString($value, Cell $cell, callable $callback = null)
+    private function formatString($value, Cell $cell, callable $callback = null): string
     {
         // get cell style to find number format code
         $style = $cell->getWorksheet()->getParent()->getCellXfByIndex($cell->getXfIndex());
@@ -112,7 +112,7 @@ class CellService
             // check current locales and set them for converting numeric values
             if (!empty($this->currentLocales)) {
                 $availableLocales = GeneralUtility::trimExplode(',', $this->currentLocales, true);
-                $currentLocale = setlocale(LC_NUMERIC, 0);
+                $currentLocale = setlocale(LC_NUMERIC, '0');
                 setlocale(LC_NUMERIC, ...$availableLocales);
             }
 

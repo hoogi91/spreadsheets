@@ -35,6 +35,16 @@ install:
 
 script:
   - >
+    echo;
+    echo "Executing PHP code sniffer";
+    .Build/bin/phpcs --runtime-set ignore_warnings_on_exit true --standard=PSR2 Classes/
+
+  - >
+    echo;
+    echo "Executing PHPStan";
+    .Build/bin/phpstan analyse --level 5 Classes/
+
+  - >
     if [ -d "Tests/Unit" ]; then
       echo;
       echo "Running unit tests";
@@ -51,11 +61,6 @@ script:
       echo;
       find 'Tests/Functional' -wholename '*Test.php' | parallel --gnu 'echo; echo "Running functional test suite {}"; .Build/bin/phpunit --bootstrap .Build/vendor/nimut/testing-framework/res/Configuration/FunctionalTestsBootstrap.php {}';
     fi
-
-  - >
-    echo;
-    echo "Executing PHP code sniffer";
-    .Build/bin/phpcs --runtime-set ignore_warnings_on_exit true --standard=PSR2 Classes/
 
 
 jobs:

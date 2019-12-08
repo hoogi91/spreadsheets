@@ -85,7 +85,7 @@ class SpreadsheetProcessor implements DataProcessorInterface
             'bodyData' => $extraction->getBodyData(),
         ];
 
-        $ignoreStyles = (bool)$cObj->stdWrapValue('ignoreStyles', $processorConfiguration['options.'] ?: [], false);
+        $ignoreStyles = (bool)$cObj->stdWrapValue('ignoreStyles', $processorConfiguration['options.'] ?: []);
         if ($ignoreStyles !== false) {
             return $processedData;
         }
