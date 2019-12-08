@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Service;
@@ -61,9 +62,12 @@ class SpanService
         }
 
         // check if unique column values will exceed max. column count and should be ignored
-        $ignoredColumnsByRow = array_map(static function ($values) use ($maxRowCount) {
-            return count(array_unique($values)) >= $maxRowCount;
-        }, $ignoredColumnsByRow);
+        $ignoredColumnsByRow = array_map(
+            static function ($values) use ($maxRowCount) {
+                return count(array_unique($values)) >= $maxRowCount;
+            },
+            $ignoredColumnsByRow
+        );
 
         // only return row numbers of rows to ignore
         return static::$ignoredColumns[$sheetHash] = array_keys(array_filter($ignoredColumnsByRow));
@@ -95,9 +99,12 @@ class SpanService
         }
 
         // check if unique column values will exceed max. column count and should be ignored
-        $ignoredRowsByColumn = array_map(static function ($values) use ($maxColumnCount) {
-            return count(array_unique($values)) >= $maxColumnCount;
-        }, $ignoredRowsByColumn);
+        $ignoredRowsByColumn = array_map(
+            static function ($values) use ($maxColumnCount) {
+                return count(array_unique($values)) >= $maxColumnCount;
+            },
+            $ignoredRowsByColumn
+        );
 
         // only return row numbers of rows to ignore
         return static::$ignoredRows[$sheetHash] = array_keys(array_filter($ignoredRowsByColumn));
@@ -213,12 +220,22 @@ class SpanService
         $cellsByRange = Coordinate::extractAllCellReferencesInRange($range);
 
         // get information about rows and cols in cell references
-        $rowsInRange = array_unique(array_map(static function ($cell) {
-            return (int)Coordinate::coordinateFromString($cell)[1];
-        }, $cellsByRange));
-        $columnsInRange = array_unique(array_map(static function ($cell) {
-            return Coordinate::coordinateFromString($cell)[0];
-        }, $cellsByRange));
+        $rowsInRange = array_unique(
+            array_map(
+                static function ($cell) {
+                    return (int)Coordinate::coordinateFromString($cell)[1];
+                },
+                $cellsByRange
+            )
+        );
+        $columnsInRange = array_unique(
+            array_map(
+                static function ($cell) {
+                    return Coordinate::coordinateFromString($cell)[0];
+                },
+                $cellsByRange
+            )
+        );
 
         // update rangeDimension by count of ignoredRows inside rows in current range
         $rangeDimension[0] -= count(array_intersect($columnsInRange, $ignoredColumns));

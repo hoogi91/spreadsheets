@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Domain\ValueObject;
@@ -73,16 +74,22 @@ class StylesheetValueObject
         foreach ($this->styles as $styleName => $styleDefinition) {
             if ($styleName !== 'html') {
                 if (empty($htmlIdentifier) === false) {
-                    $content .= vsprintf('#%s %s {%s}' . PHP_EOL, [
-                        $htmlIdentifier,
-                        $styleName,
-                        $this->assembleStyles($styleDefinition),
-                    ]);
+                    $content .= vsprintf(
+                        '#%s %s {%s}' . PHP_EOL,
+                        [
+                            $htmlIdentifier,
+                            $styleName,
+                            $this->assembleStyles($styleDefinition),
+                        ]
+                    );
                 } else {
-                    $content .= vsprintf('%s {%s}' . PHP_EOL, [
-                        $styleName,
-                        $this->assembleStyles($styleDefinition),
-                    ]);
+                    $content .= vsprintf(
+                        '%s {%s}' . PHP_EOL,
+                        [
+                            $styleName,
+                            $this->assembleStyles($styleDefinition),
+                        ]
+                    );
                 }
             }
         }

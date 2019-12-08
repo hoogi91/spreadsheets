@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Domain\ValueObject;
@@ -34,8 +35,11 @@ class ExtractionValueObject
         $this->headData = $headData;
     }
 
-    public static function create(Spreadsheet $spreadsheet, array $bodyData, array $headData = []): ExtractionValueObject
-    {
+    public static function create(
+        Spreadsheet $spreadsheet,
+        array $bodyData,
+        array $headData = []
+    ): ExtractionValueObject {
         return new self($spreadsheet, $bodyData, $headData);
     }
 

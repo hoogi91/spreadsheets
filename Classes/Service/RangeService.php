@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Service;
@@ -83,8 +84,12 @@ class RangeService
      *
      * @return string
      */
-    private function buildRange(string $startColumn, int $startRow, string $endColumn = null, int $endRow = null): string
-    {
+    private function buildRange(
+        string $startColumn,
+        int $startRow,
+        string $endColumn = null,
+        int $endRow = null
+    ): string {
         if ($endColumn === null && $endRow === null) {
             return sprintf('%s%d', $startColumn, $startRow);
         }

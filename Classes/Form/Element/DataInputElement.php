@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Form\Element;
@@ -111,15 +112,17 @@ class DataInputElement extends AbstractFormElement
             'EXT:spreadsheets/Resources/Public/Css/HandsOnTable/handsontable.full.min.css',
         ];
 
-        $this->view->assignMultiple([
-            'items' => $references,
-            'sheetData' => json_encode($this->getFileReferencesSpreadsheetData($references)),
-            'sheetsOnly' => (bool)$this->config['sheetsOnly'],
-            'allowColumnExtraction' => (bool)$this->config['allowColumnExtraction'],
-            'inputName' => $this->params['itemFormElName'],
-            'inputNameHash' => md5($this->params['itemFormElName']),
-            'valueObject' => DsnValueObject::createFromDSN($this->params['itemFormElValue']),
-        ]);
+        $this->view->assignMultiple(
+            [
+                'items' => $references,
+                'sheetData' => json_encode($this->getFileReferencesSpreadsheetData($references)),
+                'sheetsOnly' => (bool)$this->config['sheetsOnly'],
+                'allowColumnExtraction' => (bool)$this->config['allowColumnExtraction'],
+                'inputName' => $this->params['itemFormElName'],
+                'inputNameHash' => md5($this->params['itemFormElName']),
+                'valueObject' => DsnValueObject::createFromDSN($this->params['itemFormElValue']),
+            ]
+        );
 
         // render view and return result array
         $resultArray['html'] = $this->view->render();
@@ -160,10 +163,13 @@ class DataInputElement extends AbstractFormElement
         }
 
         // filter references by allowed types
-        $references = array_filter($references, static function ($reference) {
-            /** @var FileReference $reference */
-            return in_array($reference->getExtension(), ReaderService::ALLOWED_EXTENSIONS, true);
-        });
+        $references = array_filter(
+            $references,
+            static function ($reference) {
+                /** @var FileReference $reference */
+                return in_array($reference->getExtension(), ReaderService::ALLOWED_EXTENSIONS, true);
+            }
+        );
 
         // update key values of file references
         foreach ($references as $key => $reference) {
@@ -209,11 +215,14 @@ class DataInputElement extends AbstractFormElement
         }
 
         // convert whole sheet data content to UTF-8
-        array_walk_recursive($sheetData, static function (&$item) {
-            if (is_string($item) && !mb_detect_encoding($item, 'utf-8', true)) {
-                $item = utf8_encode($item);
+        array_walk_recursive(
+            $sheetData,
+            static function (&$item) {
+                if (is_string($item) && !mb_detect_encoding($item, 'utf-8', true)) {
+                    $item = utf8_encode($item);
+                }
             }
-        });
+        );
         return $sheetData;
     }
 
@@ -284,19 +293,24 @@ class DataInputElement extends AbstractFormElement
      */
     private function getMergeCells(Worksheet $sheet): array
     {
-        return array_values(array_map(static function (string $cells) {
-            $coordinates = Coordinate::splitRange($cells);
-            [$startColumn, $startRow] = Coordinate::coordinateFromString($coordinates[0]);
-            [$endColumn, $endRow] = Coordinate::coordinateFromString($coordinates[1]);
+        return array_values(
+            array_map(
+                static function (string $cells) {
+                    $coordinates = Coordinate::splitRange($cells);
+                    [$startColumn, $startRow] = Coordinate::coordinateFromString($coordinates[0]);
+                    [$endColumn, $endRow] = Coordinate::coordinateFromString($coordinates[1]);
 
-            $startIndex = Coordinate::columnIndexFromString($startColumn);
-            $endIndex = Coordinate::columnIndexFromString($endColumn);
-            return [
-                'row' => (int)$startRow - 1,
-                'col' => $startIndex - 1,
-                'rowspan' => (int)$endRow - (int)$startRow + 1,
-                'colspan' => $endIndex - $startIndex + 1,
-            ];
-        }, $sheet->getMergeCells()));
+                    $startIndex = Coordinate::columnIndexFromString($startColumn);
+                    $endIndex = Coordinate::columnIndexFromString($endColumn);
+                    return [
+                        'row' => (int)$startRow - 1,
+                        'col' => $startIndex - 1,
+                        'rowspan' => (int)$endRow - (int)$startRow + 1,
+                        'colspan' => $endIndex - $startIndex + 1,
+                    ];
+                },
+                $sheet->getMergeCells()
+            )
+        );
     }
 }

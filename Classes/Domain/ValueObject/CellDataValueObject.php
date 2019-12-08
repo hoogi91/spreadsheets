@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Domain\ValueObject;
@@ -86,8 +87,13 @@ class CellDataValueObject
      * @param array $additionalStyles
      * @throws SpreadsheetException
      */
-    public function __construct(Cell $cell, string $value, int $rowspan = 0, int $colspan = 0, array $additionalStyles = [])
-    {
+    public function __construct(
+        Cell $cell,
+        string $value,
+        int $rowspan = 0,
+        int $colspan = 0,
+        array $additionalStyles = []
+    ) {
         $this->cell = $cell;
         $this->type = $cell->getDataType();
         $this->value = $value;
@@ -121,8 +127,13 @@ class CellDataValueObject
      * @return CellDataValueObject
      * @throws SpreadsheetException
      */
-    public static function create(Cell $cell, string $value, int $rowspan = 0, int $colspan = 0, array $additionalStyles = []): CellDataValueObject
-    {
+    public static function create(
+        Cell $cell,
+        string $value,
+        int $rowspan = 0,
+        int $colspan = 0,
+        array $additionalStyles = []
+    ): CellDataValueObject {
         return new self($cell, $value, $rowspan, $colspan, $additionalStyles);
     }
 

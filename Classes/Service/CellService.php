@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Service;
@@ -91,10 +92,13 @@ class CellService
         }
 
         // create span to add font styles and insert textual content inside
-        return vsprintf('<span style="%s">%s</span>', [
-            $this->styleService->getStylesheetForRichTextElement($element)->toInlineCSS(),
-            $textContent,
-        ]);
+        return vsprintf(
+            '<span style="%s">%s</span>',
+            [
+                $this->styleService->getStylesheetForRichTextElement($element)->toInlineCSS(),
+                $textContent,
+            ]
+        );
     }
 
     /**

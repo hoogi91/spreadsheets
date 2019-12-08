@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\DataProcessing;
@@ -43,8 +44,7 @@ class SpreadsheetProcessor implements DataProcessorInterface
         ExtractorService $extractorService,
         StyleService $styleService,
         PageRenderer $pageRenderer
-    )
-    {
+    ) {
         $this->extractorService = $extractorService;
         $this->styleService = $styleService;
         $this->pageRenderer = $pageRenderer;
@@ -65,8 +65,7 @@ class SpreadsheetProcessor implements DataProcessorInterface
         array $contentObjectConfiguration,
         array $processorConfiguration,
         array $processedData
-    ): array
-    {
+    ): array {
         $databaseValue = $cObj->stdWrapValue('value', $processorConfiguration, '');
         if (empty($databaseValue)) {
             return $processedData;

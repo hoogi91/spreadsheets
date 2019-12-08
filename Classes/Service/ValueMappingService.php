@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Service;
@@ -35,7 +36,7 @@ class ValueMappingService
      *
      * @return string|null
      */
-    public function convertValue(string $map, string $value, ?string $default = NULL): ?string
+    public function convertValue(string $map, string $value, ?string $default = null): ?string
     {
         return $this->mappings[$map][$value] ?? $default;
     }

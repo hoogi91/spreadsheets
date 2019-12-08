@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\ViewHelpers\Reader\Sheet;
@@ -41,8 +42,7 @@ class TitleViewHelper extends AbstractViewHelper
         array $arguments,
         Closure $renderChildrenClosure,
         RenderingContextInterface $renderingContext
-    ): string
-    {
+    ): string {
         if (empty($arguments['file'])) {
             $arguments['file'] = $renderChildrenClosure();
         }

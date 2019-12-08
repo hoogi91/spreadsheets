@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Service;
@@ -29,11 +30,14 @@ class ReaderService
         }
 
         if (in_array($reference->getExtension(), static::ALLOWED_EXTENSIONS, true) === false) {
-            throw new Reader\Exception(sprintf(
-                'Reference has not allowed file extension "%s"! Allowed Extensions are "%s"',
-                $reference->getExtension(),
-                implode(',', static::ALLOWED_EXTENSIONS)
-            ), 1514909945);
+            throw new Reader\Exception(
+                sprintf(
+                    'Reference has not allowed file extension "%s"! Allowed Extensions are "%s"',
+                    $reference->getExtension(),
+                    implode(',', static::ALLOWED_EXTENSIONS)
+                ),
+                1514909945
+            );
         }
 
         switch ($reference->getExtension()) {
@@ -51,9 +55,12 @@ class ReaderService
                 return (new Reader\Html())->load($reference->getForLocalProcessing());
         }
 
-        throw new Reader\Exception(sprintf(
-            'Unknown file extension "%s" could not be loaded',
-            $reference->getExtension()
-        ), 1514909946);
+        throw new Reader\Exception(
+            sprintf(
+                'Unknown file extension "%s" could not be loaded',
+                $reference->getExtension()
+            ),
+            1514909946
+        );
     }
 }

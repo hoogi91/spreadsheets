@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Service;
@@ -53,8 +54,7 @@ class ExtractorService
         CellService $cellService,
         SpanService $spanService,
         RangeService $rangeService
-    )
-    {
+    ) {
         $this->readerService = $readerService;
         $this->cellService = $cellService;
         $this->spanService = $spanService;
@@ -142,15 +142,17 @@ class ExtractorService
         string $range,
         string $direction = self::EXTRACT_DIRECTION_HORIZONTAL,
         bool $returnCellRef = true
-    ): array
-    {
+    ): array {
         // Identify the range that we need to extract from the worksheet
         [$rangeStart, $rangeEnd] = Coordinate::rangeBoundaries($this->rangeService->convert($sheet, $range));
 
         // set ignored cells, cell iterator range and iterator type to use (column or row)
         if ($direction === self::EXTRACT_DIRECTION_VERTICAL) {
             $cellArray = $this->processIteratorCellsWithCallback(
-                $sheet->getColumnIterator(Coordinate::stringFromColumnIndex($rangeStart[0]), Coordinate::stringFromColumnIndex($rangeEnd[0])),
+                $sheet->getColumnIterator(
+                    Coordinate::stringFromColumnIndex($rangeStart[0]),
+                    Coordinate::stringFromColumnIndex($rangeEnd[0])
+                ),
                 [(int)$rangeStart[1], (int)$rangeEnd[1]],
                 $this->spanService->getIgnoredColumns($sheet),
                 $this->spanService->getIgnoredCells($sheet),
@@ -188,8 +190,7 @@ class ExtractorService
         array $ignoredCellLines = [],
         array $ignoreCells = [],
         array $mergedCells = []
-    ): array
-    {
+    ): array {
         $returnValue = [];
         foreach ($iterator as $line => $cells) {
             if (in_array($line, $ignoredCellLines, true)) {
@@ -201,7 +202,10 @@ class ExtractorService
             $cellIterator->setIterateOnlyExistingCells(false); // loop all cells ;)
 
             foreach ($cellIterator as $cellIndex => $cell) {
-                $cellReference = $cellIterator instanceof Worksheet\ColumnCellIterator ? ($line . $cellIndex) : ($cellIndex . $line);
+                $cellReference = $cellIterator instanceof Worksheet\ColumnCellIterator
+                    ? ($line . $cellIndex)
+                    : ($cellIndex . $line);
+
                 if (in_array($cellReference, $ignoreCells, true)) {
                     continue; // ignore processing of this cell
                 }
@@ -243,21 +247,35 @@ class ExtractorService
      *
      * @return ValueObject\CellDataValueObject[][]
      */
-    private function updateColumnIndexesFromString(array $cellArray, $direction = self::EXTRACT_DIRECTION_HORIZONTAL): array
-    {
+    private function updateColumnIndexesFromString(
+        array $cellArray,
+        string $direction = self::EXTRACT_DIRECTION_HORIZONTAL
+    ): array {
         if ($direction === self::EXTRACT_DIRECTION_VERTICAL) {
             // just get all keys and values for array combine
             // before combine map all keys to get column index from string
-            return array_combine(array_map(static function ($key) {
-                return Coordinate::columnIndexFromString($key);
-            }, array_keys($cellArray)), array_values($cellArray));
+            return array_combine(
+                array_map(
+                    static function ($key) {
+                        return Coordinate::columnIndexFromString($key);
+                    },
+                    array_keys($cellArray)
+                ),
+                array_values($cellArray)
+            );
         }
 
         // iterate all rows and do same column conversion as above
         foreach ($cellArray as $row => $columns) {
-            $cellArray[$row] = array_combine(array_map(static function ($key) {
-                return Coordinate::columnIndexFromString($key);
-            }, array_keys($columns)), array_values($columns));
+            $cellArray[$row] = array_combine(
+                array_map(
+                    static function ($key) {
+                        return Coordinate::columnIndexFromString($key);
+                    },
+                    array_keys($columns)
+                ),
+                array_values($columns)
+            );
         }
 
         return $cellArray;

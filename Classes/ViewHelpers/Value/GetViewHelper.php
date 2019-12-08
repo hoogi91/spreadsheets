@@ -1,11 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\ViewHelpers\Value;
 
 use Closure;
 use Hoogi91\Spreadsheets\Domain\ValueObject\DsnValueObject;
-use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 use TYPO3Fluid\Fluid\Core\ViewHelper\Traits\CompileWithRenderStatic;
@@ -38,8 +38,7 @@ class GetViewHelper extends AbstractViewHelper
         array $arguments,
         Closure $renderChildrenClosure,
         RenderingContextInterface $renderingContext
-    ): ?DsnValueObject
-    {
+    ): ?DsnValueObject {
         if (empty($arguments['subject'])) {
             $arguments['subject'] = $renderChildrenClosure();
         }
