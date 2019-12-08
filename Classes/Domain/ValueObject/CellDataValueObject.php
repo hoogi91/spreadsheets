@@ -1,98 +1,103 @@
 <?php
 declare(strict_types=1);
 
-namespace Hoogi91\Spreadsheets\Domain\Model;
+namespace Hoogi91\Spreadsheets\Domain\ValueObject;
 
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\RichText\RichText;
 
 /**
- * Class CellValue
- * @package Hoogi91\Spreadsheets\Domain\Model
+ * Class CellDataValueObject
+ * @package Hoogi91\Spreadsheets\Domain\ValueObject
  */
-class CellValue
+class CellDataValueObject
 {
+
 
     /**
      * @var Cell
      */
-    protected $cell;
+    private $cell;
 
     /**
-     * @var bool
+     * @var string
      */
-    protected $isRichText = false;
+    private $type;
 
     /**
      * @var mixed|string
      */
-    protected $value = '';
-
-    /**
-     * @var string
-     */
-    protected $type = '';
+    private $value;
 
     /**
      * @var int
      */
-    protected $styleIndex = 0;
+    private $rowspan;
+
+    /**
+     * @var int
+     */
+    private $colspan;
+
+    /**
+     * @var int
+     */
+    private $styleIndex;
 
     /**
      * @var array
      */
-    protected $additionalStyleIndexes = [];
+    private $additionalStyleIndexes;
 
     /**
      * @var bool
      */
-    protected $superscript = false;
+    private $isRichText = false;
 
     /**
      * @var bool
      */
-    protected $subscript = false;
+    private $superscript = false;
+
+    /**
+     * @var bool
+     */
+    private $subscript = false;
 
     /**
      * @var string
      */
-    protected $hyperlink = '';
+    private $hyperlink = '';
 
     /**
      * @var string
      */
-    protected $hyperlinkTitle = '';
+    private $hyperlinkTitle = '';
 
     /**
-     * @var int
-     */
-    protected $rowspan = 0;
-
-    /**
-     * @var int
-     */
-    protected $colspan = 0;
-
-    /**
-     * CellValue constructor.
+     * CellDataValueObject constructor.
      *
      * @param Cell $cell
      *
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @param $value
+     * @param int $rowspan
+     * @param int $colspan
+     * @param array $additionalStyles
+     * @throws SpreadsheetException
      */
-    public function __construct(Cell $cell)
+    public function __construct(Cell $cell, $value, int $rowspan = 0, int $colspan = 0, array $additionalStyles = [])
     {
         $this->cell = $cell;
-        $this->setValue($cell->getValue());
-
         $this->type = $cell->getDataType();
-
-        // create cell styling
+        $this->value = $value;
+        $this->rowspan = $rowspan;
+        $this->colspan = $colspan;
         $this->styleIndex = $cell->getXfIndex();
+        $this->additionalStyleIndexes = $additionalStyles;
 
         // check for super- and subscript
-        $cellValue = $cell->getValue();
-        if ($cellValue instanceof RichText) {
+        if ($cell->getValue() instanceof RichText) {
             // set rich text option true to ignore styling - cause value has integrated styling
             $this->isRichText = true;
         } else {
@@ -105,6 +110,20 @@ class CellValue
             $this->hyperlink = $cell->getHyperlink()->getUrl();
             $this->hyperlinkTitle = $cell->getHyperlink()->getTooltip();
         }
+    }
+
+    /**
+     * @param Cell $cell
+     * @param $value
+     * @param int $rowspan
+     * @param int $colspan
+     * @param array $additionalStyles
+     * @return CellDataValueObject
+     * @throws SpreadsheetException
+     */
+    public static function create(Cell $cell, $value, int $rowspan = 0, int $colspan = 0, array $additionalStyles = []): CellDataValueObject
+    {
+        return new self($cell, $value, $rowspan, $colspan, $additionalStyles);
     }
 
     /**
@@ -132,27 +151,11 @@ class CellValue
     }
 
     /**
-     * @param string|int|float $value
-     */
-    public function setValue($value)
-    {
-        $this->value = $value;
-    }
-
-    /**
      * @return string
      */
     public function getType(): string
     {
         return $this->type;
-    }
-
-    /**
-     * @param string $type
-     */
-    public function setType(string $type)
-    {
-        $this->type = $type;
     }
 
     /**
@@ -169,14 +172,6 @@ class CellValue
     public function getAdditionalStyleIndexes(): array
     {
         return $this->additionalStyleIndexes;
-    }
-
-    /**
-     * @param array $additionalStyleIndexes
-     */
-    public function setAdditionalStyleIndexes(array $additionalStyleIndexes)
-    {
-        $this->additionalStyleIndexes = $additionalStyleIndexes;
     }
 
     /**
@@ -204,27 +199,11 @@ class CellValue
     }
 
     /**
-     * @param string $hyperlink
-     */
-    public function setHyperlink(string $hyperlink)
-    {
-        $this->hyperlink = $hyperlink;
-    }
-
-    /**
      * @return string
      */
     public function getHyperlinkTitle(): string
     {
         return $this->hyperlinkTitle;
-    }
-
-    /**
-     * @param string $hyperlinkTitle
-     */
-    public function setHyperlinkTitle(string $hyperlinkTitle)
-    {
-        $this->hyperlinkTitle = $hyperlinkTitle;
     }
 
     /**
@@ -236,27 +215,11 @@ class CellValue
     }
 
     /**
-     * @param int $rowspan
-     */
-    public function setRowspan(int $rowspan)
-    {
-        $this->rowspan = $rowspan;
-    }
-
-    /**
      * @return int
      */
     public function getColspan(): int
     {
         return $this->colspan;
-    }
-
-    /**
-     * @param int $colspan
-     */
-    public function setColspan(int $colspan)
-    {
-        $this->colspan = $colspan;
     }
 
     /**

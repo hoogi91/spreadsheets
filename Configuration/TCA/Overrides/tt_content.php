@@ -1,7 +1,7 @@
 <?php
 defined('TYPO3_MODE') or die();
 
-(function ($extKey, $table) {
+(static function ($extKey, $table) {
     // Adds the content element to the "Type" dropdown
     \Hoogi91\Spreadsheets\Utility\ExtensionManagementUtility::addItemToCTypeList([
         'LLL:EXT:' . $extKey . '/Resources/Private/Language/locallang.xlf:wizards.spreadsheets_table.title',
@@ -10,7 +10,6 @@ defined('TYPO3_MODE') or die();
     ], 'after:table');
 
     // add own assets upload field
-    $allowedFileExtensions = \Hoogi91\Spreadsheets\Service\ReaderService::ALLOWED_EXTENSTIONS;
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns($table, [
         'tx_spreadsheets_assets'        => [
             'config' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getFileFieldTCAConfig(
@@ -27,7 +26,7 @@ defined('TYPO3_MODE') or die();
                         ],
                     ],
                 ],
-                implode(',', $allowedFileExtensions)
+                implode(',', \Hoogi91\Spreadsheets\Service\ReaderService::ALLOWED_EXTENSIONS)
             ),
         ],
         'tx_spreadsheets_ignore_styles' => [

@@ -3,9 +3,7 @@ declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Service;
 
-use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use Hoogi91\Spreadsheets\Traits\SheetIndexTrait;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 /**
  * Class RangeService
@@ -13,35 +11,17 @@ use Hoogi91\Spreadsheets\Traits\SheetIndexTrait;
  */
 class RangeService
 {
-    use SheetIndexTrait;
-
-    /**
-     * RangeService constructor.
-     *
-     * @param Spreadsheet $spreadsheet
-     */
-    public function __construct(Spreadsheet $spreadsheet)
-    {
-        $this->setSpreadsheet($spreadsheet);
-    }
 
     /**
      * converts range string from database value for given worksheet
      *
-     * @param int    $sheetIndex
+     * @param Worksheet $sheet
      * @param string $range
      *
      * @return string
      */
-    public function convert(int $sheetIndex, string $range): string
+    public function convert(Worksheet $sheet, string $range): string
     {
-        try {
-            $sheet = $this->getSpreadsheet()->getSheet($sheetIndex);
-        } catch (SpreadsheetException $e) {
-            // return empty if sheet can't be found
-            return '';
-        }
-
         // match against => 2:24
         if (preg_match('/^(\d+):(\d+)$/', $range, $matches) === 1) {
             // return range => A2:D24 (if highest Column is D)
@@ -97,19 +77,15 @@ class RangeService
 
     /**
      * @param string $startColumn
-     * @param int    $startRow
+     * @param int $startRow
      * @param string $endColumn
-     * @param int    $endRow
+     * @param int $endRow
      *
      * @return string
      */
-    protected function buildRange(
-        string $startColumn,
-        int $startRow,
-        string $endColumn = null,
-        int $endRow = null
-    ): string {
-        if (count(func_get_args()) === 2) {
+    private function buildRange(string $startColumn, int $startRow, string $endColumn = null, int $endRow = null): string
+    {
+        if ($endColumn === null && $endRow === null) {
             return sprintf('%s%d', $startColumn, $startRow);
         }
         return sprintf('%s%d:%s%d', $startColumn, $startRow, $endColumn, $endRow);

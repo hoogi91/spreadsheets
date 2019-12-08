@@ -2,12 +2,11 @@
 
 namespace Hoogi91\Spreadsheets\Tests\Domain\Model;
 
-use GeorgRinger\News\Domain\Model\FileReference;
 use Hoogi91\Spreadsheets\Service\ExtractorService;
 use Nimut\TestingFramework\TestCase\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\FileRepository;
-use Hoogi91\Spreadsheets\Domain\Model\SpreadsheetValue;
 
 /**
  * Class SpreadsheetValueTest
@@ -48,6 +47,7 @@ class SpreadsheetValueTest extends UnitTestCase
     {
         $databaseString = 'file:5|1!D2:G5!vertical';
         $value = SpreadsheetValue::createFromDatabaseString($databaseString, $this->sheetData);
+
 
         // assert data from value
         $this->assertEquals(5, $value->getFileReferenceUid());
