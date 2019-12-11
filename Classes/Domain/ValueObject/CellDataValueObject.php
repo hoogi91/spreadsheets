@@ -29,7 +29,7 @@ class CellDataValueObject
     /**
      * @var string
      */
-    private $value;
+    private $formattedValue;
 
     /**
      * @var int
@@ -81,7 +81,7 @@ class CellDataValueObject
      *
      * @param Cell $cell
      *
-     * @param string $value
+     * @param string $formattedValue
      * @param int $rowspan
      * @param int $colspan
      * @param array $additionalStyles
@@ -89,14 +89,14 @@ class CellDataValueObject
      */
     public function __construct(
         Cell $cell,
-        string $value,
+        string $formattedValue,
         int $rowspan = 0,
         int $colspan = 0,
         array $additionalStyles = []
     ) {
         $this->cell = $cell;
         $this->type = $cell->getDataType();
-        $this->value = $value;
+        $this->formattedValue = $formattedValue;
         $this->rowspan = $rowspan;
         $this->colspan = $colspan;
         $this->styleIndex = $cell->getXfIndex();
@@ -120,7 +120,7 @@ class CellDataValueObject
 
     /**
      * @param Cell $cell
-     * @param string $value
+     * @param string $formattedValue
      * @param int $rowspan
      * @param int $colspan
      * @param array $additionalStyles
@@ -129,12 +129,12 @@ class CellDataValueObject
      */
     public static function create(
         Cell $cell,
-        string $value,
+        string $formattedValue,
         int $rowspan = 0,
         int $colspan = 0,
         array $additionalStyles = []
     ): CellDataValueObject {
-        return new self($cell, $value, $rowspan, $colspan, $additionalStyles);
+        return new self($cell, $formattedValue, $rowspan, $colspan, $additionalStyles);
     }
 
     /**
@@ -146,19 +146,20 @@ class CellDataValueObject
     }
 
     /**
-     * @return bool
+     * @return string|int|float|mixed
+     * @throws SpreadsheetException
      */
-    public function getIsRichText(): bool
+    public function getCalculatedValue()
     {
-        return $this->isRichText;
+        return $this->cell->getCalculatedValue();
     }
 
     /**
      * @return string
      */
-    public function getValue(): string
+    public function getFormattedValue(): string
     {
-        return $this->value;
+        return $this->formattedValue;
     }
 
     /**
@@ -183,6 +184,14 @@ class CellDataValueObject
     public function getAdditionalStyleIndexes(): array
     {
         return $this->additionalStyleIndexes;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isRichText(): bool
+    {
+        return $this->isRichText;
     }
 
     /**

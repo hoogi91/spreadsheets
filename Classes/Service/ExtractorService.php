@@ -61,7 +61,12 @@ class ExtractorService
         $this->rangeService = $rangeService;
     }
 
-    public function getDataByDsnValueObject(ValueObject\DsnValueObject $dsnValue): ?ValueObject\ExtractionValueObject
+    /**
+     * @param ValueObject\DsnValueObject $dsnValue
+     * @param bool $returnCellRef
+     * @return ValueObject\ExtractionValueObject|null
+     */
+    public function getDataByDsnValueObject(ValueObject\DsnValueObject $dsnValue, bool $returnCellRef = false): ?ValueObject\ExtractionValueObject
     {
         try {
             $spreadsheet = $this->readerService->getSpreadsheet($dsnValue->getFileReference());
@@ -70,12 +75,19 @@ class ExtractorService
         }
 
         try {
-            $spreadsheet->setActiveSheetIndex($dsnValue->getSheetIndex());
+            // calculate correct range from worksheet or selection
+            $worksheet = $spreadsheet->setActiveSheetIndex($dsnValue->getSheetIndex());
+            $range = $dsnValue->getSelection();
+            if ($range === null) {
+                $range = sprintf('A1:%s%d', $worksheet->getHighestColumn(), $worksheet->getHighestRow());
+            }
 
+            // get cell data and return value object
             $cellData = $this->rangeToCellArray(
-                $spreadsheet->getActiveSheet(),
-                $dsnValue->getSelection(),
-                $dsnValue->getDirectionOfSelection()
+                $worksheet,
+                $range,
+                $dsnValue->getDirectionOfSelection() ?? self::EXTRACT_DIRECTION_HORIZONTAL,
+                $returnCellRef
             );
 
             return ValueObject\ExtractionValueObject::create($spreadsheet, $cellData);
@@ -86,9 +98,10 @@ class ExtractorService
 
     /**
      * @param Worksheet\Worksheet $sheet
+     * @param bool $returnCellRef
      * @return ValueObject\CellDataValueObject[][]
      */
-    public function getHeadData(Worksheet\Worksheet $sheet): array
+    public function getHeadData(Worksheet\Worksheet $sheet, bool $returnCellRef = false): array
     {
         try {
             if ($sheet->getPageSetup()->isRowsToRepeatAtTopSet() === false) {
@@ -97,7 +110,7 @@ class ExtractorService
 
             $rowsToRepeatAtTop = $sheet->getPageSetup()->getRowsToRepeatAtTop();
             $range = 'A1:' . $sheet->getHighestColumn() . ($rowsToRepeatAtTop[1] + 1);
-            return $this->rangeToCellArray($sheet, $range);
+            return $this->rangeToCellArray($sheet, $range, self::EXTRACT_DIRECTION_HORIZONTAL, $returnCellRef);
         } catch (SpreadsheetException $e) {
             // sheet or range of cells couldn't be loaded
             return [];
@@ -106,19 +119,20 @@ class ExtractorService
 
     /**
      * @param Worksheet\Worksheet $sheet
+     * @param bool $returnCellRef
      * @return ValueObject\CellDataValueObject[][]
      */
-    public function getBodyData(Worksheet\Worksheet $sheet): array
+    public function getBodyData(Worksheet\Worksheet $sheet, bool $returnCellRef = false): array
     {
         try {
             if ($sheet->getPageSetup()->isRowsToRepeatAtTopSet() === false) {
                 $range = 'A1:' . $sheet->getHighestColumn() . $sheet->getHighestRow();
-                return $this->rangeToCellArray($sheet, $range);
+                return $this->rangeToCellArray($sheet, $range, self::EXTRACT_DIRECTION_HORIZONTAL, $returnCellRef);
             }
 
             $rowsToRepeatAtTop = $sheet->getPageSetup()->getRowsToRepeatAtTop();
             $range = 'A' . ($rowsToRepeatAtTop[1] + 1) . ':' . $sheet->getHighestColumn() . $sheet->getHighestRow();
-            return $this->rangeToCellArray($sheet, $range);
+            return $this->rangeToCellArray($sheet, $range, self::EXTRACT_DIRECTION_HORIZONTAL, $returnCellRef);
         } catch (SpreadsheetException $e) {
             // sheet or range of cells couldn't be loaded
             return [];
@@ -137,11 +151,11 @@ class ExtractorService
      * @return ValueObject\CellDataValueObject[][]
      * @throws SpreadsheetException
      */
-    private function rangeToCellArray(
+    public function rangeToCellArray(
         Worksheet\Worksheet $sheet,
         string $range,
         string $direction = self::EXTRACT_DIRECTION_HORIZONTAL,
-        bool $returnCellRef = true
+        bool $returnCellRef = false
     ): array {
         // Identify the range that we need to extract from the worksheet
         [$rangeStart, $rangeEnd] = Coordinate::rangeBoundaries($this->rangeService->convert($sheet, $range));
@@ -234,7 +248,7 @@ class ExtractorService
     {
         return ValueObject\CellDataValueObject::create(
             $cell,
-            $this->cellService->getValue($cell),
+            $this->cellService->getFormattedValue($cell),
             (int)($mergeInformation['rowspan'] ?? 0),
             (int)($mergeInformation['colspan'] ?? 0),
             (array)($mergeInformation['additionalStyleIndexes'] ?? [])

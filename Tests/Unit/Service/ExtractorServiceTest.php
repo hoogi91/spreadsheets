@@ -2,227 +2,158 @@
 
 namespace Hoogi91\Spreadsheets\Tests\Unit\Service;
 
-use TYPO3\CMS\Core\Resource\File;
+use Hoogi91\Spreadsheets\Domain\ValueObject\CellDataValueObject;
+use Hoogi91\Spreadsheets\Domain\ValueObject\DsnValueObject;
+use Hoogi91\Spreadsheets\Service;
+use Nimut\TestingFramework\TestCase\UnitTestCase;
+use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PHPUnit\Framework\MockObject\MockObject;
 use TYPO3\CMS\Core\Resource\FileReference;
-use Hoogi91\Spreadsheets\Service\ExtractorService;
 
 /**
  * Class ExtractorServiceTest
  * @package Hoogi91\Spreadsheets\Tests\Unit\Service
  */
-class ExtractorServiceTest extends AbstractSpreadsheetServiceTest
+class ExtractorServiceTest extends UnitTestCase
 {
+    /**
+     * @var Service\ExtractorService
+     */
+    private $extractorService;
 
     /**
-     * @return ExtractorService
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @var MockObject|Service\ReaderService
      */
-    protected function setService()
+    private $readerService;
+
+    /**
+     * @var Spreadsheet
+     */
+    private $spreadsheet;
+
+    /**
+     * @throws SpreadsheetException
+     */
+    protected function setUp()
     {
-        return new ExtractorService($this->getFixtureSpreadsheet(), static::TEST_SHEET_INDEX);
+        parent::setUp();
+
+        // setup reader mock instance
+        $this->spreadsheet = (new Xlsx())->load(dirname(__DIR__, 2) . '/Fixtures/01_fixture.xlsx');
+        $this->readerService = $this->getMockBuilder(Service\ReaderService::class)->getMock();
+        $this->readerService->method('getSpreadsheet')->willReturn($this->spreadsheet);
+
+        $this->extractorService = new Service\ExtractorService(
+            $this->readerService,
+            new Service\CellService(new Service\StyleService(new Service\ValueMappingService())),
+            new Service\SpanService(),
+            new Service\RangeService()
+        );
     }
 
     /**
-     * @test
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionCode  1515668054
+     * @expectedException \Hoogi91\Spreadsheets\Exception\InvalidDataSourceNameException
      */
-    public function testConstructWithNegativeSheetIndex()
+    public function testExtractionWithEmptyDSN(): void
     {
-        new ExtractorService($this->getFixtureSpreadsheet(), -1);
+        $this->extractorService->getDataByDsnValueObject(DsnValueObject::createFromDSN(''));
     }
 
     /**
-     * @test
+     * @expectedException \Hoogi91\Spreadsheets\Exception\InvalidDataSourceNameException
      */
-    public function testCreateFromDatabaseString()
+    public function testExtractionWithInvalidDSN(): void
     {
-        $this->assertNull(ExtractorService::loadFromDatabaseString(''));
-
-        // TODO: the evaluated spreadsheet value needs be mocked to get valid file reference!
-        $this->assertNull(ExtractorService::loadFromDatabaseString('file:0|0'));
+        $this->extractorService->getDataByDsnValueObject(DsnValueObject::createFromDSN('file:0|0'));
     }
 
-    /**
-     * @test
-     * @expectedException \PhpOffice\PhpSpreadsheet\Reader\Exception
-     * @expectedExceptionCode  1514909945
-     */
-    public function testCreateFromSpreadsheetValue()
+    public function testExtractionOfDataByDsnValueObject(): void
     {
-        $invalidFileReferenceValueMock = $this->createSpreadsheetValueMock(null);
-        $this->assertNull(ExtractorService::loadFromSpreadsheetValue($invalidFileReferenceValueMock));
-
-        $validFileReferenceMock = $this->createSpreadsheetValueMock($this->createFileReferenceMock(
-            '01_fixture.xlsx',
-            'xlsx'
-        ));
-        $this->assertInstanceOf(
-            ExtractorService::class,
-            ExtractorService::loadFromSpreadsheetValue($validFileReferenceMock)
+        /** @var MockObject|DsnValueObject $mockDsnValueObject */
+        $mockDsnValueObject = $this->getMockBuilder(DsnValueObject::class)->disableOriginalConstructor()->getMock();
+        $mockDsnValueObject->expects($this->once())->method('getSheetIndex')->willReturn(0);
+        $mockDsnValueObject->expects($this->once())->method('getFileReference')->willReturn(
+            $this->getMockBuilder(FileReference::class)->disableOriginalConstructor()->getMock()
         );
 
-        $invalidFileReferenceExtensionMock = $this->createSpreadsheetValueMock($this->createFileReferenceMock(
-            '01_fixture.xlsx',
-            'ext'
-        ));
-        ExtractorService::loadFromSpreadsheetValue($invalidFileReferenceExtensionMock);
+        // execute the extractor and expect data from sheet 0
+        $this->extractorService->getDataByDsnValueObject($mockDsnValueObject);
     }
 
-    /**
-     * @test
-     */
-    public function testRangeExtractor()
+    public function testHeadDataExtraction(): void
     {
-//        /** @var ExtractorService $extractorService */
-//        $extractorService = $this->getCurrentService()->setSheetIndex(static::TEST_SHEET_INDEX);
-//        $range = $extractorService->rangeToCellArray('A1:E7');
-//
-//        /** @var CellValue $cellValueA1 */
-//        $cellValueA1 = $range[1]['A'];
-//        /** @var CellValue $cellValueE5 */
-//        $cellValueE5 = $range[5]['E'];
-//
-//        $this->assertEquals('2014', $cellValueA1->getValue());
-//        $this->assertEquals(
-//            '<span style="color:#000000"><sup>Hoch</sup></span><span style="color:#000000"> Test </span><span style="color:#000000"><sub>Tief</sub></span>',
-//            $cellValueE5->getValue()
-//        );
+        $worksheet = $this->spreadsheet->getSheet(0);
+        $this->assertEmpty($this->extractorService->getHeadData($worksheet, true));
     }
 
-    /**
-     * @test
-     */
-    public function testRangeExtractorWithCellReference()
+    public function testBodyDataExtraction(): void
     {
-//        /** @var ExtractorService $extractorService */
-//        $extractorService = $this->getCurrentService()->setSheetIndex(static::TEST_SHEET_INDEX);
-//        $range = $extractorService->rangeToCellArray('A1:E7', true);
-//
-//        /** @var CellValue $cellValueA1 */
-//        $cellValueA1 = $range[1][1];
-//        /** @var CellValue $cellValueE5 */
-//        $cellValueE5 = $range[5][5];
-//
-//        $this->assertEquals('2014', $cellValueA1->getValue());
-//        $this->assertEquals(
-//            '<span style="color:#000000"><sup>Hoch</sup></span><span style="color:#000000"> Test </span><span style="color:#000000"><sub>Tief</sub></span>',
-//            $cellValueE5->getValue()
-//        );
-    }
+        $worksheet = $this->spreadsheet->getSheet(0);
+        $bodyData = $this->extractorService->getBodyData($worksheet, true);
 
-    /**
-     * @test
-     */
-    public function testHeadDataExtraction()
-    {
-        /** @var ExtractorService $extractorService */
-        $extractorService = $this->getCurrentService()->setSheetIndex(static::TEST_SHEET_INDEX);
-        $this->assertEmpty($extractorService->getHeadData());
-    }
-
-    /**
-     * @test
-     */
-    public function testBodyDataExtraction()
-    {
-        /** @var ExtractorService $extractorService */
-        $extractorService = $this->getCurrentService()->setSheetIndex(static::TEST_SHEET_INDEX);
-
-        $bodyData = $extractorService->getBodyData();
-
-        /** @var CellValue $cellValueA1 */
-        $cellValueA1 = $bodyData[1][1];
-        /** @var CellValue $cellValueE5 */
-        $cellValueE5 = $bodyData[5][5];
-
-        $this->assertInternalType('array', $bodyData);
+        $this->assertIsArray($bodyData);
         $this->assertCount(7, $bodyData);
-        $this->assertEquals('2014', $cellValueA1->getValue());
+
+        /** @var CellDataValueObject $cellValueA1 */
+        $cellValueA1 = $bodyData[1][1];
+        $this->assertInstanceOf(CellDataValueObject::class, $cellValueA1);
+        $this->assertEquals('2014', $cellValueA1->getFormattedValue());
+
+
+        /** @var CellDataValueObject $cellValueD5 */
+        $cellValueD5 = $bodyData[5][4];
+        $this->assertInstanceOf(CellDataValueObject::class, $cellValueD5);
         $this->assertEquals(
             '<span style="color:#000000"><sup>Hoch</sup></span><span style="color:#000000"> Test </span><span style="color:#000000"><sub>Tief</sub></span>',
-            $cellValueE5->getValue()
+            $cellValueD5->getFormattedValue()
         );
     }
 
     /**
-     * @test
+     * @param string $range
+     * @param string $direction
+     * @param bool $cellRef
+     *
+     * @dataProvider rangeExtractorDataProvider
+     *
+     * @throws SpreadsheetException
      */
-    public function testStyleExtraction()
+    public function testRangeExtractor(string $range, string $direction, bool $cellRef = false): void
     {
-        /** @var ExtractorService $extractorService */
-        $extractorService = $this->getCurrentService()->setSheetIndex(static::TEST_SHEET_INDEX);
+        $worksheet = $this->spreadsheet->getSheet(0);
+        $data = $this->extractorService->rangeToCellArray($worksheet, $range, $direction, $cellRef);
 
-        $styles = $extractorService->getStyles('identifier');
-        $this->assertInternalType('string', $styles);
-        $this->assertStringStartsWith('#identifier', $styles);
-        $this->assertContains('.cell-type-e', $styles);
-        $this->assertContains('.cell-type-f', $styles);
-        $this->assertContains('.cell-type-inlineStr', $styles);
-        $this->assertContains('.cell-type-n', $styles);
-        $this->assertContains('.cell-type-s', $styles);
-        $this->assertContains('.cell-style-', $styles);
-    }
+        /** @var CellDataValueObject $cellValueA1 */
+        if ($direction === Service\ExtractorService::EXTRACT_DIRECTION_HORIZONTAL) {
+            $cellValueA1 = $cellRef === false ? $data[1]['B'] : $data[1][2];
+        } else {
+            $cellValueA1 = $cellRef === false ? $data['B'][1] : $data[2][1];
+        }
+        $this->assertInstanceOf(CellDataValueObject::class, $cellValueA1);
+        $this->assertEquals('2015', $cellValueA1->getFormattedValue());
 
-    /**
-     * get spreadsheet value mock object
-     *
-     * @param object|null $fileReference
-     *
-     * @return \PHPUnit_Framework_MockObject_MockObject
-     */
-    protected function createSpreadsheetValueMock($fileReference)
-    {
-        $mock = $this->getMockBuilder(SpreadsheetValue::class)
-            ->disableOriginalConstructor()
-            ->setMethods(['getFileReference', 'getSheetIndex'])
-            ->getMock();
-        $mock->method('getFileReference')->willReturn($fileReference);
-        $mock->method('getSheetIndex')->willReturn(static::TEST_SHEET_INDEX);
-
-        return $mock;
-    }
-
-    /**
-     * get file referece mock of fixture file
-     *
-     * @param string $file
-     * @param string $extension
-     *
-     * @return \PHPUnit_Framework_MockObject_MockObject
-     */
-    protected function createFileReferenceMock($file, $extension)
-    {
-        $fileReferenceMock = $this->getMockBuilder(FileReference::class)
-            ->disableOriginalConstructor()
-            ->setMethods([
-                'getExtension',
-                'getOriginalFile',
-                'getForLocalProcessing',
-            ])
-            ->getMock();
-
-        $fileReferenceMock->method('getExtension')->willReturn($extension);
-        $fileReferenceMock->method('getOriginalFile')->willReturn($this->createOriginalFileMock());
-        $fileReferenceMock->method('getForLocalProcessing')->willReturn(
-            dirname(__DIR__, 2) . '/Fixtures/' . $file
+        /** @var CellDataValueObject $cellValueE5 */
+        if ($direction === Service\ExtractorService::EXTRACT_DIRECTION_HORIZONTAL) {
+            $cellValueE5 = $cellRef === false ? $data[5]['D'] : $data[5][4];
+        } else {
+            $cellValueE5 = $cellRef === false ? $data['D'][5] : $data[4][5];
+        }
+        $this->assertInstanceOf(CellDataValueObject::class, $cellValueE5);
+        $this->assertEquals(
+            '<span style="color:#000000"><sup>Hoch</sup></span><span style="color:#000000"> Test </span><span style="color:#000000"><sub>Tief</sub></span>',
+            $cellValueE5->getFormattedValue()
         );
-
-        return $fileReferenceMock;
     }
 
-    /**
-     * @param bool $exists
-     *
-     * @return \PHPUnit_Framework_MockObject_MockObject
-     */
-    protected function createOriginalFileMock($exists = true)
+    public function rangeExtractorDataProvider(): array
     {
-        $fileMock = $this->getMockBuilder(File::class)
-            ->disableOriginalConstructor()
-            ->setMethods(['exists'])
-            ->getMock();
-        $fileMock->method('exists')->willReturn($exists);
-        return $fileMock;
+        return [
+            ['A1:E7', Service\ExtractorService::EXTRACT_DIRECTION_HORIZONTAL],
+            ['A1:E7', Service\ExtractorService::EXTRACT_DIRECTION_HORIZONTAL, true],
+            ['A1:E7', Service\ExtractorService::EXTRACT_DIRECTION_VERTICAL],
+            ['A1:E7', Service\ExtractorService::EXTRACT_DIRECTION_VERTICAL, true],
+        ];
     }
 }

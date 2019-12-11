@@ -44,7 +44,7 @@ class CellService
      *
      * @return string
      */
-    public function getValue(Cell $cell, callable $formatCallback = null): string
+    public function getFormattedValue(Cell $cell, callable $formatCallback = null): string
     {
         if ($cell->getValue() === null) {
             return '';
@@ -138,9 +138,9 @@ class CellService
                 setlocale(LC_NUMERIC, $currentLocale);
             }
 
-            return $value;
+            return (string)$value;
         }
 
-        return NumberFormat::toFormattedString($value, NumberFormat::FORMAT_GENERAL, $callback);
+        return (string)NumberFormat::toFormattedString($value, NumberFormat::FORMAT_GENERAL, $callback);
     }
 }

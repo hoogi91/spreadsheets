@@ -52,11 +52,13 @@ class DsnValueObject
         }
 
         try {
-            /** @var FileRepository $fileRepository */
-            $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
-            if (strpos($file, 'file:') === 0) {
+            if (strpos($file, 'file:') === 0 && (int)substr($file, 5) !== 0) {
+                /** @var FileRepository $fileRepository */
+                $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
                 $this->fileReference = $fileRepository->findFileReferenceByUid((int)substr($file, 5));
-            } elseif (MathUtility::canBeInterpretedAsInteger($file)) {
+            } elseif ((int)$file !== 0 && MathUtility::canBeInterpretedAsInteger($file)) {
+                /** @var FileRepository $fileRepository */
+                $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
                 $this->fileReference = $fileRepository->findFileReferenceByUid((int)$file);
             } else {
                 throw new InvalidDataSourceNameException('File reference from DSN can not be parsed/evaluated!');
@@ -86,6 +88,22 @@ class DsnValueObject
     public static function createFromDSN(string $dsn): DsnValueObject
     {
         return new self($dsn);
+    }
+
+    /**
+     * @return string
+     */
+    public function getDsn(): string
+    {
+        $dsn = sprintf('file:%d|%d', $this->getFileReference()->getUid(), $this->getSheetIndex());
+        if ($this->getSelection() !== null) {
+            $dsn .= '!' . $this->getSelection();
+
+            if ($this->getDirectionOfSelection() !== null) {
+                $dsn .= '!' . $this->getDirectionOfSelection();
+            }
+        }
+        return $dsn;
     }
 
     /**

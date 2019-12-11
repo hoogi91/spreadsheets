@@ -2,11 +2,13 @@
 
 namespace Hoogi91\Spreadsheets\Tests\Domain\Model;
 
-use Hoogi91\Spreadsheets\Service\ExtractorService;
+use Hoogi91\Spreadsheets\Domain\ValueObject\DsnValueObject;
 use Nimut\TestingFramework\TestCase\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Container\ContainerInterface;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\FileRepository;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class SpreadsheetValueTest
@@ -17,7 +19,7 @@ class SpreadsheetValueTest extends UnitTestCase
 
     protected $sheetData = [
         // file reference uid
-        5  => [
+        5 => [
             // sheet index
             1 => [
                 'name' => 'Worksheet Name 1',
@@ -40,149 +42,76 @@ class SpreadsheetValueTest extends UnitTestCase
         ],
     ];
 
-    /**
-     * @test
-     */
-    public function testCreationFromDatabaseString()
+    public function setUp()
+    {
+        parent::setUp();
+        $_this = $this;
+
+        /** @var ContainerInterface|MockObject $container */
+        $container = $this->getMockBuilder(ContainerInterface::class)->getMock();
+        $filRepositoryMock = $this->getMockBuilder(FileRepository::class)->disableOriginalConstructor()->getMock();
+        $filRepositoryMock->expects($this->once())->method('findFileReferenceByUid')->willReturnCallback(
+            static function (int $fileUid) use ($_this) {
+                $mock = $_this->getMockBuilder(FileReference::class)->disableOriginalConstructor()->getMock();
+                $mock->method('getUid')->willReturn($fileUid);
+                return $mock;
+            }
+        );
+
+        // add expectation on container and apply to general utility
+        $container->expects($this->any())->method('has')->willReturn(true);
+        $container->expects($this->once())->method('get')->willReturn($filRepositoryMock);
+        GeneralUtility::setContainer($container);
+    }
+
+    public function testCreationFromDatabaseString(): void
     {
         $databaseString = 'file:5|1!D2:G5!vertical';
-        $value = SpreadsheetValue::createFromDatabaseString($databaseString, $this->sheetData);
-
+        $value = DsnValueObject::createFromDSN($databaseString);
 
         // assert data from value
-        $this->assertEquals(5, $value->getFileReferenceUid());
+        $this->assertEquals(5, $value->getFileReference()->getUid());
         $this->assertEquals(1, $value->getSheetIndex());
         $this->assertEquals('D2:G5', $value->getSelection());
-        $this->assertEquals('Worksheet Name 1', $value->getSheetName());
-        $this->assertEquals('Worksheet Name 1!D2:G5!vertical', $value->getFormattedValue());
-        $this->assertEquals($databaseString, $value->getDatabaseValue());
+        $this->assertEquals('vertical', $value->getDirectionOfSelection());
+        $this->assertEquals($databaseString, $value->getDsn());
     }
 
-    /**
-     * @test
-     */
-    public function testCreationFromDatabaseStringAndCorrectSheetSelection()
+    public function testCreationFromDatabaseStringAndCorrectSheetSelection(): void
     {
         $databaseString = 'file:10|2!A2:B5';
-        $value = SpreadsheetValue::createFromDatabaseString($databaseString, $this->sheetData);
+        $value = DsnValueObject::createFromDSN($databaseString);
 
         // assert data from value
-        $this->assertEquals(10, $value->getFileReferenceUid());
+        $this->assertEquals(10, $value->getFileReference()->getUid());
         $this->assertEquals(2, $value->getSheetIndex());
         $this->assertEquals('A2:B5', $value->getSelection());
-        $this->assertEquals('Worksheet Finance', $value->getSheetName());
-        $this->assertEquals('Worksheet Finance!A2:B5!horizontal', $value->getFormattedValue());
-        $this->assertEquals($databaseString . '!horizontal', $value->getDatabaseValue());
+        $this->assertEquals(null, $value->getDirectionOfSelection());
+        $this->assertEquals($databaseString, $value->getDsn());
     }
 
-    /**
-     * @test
-     */
-    public function testCreationFromDatabaseStringWithoutFilePrefix()
+    public function testCreationFromDatabaseStringWithoutFilePrefix(): void
     {
         $databaseString = '5|1!D2:G5!vertical';
-        $value = SpreadsheetValue::createFromDatabaseString($databaseString, $this->sheetData);
+        $value = DsnValueObject::createFromDSN($databaseString);
 
         // assert data from value
-        $this->assertEquals(5, $value->getFileReferenceUid());
+        $this->assertEquals(5, $value->getFileReference()->getUid());
         $this->assertEquals(1, $value->getSheetIndex());
         $this->assertEquals('D2:G5', $value->getSelection());
-        $this->assertEquals('Worksheet Name 1', $value->getSheetName());
-        $this->assertEquals('Worksheet Name 1!D2:G5!vertical', $value->getFormattedValue());
-        $this->assertEquals('file:' . $databaseString, $value->getDatabaseValue());
+        $this->assertEquals('file:' . $databaseString, $value->getDsn());
     }
 
-    /**
-     * @test
-     */
-    public function testCreationFromDatabaseStringOnUnknown()
+    public function testCreationFromDatabaseStringOnUnknown(): void
     {
         $databaseString = 'file:99|99!A1:B2';
-        $value = SpreadsheetValue::createFromDatabaseString($databaseString, $this->sheetData);
+        $value = DsnValueObject::createFromDSN($databaseString);
 
         // assert data from value
-        $this->assertEquals(99, $value->getFileReferenceUid());
+        $this->assertEquals(99, $value->getFileReference()->getUid());
         $this->assertEquals(99, $value->getSheetIndex());
         $this->assertEquals('A1:B2', $value->getSelection());
-        $this->assertEquals('', $value->getSheetName());
-        $this->assertEquals('A1:B2!horizontal', $value->getFormattedValue());
-        $this->assertEquals($databaseString . '!horizontal', $value->getDatabaseValue());
-    }
-
-    /**
-     * @test
-     */
-    public function testSetterAndGetter()
-    {
-        $value = new SpreadsheetValue($this->createFileRepositoryMock($this->createFileReferenceMock(
-            'fixture.xlsx',
-            'xlsx'
-        )));
-
-        $value->setFileReferenceUid(10);
-        $this->assertEquals(10, $value->getFileReferenceUid());
-
-        $value->setSheetIndex(5);
-        $this->assertEquals(5, $value->getSheetIndex());
-
-        $value->setSheetName('Lorem ipsum');
-        $this->assertEquals('Lorem ipsum', $value->getSheetName());
-
-        $value->setSelection('A3:X25');
-        $this->assertEquals('A3:X25', $value->getSelection());
-
-        $value->setDirectionOfSelection(ExtractorService::EXTRACT_DIRECTION_VERTICAL);
-        $this->assertEquals(ExtractorService::EXTRACT_DIRECTION_VERTICAL, $value->getDirectionOfSelection());
-
-        // assert default formatted value
-        $this->assertEquals('Lorem ipsum!A3:X25!vertical', $value->getFormattedValue());
-
-        // assert formatted value without sheet name
-        $value->setSelection('B5:Y10');
-        $value->setSheetName('');
-        $this->assertEquals('B5:Y10!vertical', $value->getFormattedValue());
-
-        // assert formatted value without selection
-        $value->setSelection('');
-        $value->setSheetName('Lorem ipsum dolor sit amet');
-        $value->setDirectionOfSelection(ExtractorService::EXTRACT_DIRECTION_HORIZONTAL);
-        $this->assertEquals('Lorem ipsum dolor sit amet!horizontal', $value->getFormattedValue());
-
-        // assert formatted on magic __toString method
-        $value->setSelection('D5:Q10');
-        $value->setSheetName('Worksheet 1');
-        $this->assertEquals('Worksheet 1!D5:Q10!horizontal', (string)$value);
-    }
-
-    /**
-     * @test
-     */
-    public function testGetFileReference()
-    {
-        $value = new SpreadsheetValue($this->createFileRepositoryMock($this->createFileReferenceMock(
-            'fixture.xlsx',
-            'xlsx'
-        )));
-
-        // assert that item with file reference is returned
-        $value->setFileReferenceUid(123);
-        $this->assertEquals('xlsx', $value->getFileReference()->getExtension());
-        $this->assertEquals(
-            dirname(__DIR__, 2) . '/Fixtures/fixture.xlsx',
-            $value->getFileReference()->getForLocalProcessing()
-        );
-
-        // assert correct exception handling on missing file reference uid
-        $value->setFileReferenceUid(0);
-        $this->assertNull($value->getFileReference());
-
-        // assert that uid 123 should be returned from static cache
-        $value->setFileReferenceUid(123);
-        $this->assertEquals('xlsx', $value->getFileReference()->getExtension());
-        $this->assertEquals(
-            dirname(__DIR__, 2) . '/Fixtures/fixture.xlsx',
-            $value->getFileReference()->getForLocalProcessing()
-        );
+        $this->assertEquals($databaseString, $value->getDsn());
     }
 
     /**
@@ -208,30 +137,4 @@ class SpreadsheetValueTest extends UnitTestCase
 
         return $fileRepositoryMock;
     }
-
-    /**
-     * get file referece mock of fixture file
-     *
-     * @param string $file
-     * @param string $extension
-     *
-     * @return MockObject
-     */
-    protected function createFileReferenceMock($file, $extension)
-    {
-        $fileReferenceMock = $this->getMockBuilder(FileReference::class)
-            ->disableOriginalConstructor()
-            ->setMethods([
-                'getExtension',
-                'getForLocalProcessing',
-            ])
-            ->getMock();
-        $fileReferenceMock->method('getExtension')->willReturn($extension);
-        $fileReferenceMock->method('getForLocalProcessing')->willReturn(
-            dirname(__DIR__, 2) . '/Fixtures/' . $file
-        );
-
-        return $fileReferenceMock;
-    }
-
 }
