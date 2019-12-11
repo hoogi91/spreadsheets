@@ -64,8 +64,10 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'Handsontable'], function ($, Modal
                 var sheetData = _this.getCurrentFileSheets();
                 _this.buildSheetTabs(sheetData);
                 _this.buildHandsOnTable(sheetData);
+                _this.$inputWrapper.find('.spreadsheet-direction').show();
             }, function () {
                 _this.$inputWrapper.find('.spreadsheet-sheets').hide();
+                _this.$inputWrapper.find('.spreadsheet-direction').hide();
                 _this.$inputWrapper.find('.spreadsheet-table').hide();
             });
         });
@@ -75,6 +77,7 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'Handsontable'], function ($, Modal
             _this.triggerCloseEditButton(function () {
                 // hide sheets and table
                 _this.$inputWrapper.find('.spreadsheet-sheets').hide();
+                _this.$inputWrapper.find('.spreadsheet-direction').hide();
                 _this.$inputWrapper.find('.spreadsheet-table').hide();
 
                 // reset hidden and text input values
@@ -431,7 +434,7 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'Handsontable'], function ($, Modal
             // table cell selection is disabled => sheets only
             this.$inputWrapper.find('input.spreadsheet-input-database').val('file:' + this.selectedFileUid + '|' + this.selectedSheetIndex);
             this.$inputWrapper.find('input.spreadsheet-input-formatted').val(this.selectedSheetName);
-        } else if (this.$inputWrapper.find('.spreadsheet-table .spreadsheet-input-direction').length !== 0) {
+        } else if (this.$inputWrapper.find('.spreadsheet-input-direction').length !== 0) {
             // cell selection and direction selction are enabled
             this.$inputWrapper.find('input.spreadsheet-input-database').val('file:' + this.selectedFileUid + '|' + this.selectedSheetIndex + '!' + this.selectedSheetCells + '!' + this.directionOfSelection);
             this.$inputWrapper.find('input.spreadsheet-input-formatted').val(this.selectedSheetName + '!' + this.selectedSheetCells + '!' + this.directionOfSelection);
