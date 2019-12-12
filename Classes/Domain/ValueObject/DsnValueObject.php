@@ -43,6 +43,8 @@ class DsnValueObject
      * e.g. spreadsheet://123?index=1&range=A2:B5&direction=vertical
      *
      * @param string $dsn
+     *
+     * @throws InvalidDataSourceNameException
      */
     public function __construct(string $dsn)
     {
@@ -85,6 +87,12 @@ class DsnValueObject
         }
     }
 
+    /**
+     * @param string $dsn
+     * @return DsnValueObject
+     *
+     * @throws InvalidDataSourceNameException
+     */
     public static function createFromDSN(string $dsn): DsnValueObject
     {
         return new self($dsn);

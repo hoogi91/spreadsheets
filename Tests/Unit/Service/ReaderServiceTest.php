@@ -81,7 +81,7 @@ class ReaderServiceTest extends UnitTestCase
      *
      * @return FileReference|\PHPUnit_Framework_MockObject_MockObject
      */
-    protected function createFileReferenceMock($file, $extension, $missingOriginalFile = false)
+    private function createFileReferenceMock($file, $extension, $missingOriginalFile = false)
     {
         $fileReferenceMock = $this->getMockBuilder(FileReference::class)->disableOriginalConstructor()->getMock();
 
@@ -99,7 +99,7 @@ class ReaderServiceTest extends UnitTestCase
      *
      * @return File|\PHPUnit_Framework_MockObject_MockObject
      */
-    protected function createOriginalFileMock($exists = true)
+    private function createOriginalFileMock($exists = true)
     {
         $fileMock = $this->getMockBuilder(File::class)->disableOriginalConstructor()->getMock();
         $fileMock->method('exists')->willReturn($exists);

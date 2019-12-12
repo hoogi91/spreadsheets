@@ -91,7 +91,7 @@ class ExtractorService
             );
 
             return ValueObject\ExtractionValueObject::create($spreadsheet, $cellData);
-        } catch (SpreadsheetException $e) {
+        } catch (SpreadsheetException $exception) {
             return ValueObject\ExtractionValueObject::create($spreadsheet, []);
         }
     }

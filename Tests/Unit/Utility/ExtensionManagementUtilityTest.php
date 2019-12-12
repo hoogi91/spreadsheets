@@ -14,7 +14,7 @@ class ExtensionManagementUtilityTest extends UnitTestCase
     /**
      * @var array
      */
-    protected static $elementToInsert = [
+    private static $elementToInsert = [
         'Title of Plugin/Element',
         'element_key',
         'icon-identifier-of-element',
@@ -37,10 +37,7 @@ class ExtensionManagementUtilityTest extends UnitTestCase
         ];
     }
 
-    /**
-     * @test
-     */
-    public function testInsertOnCType()
+    public function testInsertOnCType(): void
     {
         // execute insert
         ExtensionManagementUtility::addItemToCTypeList(self::$elementToInsert);
@@ -57,10 +54,7 @@ class ExtensionManagementUtilityTest extends UnitTestCase
         );
     }
 
-    /**
-     * @test
-     */
-    public function testInsertOnCTypeBeforeSpecificElement()
+    public function testInsertOnCTypeBeforeSpecificElement(): void
     {
         // execute insert
         ExtensionManagementUtility::addItemToCTypeList(self::$elementToInsert, 'before:existing_element_key');
@@ -77,10 +71,7 @@ class ExtensionManagementUtilityTest extends UnitTestCase
         );
     }
 
-    /**
-     * @test
-     */
-    public function testInsertOnCTypeAfterSpecificElement()
+    public function testInsertOnCTypeAfterSpecificElement(): void
     {
         // execute insert
         ExtensionManagementUtility::addItemToCTypeList(self::$elementToInsert, 'after:existing_element_key');
@@ -97,10 +88,7 @@ class ExtensionManagementUtilityTest extends UnitTestCase
         );
     }
 
-    /**
-     * @test
-     */
-    public function testInsertOnCTypeWithoutPositionSpecifier()
+    public function testInsertOnCTypeWithoutPositionSpecifier(): void
     {
         // execute insert
         ExtensionManagementUtility::addItemToCTypeList(self::$elementToInsert, 'existing_element_key');
@@ -117,10 +105,7 @@ class ExtensionManagementUtilityTest extends UnitTestCase
         );
     }
 
-    /**
-     * @test
-     */
-    public function testInsertOnCTypeWithInvalidPositionSpecifier()
+    public function testInsertOnCTypeWithInvalidPositionSpecifier(): void
     {
         // execute insert
         ExtensionManagementUtility::addItemToCTypeList(self::$elementToInsert, 'somewhere:existing_element_key');

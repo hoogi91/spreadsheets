@@ -14,8 +14,6 @@ use PhpOffice\PhpSpreadsheet\RichText\RichText;
  */
 class CellDataValueObject
 {
-
-
     /**
      * @var Cell
      */

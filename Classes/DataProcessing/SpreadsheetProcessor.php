@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Hoogi91\Spreadsheets\DataProcessing;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\DsnValueObject;
+use Hoogi91\Spreadsheets\Exception\InvalidDataSourceNameException;
 use Hoogi91\Spreadsheets\Service\ExtractorService;
 use Hoogi91\Spreadsheets\Service\StyleService;
 use TYPO3\CMS\Core\Page\PageRenderer;
@@ -66,13 +67,20 @@ class SpreadsheetProcessor implements DataProcessorInterface
         array $processorConfiguration,
         array $processedData
     ): array {
-        $databaseValue = $cObj->stdWrapValue('value', $processorConfiguration, '');
-        if (empty($databaseValue)) {
+        $value = $cObj->stdWrapValue('value', $processorConfiguration, '');
+        if (empty($value)) {
             return $processedData;
         }
 
-        $dsnValue = DsnValueObject::createFromDSN($databaseValue);
-        $extraction = $this->extractorService->getDataByDsnValueObject($dsnValue);
+        try {
+            // get spreadsheet DSN value from content object to parse and render
+            $dsnValue = DsnValueObject::createFromDSN($value);
+        } catch (InvalidDataSourceNameException $exception) {
+            // if DSN could not be parsed or is invalid the output is empty
+            return $processedData;
+        }
+
+        $extraction = $this->extractorService->getDataByDsnValueObject($dsnValue, true);
         if ($extraction === null) {
             return $processedData;
         }

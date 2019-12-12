@@ -1,23 +1,24 @@
 <?php
 
-namespace Hoogi91\Spreadsheets\Tests\Domain\Model;
+namespace Hoogi91\Spreadsheets\Tests\Domain\ValueObject;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\DsnValueObject;
+use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
 use Nimut\TestingFramework\TestCase\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Container\ContainerInterface;
-use TYPO3\CMS\Core\Resource\FileReference;
-use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
- * Class SpreadsheetValueTest
- * @package Hoogi91\Spreadsheets\Tests\Domain\Model
+ * Class SpreadsheetValueObjectTest
+ * @package Hoogi91\Spreadsheets\Tests\Domain\ValueObject
  */
-class SpreadsheetValueTest extends UnitTestCase
+class SpreadsheetValueObjectTest extends UnitTestCase
 {
 
-    protected $sheetData = [
+    use FileRepositoryMockTrait;
+
+    private $sheetData = [
         // file reference uid
         5 => [
             // sheet index
@@ -45,22 +46,10 @@ class SpreadsheetValueTest extends UnitTestCase
     public function setUp()
     {
         parent::setUp();
-        $_this = $this;
 
         /** @var ContainerInterface|MockObject $container */
-        $container = $this->getMockBuilder(ContainerInterface::class)->getMock();
-        $filRepositoryMock = $this->getMockBuilder(FileRepository::class)->disableOriginalConstructor()->getMock();
-        $filRepositoryMock->expects($this->once())->method('findFileReferenceByUid')->willReturnCallback(
-            static function (int $fileUid) use ($_this) {
-                $mock = $_this->getMockBuilder(FileReference::class)->disableOriginalConstructor()->getMock();
-                $mock->method('getUid')->willReturn($fileUid);
-                return $mock;
-            }
-        );
-
-        // add expectation on container and apply to general utility
-        $container->expects($this->any())->method('has')->willReturn(true);
-        $container->expects($this->once())->method('get')->willReturn($filRepositoryMock);
+        $container = $this->getContainerMock();
+        $container->expects($this->once())->method('get')->willReturn($this->getFileRepositoryMock());
         GeneralUtility::setContainer($container);
     }
 
@@ -112,29 +101,5 @@ class SpreadsheetValueTest extends UnitTestCase
         $this->assertEquals(99, $value->getSheetIndex());
         $this->assertEquals('A1:B2', $value->getSelection());
         $this->assertEquals($databaseString, $value->getDsn());
-    }
-
-    /**
-     * @param mixed $result
-     *
-     * @return MockObject|FileRepository
-     */
-    protected function createFileRepositoryMock($result)
-    {
-        $fileRepositoryMock = $this->getMockBuilder(FileRepository::class)
-            ->disableOriginalConstructor()
-            ->setMethods(['findFileReferenceByUid'])
-            ->getMock();
-
-        $fileRepositoryMock->method('findFileReferenceByUid')->willReturnCallback(
-            function ($fileReferenceUid) use ($result) {
-                if ($fileReferenceUid === 0) {
-                    return false;
-                }
-                return $result;
-            }
-        );
-
-        return $fileRepositoryMock;
     }
 }

@@ -88,7 +88,7 @@ class StyleService
         $css['vertical-align'] = $this->mappingService->convertValue('valign', $pStyle->getVertical(), 'baseline');
 
         $textAlign = $this->mappingService->convertValue('halign', $pStyle->getHorizontal());
-        if (empty($textAlign) === true) {
+        if (empty($textAlign) === false) {
             $css['text-align'] = $textAlign;
             if (in_array($textAlign, ['left', 'right'])) {
                 $css['padding-' . $textAlign] = ((int)$pStyle->getIndent() * 9) . 'px';

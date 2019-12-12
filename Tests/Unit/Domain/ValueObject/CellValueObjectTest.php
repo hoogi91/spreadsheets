@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoogi91\Spreadsheets\Tests\Domain\Model;
+namespace Hoogi91\Spreadsheets\Tests\Domain\ValueObject;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\CellDataValueObject;
 use Hoogi91\Spreadsheets\Service\CellService;
@@ -14,21 +14,21 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 /**
- * Class CellValueTest
- * @package Hoogi91\Spreadsheets\Tests\Domain\Model
+ * Class CellValueObjectTest
+ * @package Hoogi91\Spreadsheets\Tests\Domain\ValueObject
  */
-class CellValueTest extends UnitTestCase
+class CellValueObjectTest extends UnitTestCase
 {
 
     /**
      * @var Worksheet
      */
-    protected $sheet;
+    private $sheet;
 
     /**
      * @var CellService
      */
-    protected $cellService;
+    private $cellService;
 
     /**
      * @throws SpreadsheetException
@@ -47,7 +47,7 @@ class CellValueTest extends UnitTestCase
     /**
      * @throws SpreadsheetException
      */
-    public function testDefaultCell()
+    public function testDefaultCell(): void
     {
         $cellValue = new CellDataValueObject(
             $this->sheet->getCell('A1'),
@@ -67,7 +67,7 @@ class CellValueTest extends UnitTestCase
     /**
      * @throws SpreadsheetException
      */
-    public function testSpecialCharsCell()
+    public function testSpecialCharsCell(): void
     {
         $cellValue = new CellDataValueObject(
             $this->sheet->getCell('A4'),
@@ -87,7 +87,7 @@ class CellValueTest extends UnitTestCase
     /**
      * @throws SpreadsheetException
      */
-    public function testStringFormattedCell()
+    public function testStringFormattedCell(): void
     {
         $cellValue = new CellDataValueObject(
             $this->sheet->getCell('C4'),
@@ -107,7 +107,7 @@ class CellValueTest extends UnitTestCase
     /**
      * @throws SpreadsheetException
      */
-    public function testHyperlinkCell()
+    public function testHyperlinkCell(): void
     {
         $cellValue = new CellDataValueObject(
             $this->sheet->getCell('D4'),
@@ -127,7 +127,7 @@ class CellValueTest extends UnitTestCase
     /**
      * @throws SpreadsheetException
      */
-    public function testSuperscriptCell()
+    public function testSuperscriptCell(): void
     {
         $cellValue = new CellDataValueObject(
             $this->sheet->getCell('E5'),
@@ -147,7 +147,7 @@ class CellValueTest extends UnitTestCase
     /**
      * @throws SpreadsheetException
      */
-    public function testSubcriptCell()
+    public function testSubcriptCell(): void
     {
         $cellValue = new CellDataValueObject(
             $this->sheet->getCell('D5'),
@@ -168,14 +168,14 @@ class CellValueTest extends UnitTestCase
     /**
      * @throws SpreadsheetException
      */
-    public function testAllValueObjectFields()
+    public function testAllValueObjectFields(): void
     {
         $cellValue = CellDataValueObject::create(
             $this->sheet->getCell('B6'),
             $this->cellService->getFormattedValue($this->sheet->getCell('B6')),
             2,
             1,
-            [15,20,25]
+            [15, 20, 25]
         );
 
         $this->assertEquals(2, $cellValue->getRowspan());

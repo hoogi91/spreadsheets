@@ -83,7 +83,7 @@ class SpanServiceTest extends UnitTestCase
      * @param array $actual
      * @param string $message
      */
-    protected function assertEqualsArrays($expected, $actual, $message = ''): void
+    private function assertEqualsArrays($expected, $actual, $message = ''): void
     {
         $this->recursiveSort($expected);
         $this->recursiveSort($actual);
@@ -93,7 +93,7 @@ class SpanServiceTest extends UnitTestCase
     /**
      * @param array $array
      */
-    protected function recursiveSort(&$array): void
+    private function recursiveSort(&$array): void
     {
         foreach ($array as &$value) {
             if (is_array($value)) {
