@@ -66,8 +66,10 @@ class ExtractorService
      * @param bool $returnCellRef
      * @return ValueObject\ExtractionValueObject|null
      */
-    public function getDataByDsnValueObject(ValueObject\DsnValueObject $dsnValue, bool $returnCellRef = false): ?ValueObject\ExtractionValueObject
-    {
+    public function getDataByDsnValueObject(
+        ValueObject\DsnValueObject $dsnValue,
+        bool $returnCellRef = false
+    ): ?ValueObject\ExtractionValueObject {
         try {
             $spreadsheet = $this->readerService->getSpreadsheet($dsnValue->getFileReference());
         } catch (SpreadsheetReaderException $e) {

@@ -6,3 +6,6 @@ services:
 
   Hoogi91\Spreadsheets\:
     resource: '../Classes/*'
+
+  Hoogi91\Spreadsheets\DataProcessing\SpreadsheetProcessor:
+    public: true

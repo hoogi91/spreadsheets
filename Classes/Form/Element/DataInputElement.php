@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Hoogi91\Spreadsheets\Form\Element;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\DsnValueObject;
+use Hoogi91\Spreadsheets\Exception\InvalidDataSourceNameException;
 use Hoogi91\Spreadsheets\Service\ReaderService;
 use Hoogi91\Spreadsheets\Service\ValueMappingService;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
@@ -112,6 +113,12 @@ class DataInputElement extends AbstractFormElement
             'EXT:spreadsheets/Resources/Public/Css/HandsOnTable/handsontable.full.min.css',
         ];
 
+        try {
+            $valueObject = DsnValueObject::createFromDSN($this->params['itemFormElValue']);
+        } catch (InvalidDataSourceNameException $exception) {
+            $valueObject = '';
+        }
+
         $this->view->assignMultiple(
             [
                 'items' => $references,
@@ -120,7 +127,7 @@ class DataInputElement extends AbstractFormElement
                 'allowColumnExtraction' => (bool)$this->config['allowColumnExtraction'],
                 'inputName' => $this->params['itemFormElName'],
                 'inputNameHash' => md5($this->params['itemFormElName']),
-                'valueObject' => DsnValueObject::createFromDSN($this->params['itemFormElValue']),
+                'valueObject' => $valueObject,
             ]
         );
 
@@ -296,7 +303,7 @@ class DataInputElement extends AbstractFormElement
         return array_values(
             array_map(
                 static function (string $cells) {
-                    $coordinates = Coordinate::splitRange($cells);
+                    $coordinates = explode(':', $cells, 2);
                     [$startColumn, $startRow] = Coordinate::coordinateFromString($coordinates[0]);
                     [$endColumn, $endRow] = Coordinate::coordinateFromString($coordinates[1]);
 
