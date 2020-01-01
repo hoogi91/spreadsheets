@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Utility;
@@ -12,13 +13,13 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class ExtensionManagementUtility extends \TYPO3\CMS\Core\Utility\ExtensionManagementUtility
 {
     /**
-     * @param array  $itemArray Numerical array:
+     * @param array $itemArray Numerical array:
      *                          [0] => Plugin label
      *                          [1] => Underscored plugin name
      *                          [2] => Path to plugin icon relative to TYPO3_mainDir (optional use icon registry)
-     * @param string $position  before or after an underscored plugin name
+     * @param string $position before or after an underscored plugin name
      */
-    public static function addItemToCTypeList(array $itemArray, string $position = '')
+    public static function addItemToCTypeList(array $itemArray, string $position = ''): void
     {
         $columnConfig = &$GLOBALS['TCA']['tt_content']['columns'];
         if (is_array($columnConfig) && is_array($columnConfig['CType']['config']['items'])) {
@@ -36,7 +37,7 @@ class ExtensionManagementUtility extends \TYPO3\CMS\Core\Utility\ExtensionManage
                 return;
             }
 
-            list($insertPosition, $atField) = GeneralUtility::trimExplode(':', $position);
+            [$insertPosition, $atField] = GeneralUtility::trimExplode(':', $position);
             if (empty($atField)) {
                 $atField = $insertPosition;
                 $insertPosition = 'before';

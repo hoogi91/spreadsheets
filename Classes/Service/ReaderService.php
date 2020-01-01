@@ -1,19 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Service;
 
-use PhpOffice\PhpSpreadsheet\Reader\Csv as CsvReader;
-use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
-use PhpOffice\PhpSpreadsheet\Reader\Html as HtmlReader;
-use PhpOffice\PhpSpreadsheet\Reader\IReader;
-use PhpOffice\PhpSpreadsheet\Reader\Ods as OdsReader;
-use PhpOffice\PhpSpreadsheet\Reader\Xls as XlsReader;
-use PhpOffice\PhpSpreadsheet\Reader\Xlsx as XlsxReader;
-use PhpOffice\PhpSpreadsheet\Reader\Xml as XmlReader;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Reader;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use TYPO3\CMS\Core\Resource\FileReference;
-use Hoogi91\Spreadsheets\Traits\SheetIndexTrait;
 
 /**
  * Class ReaderService
@@ -21,87 +14,53 @@ use Hoogi91\Spreadsheets\Traits\SheetIndexTrait;
  */
 class ReaderService
 {
-    use SheetIndexTrait;
 
-    const ALLOWED_EXTENSTIONS = ['xls', 'xlsx', 'ods', 'xml', 'csv', 'html'];
-
-    /**
-     * @var IReader
-     */
-    protected $readerInstance = null;
+    public const ALLOWED_EXTENSIONS = ['xls', 'xlsx', 'ods', 'xml', 'csv', 'html'];
 
     /**
-     * ReaderService constructor.
-     *
      * @param FileReference $reference
      *
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
-     * @throws ReaderException
+     * @return Spreadsheet
+     * @throws Reader\Exception
      */
-    public function __construct(FileReference $reference)
+    public function getSpreadsheet(FileReference $reference): Spreadsheet
     {
         if ($reference->getOriginalFile()->exists() === false) {
-            throw new ReaderException('Reference original file doesn\'t exists!', 1539959214);
+            throw new Reader\Exception('Reference original file doesn\'t exists!', 1539959214);
         }
 
-        if (!in_array($reference->getExtension(), self::ALLOWED_EXTENSTIONS)) {
-            throw new ReaderException(sprintf(
-                'Reference has unallowed file extension "%s"! Allowed Extensions are "%s"',
-                $reference->getExtension(),
-                implode(',', self::ALLOWED_EXTENSTIONS)
-            ), 1514909945);
+        if (in_array($reference->getExtension(), static::ALLOWED_EXTENSIONS, true) === false) {
+            throw new Reader\Exception(
+                sprintf(
+                    'Reference has not allowed file extension "%s"! Allowed Extensions are "%s"',
+                    $reference->getExtension(),
+                    implode(',', static::ALLOWED_EXTENSIONS)
+                ),
+                1514909945
+            );
         }
 
         switch ($reference->getExtension()) {
             case 'xls':
-                $this->readerInstance = new XlsReader();
-                break;
+                return (new Reader\Xls())->load($reference->getForLocalProcessing());
             case 'xlsx':
-                $this->readerInstance = new XlsxReader();
-                break;
+                return (new Reader\Xlsx())->load($reference->getForLocalProcessing());
             case 'ods':
-                $this->readerInstance = new OdsReader();
-                break;
+                return (new Reader\Ods())->load($reference->getForLocalProcessing());
             case 'xml':
-                $this->readerInstance = new XmlReader();
-                break;
+                return (new Reader\Xml())->load($reference->getForLocalProcessing());
             case 'csv':
-                $this->readerInstance = new CsvReader();
-                break;
+                return (new Reader\Csv())->load($reference->getForLocalProcessing());
             case 'html':
-                $this->readerInstance = new HtmlReader();
-                break;
+                return (new Reader\Html())->load($reference->getForLocalProcessing());
         }
 
-        // try to load reference in current reader instance
-        $this->setSpreadsheet($this->readerInstance->load($reference->getForLocalProcessing()));
-        $this->setSheetIndex(0);
-    }
-
-    /**
-     * @return IReader
-     */
-    public function getReader(): IReader
-    {
-        return $this->readerInstance;
-    }
-
-    /**
-     * @return Worksheet[]
-     */
-    public function getSheets(): array
-    {
-        return $this->getSpreadsheet()->getAllSheets();
-    }
-
-    /**
-     * @param int $index
-     *
-     * @return Worksheet
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
-     */
-    public function getSheet(int $index = 0): Worksheet
-    {
-        return $this->getSpreadsheet()->getSheet($index);
+        throw new Reader\Exception(
+            sprintf(
+                'Unknown file extension "%s" could not be loaded',
+                $reference->getExtension()
+            ),
+            1514909946
+        );
     }
 }

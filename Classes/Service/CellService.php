@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Service;
@@ -7,11 +8,9 @@ use PhpOffice\PhpSpreadsheet\Cell\Cell;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\RichText\RichText;
 use PhpOffice\PhpSpreadsheet\RichText\Run;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Style\Style;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use Hoogi91\Spreadsheets\Traits\SheetIndexTrait;
 
 /**
  * Class CellService
@@ -19,47 +18,33 @@ use Hoogi91\Spreadsheets\Traits\SheetIndexTrait;
  */
 class CellService
 {
-    use SheetIndexTrait;
-
     /**
      * @var StyleService
      */
-    protected $styleService;
-
-    /**
-     * @var array
-     */
-    protected $typoscriptConfig;
+    private $styleService;
 
     /**
      * @var string
      */
-    protected $currentLocales = '';
+    private $currentLocales;
 
     /**
-     * CellService constructor.
-     *
-     * @param Spreadsheet $spreadsheet
+     * CellService constructor
+     * @param StyleService $styleService
      */
-    public function __construct(Spreadsheet $spreadsheet)
+    public function __construct(StyleService $styleService)
     {
-        $this->setSpreadsheet($spreadsheet);
-        $this->styleService = GeneralUtility::makeInstance(StyleService::class, $this->getSpreadsheet());
-
-        // evaluate typoscript configuration and locales
-        $this->typoscriptConfig = $GLOBALS['TSFE']->config;
-        $this->currentLocales = $this->typoscriptConfig['config']['locale_all'];
+        $this->styleService = $styleService;
+        $this->currentLocales = $GLOBALS['TSFE']->config['config']['locale_all'] ?? '';
     }
 
     /**
-     * @param Cell     $cell
-     * @param bool     $calculate Should formulas be calculated?
-     * @param bool     $format    Should formatting be applied to cell values?
+     * @param Cell $cell
      * @param callable $formatCallback
      *
-     * @return string|int|float
+     * @return string
      */
-    public function getValue(Cell $cell, bool $calculate = true, bool $format = true, callable $formatCallback = null)
+    public function getFormattedValue(Cell $cell, callable $formatCallback = null): string
     {
         if ($cell->getValue() === null) {
             return '';
@@ -77,18 +62,14 @@ class CellService
                     }
                 }
                 $value = $richTextValue;
-            } elseif ($calculate === true) {
+            } else {
                 $value = $cell->getCalculatedValue();
             }
         } catch (SpreadsheetException $e) {
-            // if something wents wrong while evaluating calculated or rich-text value we fallback to raw value
+            // if something went wrong while evaluating calculated or rich-text value we fallback to raw value
         }
 
-        if ($format === true) {
-            $value = $this->formatString($value, $cell, $formatCallback);
-        }
-
-        return $value;
+        return $this->formatString($value, $cell, $formatCallback);
     }
 
     /**
@@ -96,42 +77,46 @@ class CellService
      *
      * @return string
      */
-    protected function getTextElementValue($element)
+    private function getTextElementValue($element): string
     {
         // evaluate text content and check if it is superscript or subscript
         $textContent = $element->getText();
+        if ($element->getFont() === null) {
+            return $textContent;
+        }
+
         if ($element->getFont()->getSuperscript()) {
             $textContent = sprintf('<sup>%s</sup>', $textContent);
         } elseif ($element->getFont()->getSubscript()) {
             $textContent = sprintf('<sub>%s</sub>', $textContent);
         }
 
-        // extract font styles for current element
-        $fontStyles = $this->styleService->getFontStyles($element->getFont(), true);
-
         // create span to add font styles and insert textual content inside
-        return vsprintf('<span style="%s">%s</span>', [
-            $this->styleService->assembleStyles($fontStyles),
-            $textContent,
-        ]);
+        return vsprintf(
+            '<span style="%s">%s</span>',
+            [
+                $this->styleService->getStylesheetForRichTextElement($element)->toInlineCSS(),
+                $textContent,
+            ]
+        );
     }
 
     /**
      * @param string|int|float $value
-     * @param Cell             $cell
-     * @param callable         $callback
+     * @param Cell $cell
+     * @param callable $callback
      *
-     * @return string|int|float
+     * @return string
      */
-    protected function formatString($value, Cell $cell, callable $callback = null)
+    private function formatString($value, Cell $cell, callable $callback = null): string
     {
         // get cell style to find number format code
-        $style = $this->getSpreadsheet()->getCellXfByIndex($cell->getXfIndex());
+        $style = $cell->getWorksheet()->getParent()->getCellXfByIndex($cell->getXfIndex());
         if (is_numeric($value) && $style instanceof Style) {
             // check current locales and set them for converting numeric values
             if (!empty($this->currentLocales)) {
                 $availableLocales = GeneralUtility::trimExplode(',', $this->currentLocales, true);
-                $currentLocale = setlocale(LC_NUMERIC, 0);
+                $currentLocale = setlocale(LC_NUMERIC, '0');
                 setlocale(LC_NUMERIC, ...$availableLocales);
             }
 
@@ -141,7 +126,7 @@ class CellService
             // check for scientific format and do better formatting than NumberFormat class
             preg_match('/(0+)(\\.?)(0*)E[+-]0/i', $formatCode, $matches);
             if (isset($matches[3]) && $matches[3] !== '') {
-                // extract count of decimals and use it in sprintf argument
+                // extract count of decimals and use it as print argument
                 $value = sprintf('%5.' . strlen($matches[3]) . 'E', $value);
             } else {
                 // otherwise do normal format logic with given format code
@@ -153,9 +138,9 @@ class CellService
                 setlocale(LC_NUMERIC, $currentLocale);
             }
 
-            return $value;
+            return (string)$value;
         }
 
-        return NumberFormat::toFormattedString($value, NumberFormat::FORMAT_GENERAL, $callback);
+        return (string)NumberFormat::toFormattedString($value, NumberFormat::FORMAT_GENERAL, $callback);
     }
 }

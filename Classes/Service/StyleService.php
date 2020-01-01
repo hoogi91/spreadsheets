@@ -1,19 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Service;
 
-use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
+use Hoogi91\Spreadsheets\Domain\ValueObject\StylesheetValueObject;
+use PhpOffice\PhpSpreadsheet\RichText\Run;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Borders;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use PhpOffice\PhpSpreadsheet\Style\Font;
-use Hoogi91\Spreadsheets\Enum\BorderStyle;
-use Hoogi91\Spreadsheets\Enum\HAlign;
-use Hoogi91\Spreadsheets\Enum\VAlign;
-use Hoogi91\Spreadsheets\Traits\SheetIndexTrait;
+use PhpOffice\PhpSpreadsheet\Style;
 
 /**
  * Class StyleService
@@ -21,227 +15,46 @@ use Hoogi91\Spreadsheets\Traits\SheetIndexTrait;
  */
 class StyleService
 {
-    use SheetIndexTrait;
 
-    /**
-     * normally the ID of the html element (wrapped around all styles)
-     *
-     * @var string
-     */
-    protected $identifier = '';
-
-    /**
-     * @var array
-     */
-    protected $styles = [
-        '.cell-type-b'         => ['text-align' => 'center'], // BOOL
-        '.cell-type-e'         => ['text-align' => 'center'], // ERROR
-        '.cell-type-f'         => ['text-align' => 'right'], // FORMULA
+    private const DEFAULT_STYLES = [
+        '.cell-type-b' => ['text-align' => 'center'], // BOOL
+        '.cell-type-e' => ['text-align' => 'center'], // ERROR
+        '.cell-type-f' => ['text-align' => 'right'], // FORMULA
         '.cell-type-inlineStr' => ['text-align' => 'left'], // INLINE
-        '.cell-type-n'         => ['text-align' => 'right'], // NUMERIC
-        '.cell-type-s'         => ['text-align' => 'left'], // STRING
+        '.cell-type-n' => ['text-align' => 'right'], // NUMERIC
+        '.cell-type-s' => ['text-align' => 'left'], // STRING
     ];
 
     /**
-     * RangeService constructor.
-     *
+     * @var ValueMappingService
+     */
+    private $mappingService;
+
+    /**
+     * StyleService constructor.
+     * @param ValueMappingService $mappingService
+     */
+    public function __construct(ValueMappingService $mappingService)
+    {
+        $this->mappingService = $mappingService;
+    }
+
+    /**
      * @param Spreadsheet $spreadsheet
+     * @return StylesheetValueObject
      */
-    public function __construct(Spreadsheet $spreadsheet)
+    public function getStylesheet(Spreadsheet $spreadsheet): StylesheetValueObject
     {
-        $this->setSpreadsheet($spreadsheet);
-    }
-
-    /**
-     * @return string
-     */
-    public function getIdentifier(): string
-    {
-        return $this->identifier;
-    }
-
-    /**
-     * @param string $identifier
-     *
-     * @return StyleService
-     */
-    public function setIdentifier(string $identifier)
-    {
-        $this->identifier = $identifier;
-        return $this;
-    }
-
-    /**
-     * @param array $references
-     *
-     * @return array
-     */
-    public function getCellStyleIndexesFromReferences(array $references)
-    {
-        if (empty($references)) {
-            return [];
-        }
-
-        try {
-            $result = [];
-            $sheet = $this->getSpreadsheet()->getActiveSheet();
-            foreach ($references as $cellRef) {
-                $result[] = $sheet->getCell($cellRef)->getXfIndex();
-            }
-            return array_unique($result);
-        } catch (SpreadsheetException $e) {
-            // return empty cell style informations if spreadsheet couldn't be loaded
-        }
-        return [];
-    }
-
-    /**
-     * Create CSS style (\PhpOffice\PhpSpreadsheet\Style\Alignment).
-     *
-     * @param Alignment $pStyle \PhpOffice\PhpSpreadsheet\Style\Alignment
-     *
-     * @return array
-     */
-    public function getAlignmentStyles(Alignment $pStyle): array
-    {
-        $css = [];
-        $css['vertical-align'] = VAlign::map($pStyle->getVertical());
-        if ($textAlign = HAlign::map($pStyle->getHorizontal())) {
-            $css['text-align'] = $textAlign;
-            if (in_array($textAlign, ['left', 'right'])) {
-                $css['padding-' . $textAlign] = (string)((int)$pStyle->getIndent() * 9) . 'px';
-            }
-        }
-        return $css;
-    }
-
-    /**
-     * Create CSS style (Borders).
-     *
-     * @param Borders $pStyle Borders
-     *
-     * @return array
-     */
-    public function getBorderStyles(Borders $pStyle): array
-    {
-        $css = [];
-        if ($pStyle->getBottom()->getBorderStyle() !== Border::BORDER_NONE) {
-            $css['border-bottom'] = $this->getBorderStyle($pStyle->getBottom());
-        }
-        if ($pStyle->getTop()->getBorderStyle() !== Border::BORDER_NONE) {
-            $css['border-top'] = $this->getBorderStyle($pStyle->getTop());
-        }
-        if ($pStyle->getLeft()->getBorderStyle() !== Border::BORDER_NONE) {
-            $css['border-left'] = $this->getBorderStyle($pStyle->getLeft());
-        }
-        if ($pStyle->getRight()->getBorderStyle() !== Border::BORDER_NONE) {
-            $css['border-right'] = $this->getBorderStyle($pStyle->getRight());
-        }
-        return $css;
-    }
-
-    /**
-     * Create CSS style (Border).
-     *
-     * @param Border $pStyle Border
-     *
-     * @return string
-     */
-    protected function getBorderStyle(Border $pStyle): string
-    {
-        // add !important to non-none border styles for merged cells
-        $borderStyle = BorderStyle::map($pStyle->getBorderStyle());
-        return $borderStyle . ' #' . $pStyle->getColor()->getRGB() . (($borderStyle == 'none') ? '' : ' !important');
-    }
-
-    /**
-     * Create CSS style (\PhpOffice\PhpSpreadsheet\Style\Font).
-     *
-     * @param Font $pStyle
-     * @param bool $excludeFontFamilyAndSize
-     *
-     * @return array
-     */
-    public function getFontStyles(Font $pStyle, $excludeFontFamilyAndSize = false): array
-    {
-        $css = [];
-
-        if ($pStyle->getBold()) {
-            $css['font-weight'] = 'bold';
-        }
-
-        if ($pStyle->getUnderline() != Font::UNDERLINE_NONE && $pStyle->getStrikethrough()) {
-            $css['text-decoration'] = 'underline line-through';
-        } elseif ($pStyle->getUnderline() != Font::UNDERLINE_NONE) {
-            $css['text-decoration'] = 'underline';
-        } elseif ($pStyle->getStrikethrough()) {
-            $css['text-decoration'] = 'line-through';
-        }
-
-        if ($pStyle->getItalic()) {
-            $css['font-style'] = 'italic';
-        }
-
-        $css['color'] = '#' . $pStyle->getColor()->getRGB();
-
-        if ($excludeFontFamilyAndSize === false) {
-            $css['font-family'] = '\'' . $pStyle->getName() . '\'';
-            $css['font-size'] = $pStyle->getSize() . 'pt';
-        }
-        return $css;
-    }
-
-    /**
-     * Create CSS style (Fill).
-     *
-     * @param Fill $pStyle Fill
-     *
-     * @return array
-     */
-    public function getBackgroundStyles(Fill $pStyle): array
-    {
-        $css = [];
-        if ($pStyle->getFillType() !== Fill::FILL_NONE) {
-            $css['background-color'] = '#' . $pStyle->getStartColor()->getRGB();
-        }
-        return $css;
-    }
-
-    /**
-     * Takes array where of CSS properties / values and converts to CSS string.
-     *
-     * @param array $styles
-     *
-     * @return string
-     */
-    public function assembleStyles($styles = []): string
-    {
-        if (empty($styles)) {
-            return '';
-        }
-
-        $pairs = [];
-        foreach ($styles as $property => $value) {
-            $pairs[] = $property . ':' . $value;
-        }
-        return implode(';', $pairs);
-    }
-
-    /**
-     * @return array
-     */
-    public function toArray(): array
-    {
-        // get default styles
-        $css = $this->styles;
-
         // get style collection from spreadsheet
-        $styleCollection = $this->getSpreadsheet()->getCellXfCollection();
-        if (empty($styleCollection) || !is_array($styleCollection)) {
-            return $css;
+        $styleCollection = $spreadsheet->getCellXfCollection();
+        if (empty($styleCollection)) {
+            return StylesheetValueObject::create(self::DEFAULT_STYLES);
         }
 
-        // extend styles with calculated styles from cell informations
+        // get default styles
+        $css = self::DEFAULT_STYLES;
+
+        // extend styles with calculated styles from cell information
         foreach ($styleCollection as $index => $style) {
             $styles = array_merge(
                 $this->getAlignmentStyles($style->getAlignment()),
@@ -252,38 +65,131 @@ class StyleService
             $css['.cell.cell-style-' . $index] = $styles;
         }
 
+        return StylesheetValueObject::create($css);
+    }
+
+    public function getStylesheetForRichTextElement(Run $text): StylesheetValueObject
+    {
+        // extract font styles for current element
+        $fontStyles = $this->getFontStyles($text->getFont(), true);
+        return StylesheetValueObject::create($fontStyles);
+    }
+
+    /**
+     * Create CSS style (\PhpOffice\PhpSpreadsheet\Style\Alignment).
+     *
+     * @param Style\Alignment $pStyle \PhpOffice\PhpSpreadsheet\Style\Alignment
+     *
+     * @return array
+     */
+    private function getAlignmentStyles(Style\Alignment $pStyle): array
+    {
+        $css = [];
+        $css['vertical-align'] = $this->mappingService->convertValue('valign', $pStyle->getVertical(), 'baseline');
+
+        $textAlign = $this->mappingService->convertValue('halign', $pStyle->getHorizontal());
+        if (empty($textAlign) === false) {
+            $css['text-align'] = $textAlign;
+            if (in_array($textAlign, ['left', 'right'])) {
+                $css['padding-' . $textAlign] = ((int)$pStyle->getIndent() * 9) . 'px';
+            }
+        }
         return $css;
     }
 
     /**
+     * Create CSS style (Borders).
+     *
+     * @param Style\Borders $pStyle Borders
+     *
+     * @return array
+     */
+    private function getBorderStyles(Style\Borders $pStyle): array
+    {
+        $css = [];
+        if ($pStyle->getBottom()->getBorderStyle() !== Style\Border::BORDER_NONE) {
+            $css['border-bottom'] = $this->getBorderStyle($pStyle->getBottom());
+        }
+        if ($pStyle->getTop()->getBorderStyle() !== Style\Border::BORDER_NONE) {
+            $css['border-top'] = $this->getBorderStyle($pStyle->getTop());
+        }
+        if ($pStyle->getLeft()->getBorderStyle() !== Style\Border::BORDER_NONE) {
+            $css['border-left'] = $this->getBorderStyle($pStyle->getLeft());
+        }
+        if ($pStyle->getRight()->getBorderStyle() !== Style\Border::BORDER_NONE) {
+            $css['border-right'] = $this->getBorderStyle($pStyle->getRight());
+        }
+        return $css;
+    }
+
+    /**
+     * Create CSS style (Border).
+     *
+     * @param Style\Border $pStyle Border
+     *
      * @return string
      */
-    public function toString(): string
+    private function getBorderStyle(Style\Border $pStyle): string
     {
-        $styles = $this->toArray();
-        if (empty($styles)) {
-            return '';
+        // add !important to non-none border styles for merged cells
+        $borderStyle = $this->mappingService->convertValue(
+            'border-style',
+            $pStyle->getBorderStyle(),
+            '1px solid'
+        );
+        return $borderStyle . ' #' . $pStyle->getColor()->getRGB() . (($borderStyle === 'none') ? '' : ' !important');
+    }
+
+    /**
+     * Create CSS style (\PhpOffice\PhpSpreadsheet\Style\Font).
+     *
+     * @param Style\Font $pStyle
+     * @param bool $excludeFontFamilyAndSize
+     *
+     * @return array
+     */
+    private function getFontStyles(Style\Font $pStyle, $excludeFontFamilyAndSize = false): array
+    {
+        $css = [];
+        $css['color'] = '#' . $pStyle->getColor()->getRGB();
+
+        if ($pStyle->getBold() === true) {
+            $css['font-weight'] = 'bold';
         }
 
-        // write all styles with table selector prefix
-        $content = '';
-        $htmlIdentifier = $this->getIdentifier();
-        foreach ($styles as $styleName => $styleDefinition) {
-            if ($styleName != 'html') {
-                if (!empty($htmlIdentifier)) {
-                    $content .= vsprintf('#%s %s {%s}' . PHP_EOL, [
-                        $htmlIdentifier,
-                        $styleName,
-                        $this->assembleStyles($styleDefinition),
-                    ]);
-                } else {
-                    $content .= vsprintf('%s {%s}' . PHP_EOL, [
-                        $styleName,
-                        $this->assembleStyles($styleDefinition),
-                    ]);
-                }
-            }
+        if ($pStyle->getItalic() === true) {
+            $css['font-style'] = 'italic';
         }
-        return $content;
+
+        $css['text-decoration'] = '';
+        if ($pStyle->getUnderline() !== Style\Font::UNDERLINE_NONE) {
+            $css['text-decoration'] .= ' underline';
+        } elseif ($pStyle->getStrikethrough() === true) {
+            $css['text-decoration'] .= ' line-through';
+        }
+        $css['text-decoration'] = trim($css['text-decoration']);
+
+        if ($excludeFontFamilyAndSize === false) {
+            $css['font-family'] = '\'' . $pStyle->getName() . '\'';
+            $css['font-size'] = $pStyle->getSize() . 'pt';
+        }
+
+        return array_filter($css);
+    }
+
+    /**
+     * Create CSS style (Fill).
+     *
+     * @param Style\Fill $pStyle Fill
+     *
+     * @return array
+     */
+    private function getBackgroundStyles(Style\Fill $pStyle): array
+    {
+        $css = [];
+        if ($pStyle->getFillType() !== Style\Fill::FILL_NONE) {
+            $css['background-color'] = '#' . $pStyle->getStartColor()->getRGB();
+        }
+        return $css;
     }
 }

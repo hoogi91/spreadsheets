@@ -116,6 +116,9 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'Handsontable'], function ($, Modal
     };
 
     SpreadsheetDataInput.prototype.splitDatabaseSpreadsheetValue = function (value) {
+        if (value.length === 0) {
+            return [];
+        }
         var result = [],
             fileAndFullSelection = value.split('|', 2),
             sheetAndCellSelection = fileAndFullSelection[1].split('!', 3);
