@@ -1,7 +1,7 @@
 <?php
 $EM_CONF[$_EXTKEY] = [
     'title'        => 'Spreadsheets',
-    'description'  => 'Extension to add field definition and plugin to show and select informations from spreadsheets',
+    'description'  => 'Extension to add field definition and plugin to show and select information from spreadsheets',
     'category'     => 'be',
     'author'       => 'Thorsten Hogenkamp',
     'author_email' => 'hoogi20@googlemail.com',
@@ -9,7 +9,7 @@ $EM_CONF[$_EXTKEY] = [
     'state'        => 'stable',
     'constraints'  => [
         'depends' => [
-            'typo3' => '9.5.0-10.9.99',
+            'typo3' => '10.2.0-10.9.99',
         ],
     ],
     'autoload'     => [
