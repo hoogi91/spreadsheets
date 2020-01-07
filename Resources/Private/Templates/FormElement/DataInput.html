@@ -100,31 +100,31 @@
 
 		<f:if condition="{sheetsOnly}">
 			<f:else>
+				<f:if condition="{allowColumnExtraction}">
+					<div class="checkbox checkbox-type-toggle spreadsheet-direction" style="display:none;">
+						<input type="checkbox"
+							   id="{inputNameHash}-direction"
+							   name="{inputNameHash}-direction"
+							   class="checkbox-input spreadsheet-input-direction"
+							   value="{valueObject.directionOfSelection}"
+							   style="margin:0;"/>
+
+						<label class="checkbox-label" for="{inputNameHash}-direction">
+							<span class="checkbox-label-text spreadsheet-label-direction-column" style="display:none">
+								<f:translate key="formengine.spreadsheet.label.direction.column-based"
+											 extensionName="spreadsheets"/>
+							</span>
+							<span class="checkbox-label-text spreadsheet-label-direction-row">
+								<f:translate key="formengine.spreadsheet.label.direction.row-based"
+											 extensionName="spreadsheets"/>
+							</span>
+						</label>
+					</div>
+				</f:if>
+
 				<div class="spreadsheet-table"
 					 style="position:relative;width:100%;min-height:150px;max-height:300px;overflow:hidden;display:none;">
-
-					<f:if condition="{allowColumnExtraction}">
-						<div class="checkbox checkbox-type-toggle">
-							<input type="checkbox"
-								   id="{inputNameHash}-direction"
-								   name="{inputNameHash}-direction"
-								   class="checkbox-input spreadsheet-input-direction"
-								   value="{valueObject.directionOfSelection}"/>
-
-							<label class="checkbox-label" for="{inputNameHash}-direction">
-								<span class="checkbox-label-text spreadsheet-label-direction-column" style="display:none">
-									<f:translate key="formengine.spreadsheet.label.direction.column-based"
-												 extensionName="spreadsheets"/>
-								</span>
-								<span class="checkbox-label-text spreadsheet-label-direction-row">
-									<f:translate key="formengine.spreadsheet.label.direction.row-based"
-												 extensionName="spreadsheets"/>
-								</span>
-							</label>
-						</div>
-					</f:if>
 					<div class="handsontable"></div>
-
 				</div>
 			</f:else>
 		</f:if>
