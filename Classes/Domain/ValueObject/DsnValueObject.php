@@ -17,6 +17,25 @@ use TYPO3\CMS\Core\Utility\MathUtility;
  */
 class DsnValueObject
 {
+    /**
+     * Legacy DSN pattern matches all strings like:
+     *   - file:10|
+     *   - file:10|2
+     *   - file:10|2!
+     *   - file:10|2!AA2
+     *   - file:10|2!A22:B5
+     *   - file:10|2!A2:B555!vertical2
+     *   - 5|1!D2:G5!vertical
+     */
+    private const LEGACY_DSN_PATTERN = '/(file:)?(\d+)\|(\d+)(![A-Z]+\d+)?(:[A-Z]+\d+)?(!\w+)?/';
+
+    /**
+     * DSN pattern will match strings like
+     *   - spreadsheet://123
+     *   - spreadsheet://123?param=1
+     *   - spreadsheet://123?param=1&param=2
+     */
+    private const DSN_PATTERN = '/^spreadsheet:\/\/(\d+)(\?.*)?/';
 
     /**
      * @var FileReference
@@ -39,34 +58,65 @@ class DsnValueObject
     private $directionOfSelection;
 
     /**
-     * TODO: move to DSN-like format to parse spreadsheet value with more elegance
-     * e.g. spreadsheet://123?index=1&range=A2:B5&direction=vertical
-     *
      * @param string $dsn
      *
      * @throws InvalidDataSourceNameException
      */
     public function __construct(string $dsn)
     {
+        try {
+            if (preg_match(self::LEGACY_DSN_PATTERN, $dsn) === 1) {
+                $this->legacyDSNParsing($dsn);
+            } elseif (preg_match(self::DSN_PATTERN, $dsn) === 1) {
+                $dsnData = parse_url($dsn);
+                parse_str($dsnData['query'], $queryData);
+                if (MathUtility::canBeInterpretedAsInteger($dsnData['host'])) {
+                    /** @var FileRepository $fileRepository */
+                    $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
+                    $this->fileReference = $fileRepository->findFileReferenceByUid((int)$dsnData['host']);
+                } else {
+                    throw new InvalidDataSourceNameException('File reference from DSN can not be parsed/evaluated!');
+                }
+
+                $this->sheetIndex = (int)($queryData['index'] ?? 0);
+                $this->selection = $queryData['range'] ?: null;
+                $this->directionOfSelection = $queryData['direction'] ?: null;
+            } else {
+                throw new InvalidDataSourceNameException('Spreadsheet DSN could not be parsed!');
+            }
+        } /** @noinspection PhpRedundantCatchClauseInspection */ catch (ResourceDoesNotExistException $exception) {
+            throw new InvalidDataSourceNameException(
+                'Referenced file resource could not be found!',
+                1578420075,
+                $exception
+            );
+        }
+
+        if ($this->sheetIndex < 0) {
+            throw new InvalidDataSourceNameException('Spreadsheet DSN has an invalid sheet index provided!');
+        }
+    }
+
+    /**
+     * @param string $dsn
+     */
+    private function legacyDSNParsing(string $dsn): void
+    {
         [$file, $fullSelection] = GeneralUtility::trimExplode('|', $dsn, false, 2);
         if (empty($file)) {
             throw new InvalidDataSourceNameException('File reference is required in spreadsheet DSN!');
         }
 
-        try {
-            if (strpos($file, 'file:') === 0 && (int)substr($file, 5) !== 0) {
-                /** @var FileRepository $fileRepository */
-                $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
-                $this->fileReference = $fileRepository->findFileReferenceByUid((int)substr($file, 5));
-            } elseif ((int)$file !== 0 && MathUtility::canBeInterpretedAsInteger($file)) {
-                /** @var FileRepository $fileRepository */
-                $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
-                $this->fileReference = $fileRepository->findFileReferenceByUid((int)$file);
-            } else {
-                throw new InvalidDataSourceNameException('File reference from DSN can not be parsed/evaluated!');
-            }
-        } /** @noinspection PhpRedundantCatchClauseInspection */ catch (ResourceDoesNotExistException $exception) {
-            throw new InvalidDataSourceNameException('Referenced file resource could not be found!');
+        if (strpos($file, 'file:') === 0 && (int)substr($file, 5) !== 0) {
+            /** @var FileRepository $fileRepository */
+            $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
+            $this->fileReference = $fileRepository->findFileReferenceByUid((int)substr($file, 5));
+        } elseif ((int)$file !== 0 && MathUtility::canBeInterpretedAsInteger($file)) {
+            /** @var FileRepository $fileRepository */
+            $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
+            $this->fileReference = $fileRepository->findFileReferenceByUid((int)$file);
+        } else {
+            throw new InvalidDataSourceNameException('File reference from DSN can not be parsed/evaluated!');
         }
 
         if (isset($fullSelection) && ((string)$fullSelection) !== '') {
@@ -80,10 +130,6 @@ class DsnValueObject
             $this->sheetIndex = (int)($sheetIndex ?? 0);
             $this->selection = $selection ?: null;
             $this->directionOfSelection = $directionOfSelection ?: null;
-        }
-
-        if ($this->sheetIndex < 0) {
-            throw new InvalidDataSourceNameException('Spreadsheet DSN has an invalid sheet index provided!');
         }
     }
 
@@ -103,15 +149,24 @@ class DsnValueObject
      */
     public function getDsn(): string
     {
-        $dsn = sprintf('file:%d|%d', $this->getFileReference()->getUid(), $this->getSheetIndex());
-        if ($this->getSelection() !== null) {
-            $dsn .= '!' . $this->getSelection();
+        $parameters = [
+            'index' => $this->getSheetIndex(),
+            'range' => $this->getSelection(),
+            'direction' => $this->getDirectionOfSelection(),
+        ];
 
-            if ($this->getDirectionOfSelection() !== null) {
-                $dsn .= '!' . $this->getDirectionOfSelection();
+        $parameters = array_filter(
+            $parameters,
+            static function ($value) {
+                return $value !== null;
             }
-        }
-        return $dsn;
+        );
+
+        return sprintf(
+            'spreadsheet://%d?%s',
+            $this->getFileReference()->getUid(),
+            http_build_query($parameters)
+        );
     }
 
     /**
@@ -144,5 +199,13 @@ class DsnValueObject
     public function getDirectionOfSelection(): ?string
     {
         return $this->directionOfSelection;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->getDsn();
     }
 }
