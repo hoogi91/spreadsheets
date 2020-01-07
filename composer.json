@@ -16,6 +16,7 @@
   "require": {
     "php": ">=7.2",
     "ext-json": "*",
+    "ext-mbstring": "*",
     "phpoffice/phpspreadsheet": "^1.9",
     "typo3/cms-backend": "^10.2",
     "typo3/cms-core": "^10.2",

@@ -116,17 +116,26 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'Handsontable'], function ($, Modal
     };
 
     SpreadsheetDataInput.prototype.splitDatabaseSpreadsheetValue = function (value) {
-        if (value.length === 0) {
-            return [];
+        var result = [];
+        var matches = value.match(/^spreadsheet:\/\/(\d+)(?:\?(.+))?/);
+        if (matches === null) {
+            return result;
+        } else if (typeof matches[2] === 'undefined') {
+            result['file'] = matches[1];
+            result['sheet'] = 0;
+            result['selection'] = '';
+            result['direction'] = 'horizontal';
+            return result;
         }
-        var result = [],
-            fileAndFullSelection = value.split('|', 2),
-            sheetAndCellSelection = fileAndFullSelection[1].split('!', 3);
 
-        result['file'] = fileAndFullSelection[0].substr(5);
-        result['sheet'] = sheetAndCellSelection[0];
-        result['selection'] = sheetAndCellSelection[1] || '';
-        result['direction'] = sheetAndCellSelection[2] || 'horizontal';
+        var query = JSON.parse('{"' + matches[2].replace(/&/g, '","').replace(/=/g, '":"') + '"}', function (key, value) {
+            return key === "" ? value : decodeURIComponent(value)
+        });
+
+        result['file'] = matches[1];
+        result['sheet'] = query['index'] || 0;
+        result['selection'] = query['range'] || '';
+        result['direction'] = query['direction'] || 'horizontal';
 
         return result;
     };
@@ -432,16 +441,16 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'Handsontable'], function ($, Modal
     SpreadsheetDataInput.prototype.updateInputValues = function () {
         if (this.$inputWrapper.find('.spreadsheet-table > .handsontable').length === 0) {
             // table cell selection is disabled => sheets only
-            this.$inputWrapper.find('input.spreadsheet-input-database').val('file:' + this.selectedFileUid + '|' + this.selectedSheetIndex);
+            this.$inputWrapper.find('input.spreadsheet-input-database').val('spreadsheet://' + this.selectedFileUid + '?index=' + this.selectedSheetIndex);
             this.$inputWrapper.find('input.spreadsheet-input-formatted').val(this.selectedSheetName);
         } else if (this.$inputWrapper.find('.spreadsheet-table .spreadsheet-input-direction').length !== 0) {
             // cell selection and direction selction are enabled
-            this.$inputWrapper.find('input.spreadsheet-input-database').val('file:' + this.selectedFileUid + '|' + this.selectedSheetIndex + '!' + this.selectedSheetCells + '!' + this.directionOfSelection);
-            this.$inputWrapper.find('input.spreadsheet-input-formatted').val(this.selectedSheetName + '!' + this.selectedSheetCells + '!' + this.directionOfSelection);
+            this.$inputWrapper.find('input.spreadsheet-input-database').val('spreadsheet://' + this.selectedFileUid + '?index=' + this.selectedSheetIndex + '&range=' + this.selectedSheetCells + '&direction=' + this.directionOfSelection);
+            this.$inputWrapper.find('input.spreadsheet-input-formatted').val(this.selectedSheetName + ' - ' + this.selectedSheetCells + ' - ' + this.directionOfSelection);
         } else {
             // only cell selection is enabled
-            this.$inputWrapper.find('input.spreadsheet-input-database').val('file:' + this.selectedFileUid + '|' + this.selectedSheetIndex + '!' + this.selectedSheetCells);
-            this.$inputWrapper.find('input.spreadsheet-input-formatted').val(this.selectedSheetName + '!' + this.selectedSheetCells);
+            this.$inputWrapper.find('input.spreadsheet-input-database').val('spreadsheet://' + this.selectedFileUid + '?index=' + this.selectedSheetIndex + '&range=' + this.selectedSheetCells);
+            this.$inputWrapper.find('input.spreadsheet-input-formatted').val(this.selectedSheetName + ' - ' + this.selectedSheetCells);
         }
     };
 

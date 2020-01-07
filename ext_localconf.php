@@ -1,7 +1,8 @@
 <?php
+
 defined('TYPO3_MODE') or die();
 
-(function ($extKey) {
+(static function ($extKey = 'spreadsheets') {
     if (class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet') === false) {
         /** @noinspection PhpIncludeInspection */
         include(\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath(
@@ -25,7 +26,7 @@ defined('TYPO3_MODE') or die();
         $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1513268927167] = [
             'nodeName' => 'spreadsheetInput',
             'priority' => 30,
-            'class'    => \Hoogi91\Spreadsheets\Form\Element\DataInputElement::class,
+            'class' => \Hoogi91\Spreadsheets\Form\Element\DataInputElement::class,
         ];
 
         // add handsontable dependency to backend requireJS config (for above form node type)
@@ -43,4 +44,4 @@ defined('TYPO3_MODE') or die();
             ],
         ]);
     }
-})('spreadsheets');
+})();
