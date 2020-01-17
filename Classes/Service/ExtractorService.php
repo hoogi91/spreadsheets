@@ -81,7 +81,11 @@ class ExtractorService
             $worksheet = $spreadsheet->setActiveSheetIndex($dsnValue->getSheetIndex());
             $range = $dsnValue->getSelection();
             if ($range === null) {
-                $range = sprintf('A1:%s%d', $worksheet->getHighestColumn(), $worksheet->getHighestRow());
+                return ValueObject\ExtractionValueObject::create(
+                    $spreadsheet,
+                    $this->getBodyData($worksheet, $returnCellRef),
+                    $this->getHeadData($worksheet, $returnCellRef)
+                );
             }
 
             // get cell data and return value object
@@ -111,7 +115,7 @@ class ExtractorService
             }
 
             $rowsToRepeatAtTop = $sheet->getPageSetup()->getRowsToRepeatAtTop();
-            $range = 'A1:' . $sheet->getHighestColumn() . ($rowsToRepeatAtTop[1] + 1);
+            $range = 'A1:' . $sheet->getHighestColumn() . $rowsToRepeatAtTop[1];
             return $this->rangeToCellArray($sheet, $range, self::EXTRACT_DIRECTION_HORIZONTAL, $returnCellRef);
         } catch (SpreadsheetException $e) {
             // sheet or range of cells couldn't be loaded
