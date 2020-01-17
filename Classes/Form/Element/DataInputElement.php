@@ -170,20 +170,13 @@ class DataInputElement extends AbstractFormElement
         }
 
         // filter references by allowed types
-        $references = array_filter(
+        return array_filter(
             $references,
             static function ($reference) {
                 /** @var FileReference $reference */
                 return in_array($reference->getExtension(), ReaderService::ALLOWED_EXTENSIONS, true);
             }
         );
-
-        // update key values of file references
-        foreach ($references as $key => $reference) {
-            $references['file:' . $key] = $reference;
-            unset($references[$key]);
-        }
-        return $references;
     }
 
     /**
