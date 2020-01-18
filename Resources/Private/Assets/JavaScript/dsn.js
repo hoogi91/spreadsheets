@@ -5,8 +5,9 @@ export default class DSN {
             throw new Error('DSN class expects value to be of type string and format "spreadsheet://index=0..."');
         }
 
+        this.properties = {};
         if (typeof matches[2] === 'undefined') {
-            this.fileUid = matches[1];
+            this.properties.fileUid = matches[1];
         } else {
             const query = JSON.parse(
                 '{"' + matches[2].replace(/&/g, '","').replace(/=/g, '":"') + '"}',
@@ -15,26 +16,66 @@ export default class DSN {
                 }
             );
 
-            this.fileUid = matches[1];
-            this.index = query['index'] || 0;
-            this.range = query['range'] || '';
-            this.direction = query['direction'] || 'horizontal';
+            this.properties.fileUid = matches[1];
+            this.properties.index = query['index'] || 0;
+            this.properties.range = query['range'] || '';
+            this.properties.direction = query['direction'] || 'horizontal';
         }
     }
 
-    getFileUid() {
-        return this.fileUid;
+    /**
+     * @returns {int}
+     */
+    get fileUid() {
+        return this.properties.fileUid;
     }
 
-    getIndex() {
-        return this.index || 0;
+    /**
+     * @param {int} fileUid
+     */
+    set fileUid(fileUid) {
+        this.properties.fileUid = fileUid;
     }
 
-    getRange() {
-        return this.range || '';
+    /**
+     * @returns {int}
+     */
+    get index() {
+        return this.properties.index;
     }
 
-    getDirection() {
-        return this.direction || 'horizontal';
+    /**
+     * @param {int} index
+     */
+    set index(index) {
+        this.properties.index = index;
+    }
+
+    /**
+     * @returns {string}
+     */
+    get range() {
+        return this.properties.range;
+    }
+
+    /**
+     * @param {string} range
+     */
+    set range(range) {
+        this.properties.range = range;
+    }
+
+    /**
+     * @returns {string}
+     */
+    get direction() {
+        return this.properties.direction;
+    }
+
+    /**
+     * @param {string} direction
+     */
+    set direction(direction) {
+        this.properties.direction = direction;
     }
 }

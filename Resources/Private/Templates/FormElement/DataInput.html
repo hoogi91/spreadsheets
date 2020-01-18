@@ -55,12 +55,8 @@
 				<c:icon identifier="mimetypes-open-document-spreadsheet"/>
 			</span>
 
-            <f:form.hidden name="currentDatabaseValue" class="spreadsheet-input-original"
-                           value="{valueObject.dsn}"/>
-            <f:form.hidden name="currentFormattedvalue" class="spreadsheet-input-original-formatted"
-                           value="{valueObject.dsn}"/>
-            <f:form.hidden name="{inputName}" class="spreadsheet-input-database"
-                           value="{valueObject.dsn}"/>
+            <f:form.hidden name="currentDatabaseValue" class="spreadsheet-input-original" value="{valueObject.dsn}"/>
+            <f:form.hidden name="{inputName}" class="spreadsheet-input-database" value="{valueObject.dsn}"/>
 
             <span class="input-group-btn">
 				<f:form.select name="file" class="form-control form-control-adapt spreadsheet-file-select"
@@ -72,19 +68,7 @@
 			</span>
 
             <f:form.textfield name="formattedValue" class="form-control spreadsheet-input-formatted" type="text"
-                              value="{valueObject.dsn}" readonly="readonly"/>
-
-            <span class="input-group-btn">
-				<button class="btn btn-default spreadsheet-select-button" type="button"
-                        title="{f:translate(key: 'formengine.spreadsheet.button.selection.title', extensionName: 'spreadsheets')}">
-					<span class="open-icon">
-						<c:icon identifier="actions-open"/>
-					</span>
-					<span class="close-icon" style="display:none;">
-						<c:icon identifier="actions-close"/>
-					</span>
-				</button>
-			</span>
+                              value="" readonly="readonly"/>
 
             <span class="input-group-btn">
 				<button class="btn btn-default spreadsheet-reset-button" type="button"
@@ -101,7 +85,7 @@
         <f:if condition="{sheetsOnly}">
             <f:else>
                 <div class="spreadsheet-table"
-                     style="position:relative;width:100%;min-height:150px;max-height:300px;overflow:hidden;display:none;">
+                     style="position:relative;width:100%;min-height:150px;max-height:300px;overflow:hidden;">
 
                     <f:if condition="{allowColumnExtraction}">
                         <div class="checkbox checkbox-type-toggle">

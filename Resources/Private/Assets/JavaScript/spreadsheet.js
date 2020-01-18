@@ -1,22 +1,23 @@
-import $ from 'jquery';
 import DSN from './dsn';
+import 'core-js/es/object/entries';
+import 'core-js/es/object/values';
 
-export default class SheetData {
+export default class Spreadsheet {
     constructor(dsn, data) {
         if (!(dsn instanceof DSN)) {
-            throw new Error('SheetData class expects dsn parameter to be type of a DSN class');
+            throw new Error('Spreadsheet class expects dsn parameter to be type of a DSN class');
         }
         this.data = data;
-        this.defaultFileUid = dsn.getFileUid();
-        this.defaultSheetIndex = dsn.getIndex();
+        this.defaultFileUid = dsn.fileUid;
+        this.defaultSheetIndex = dsn.index;
     }
 
-    set fileUid(fileUid) {
-        this.defaultFileUid = fileUid;
-    }
-
-    set sheetIndex(fileUid) {
-        this.defaultSheetIndex = fileUid;
+    set dsn(dsn) {
+        if (!(dsn instanceof DSN)) {
+            throw new Error('Spreadsheet class setter "dsn" expects parameter to be type of a DSN class');
+        }
+        this.defaultFileUid = dsn.fileUid;
+        this.defaultSheetIndex = dsn.index;
     }
 
     getAllSheets(fileUid = this.defaultFileUid) {
@@ -45,14 +46,14 @@ export default class SheetData {
             return metaData;
         }
 
-        // update meta data array and set classnames for cells
+        // update meta data array and set class names for cells
         let cellMetaData = [];
-        $.each(metaData, (i, values) => {
-            $.each(values, (j, value) => {
-                value.className = i;
+        for (let [className, values] of Object.entries(metaData)) {
+            for (let value of Object.values(values)) {
+                value.className = className;
                 cellMetaData.push(value);
-            });
-        });
+            }
+        }
 
         return cellMetaData;
     }

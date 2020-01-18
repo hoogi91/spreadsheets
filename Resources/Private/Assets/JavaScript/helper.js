@@ -1,4 +1,10 @@
 export default class Helper {
+    /**
+     * Get excel like col header string from index
+     *
+     * @param {int} index
+     * @returns {string}
+     */
     static getColHeader(index) {
         // charcode of "a" == 97
         // charcode of "z" == 122
@@ -14,5 +20,20 @@ export default class Helper {
             excelStr += String.fromCharCode(97 + alphabetIndex);
         }
         return excelStr.toUpperCase();
+    }
+
+    /**
+     * Switch provided property values of an object
+     *
+     * @param {object} object
+     * @param {string} property1
+     * @param {string} property2
+     * @returns {object}
+     */
+    static switchObjectPropertiesValue(object, property1, property2) {
+        const temp = object[property1];
+        object[property1] = object[property2];
+        object[property2] = temp;
+        return object;
     }
 }
