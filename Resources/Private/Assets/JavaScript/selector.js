@@ -1,5 +1,4 @@
 import TableBuilder from "./selector/table-builder";
-import 'core-js/es/object/values';
 
 export default class Selector {
     constructor(sheetWrapper, tableWrapper) {

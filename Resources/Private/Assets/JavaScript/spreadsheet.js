@@ -1,6 +1,4 @@
 import DSN from './dsn';
-import 'core-js/es/object/entries';
-import 'core-js/es/object/values';
 
 export default class Spreadsheet {
     constructor(dsn, data) {
