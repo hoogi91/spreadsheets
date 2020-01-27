@@ -43,17 +43,7 @@ class DataInputElement extends AbstractFormElement
     /**
      * @var array
      */
-    private $params;
-
-    /**
-     * @var array
-     */
     private $config;
-
-    /**
-     * @var array
-     */
-    private $tca;
 
     /**
      * @var StandaloneView
@@ -71,10 +61,7 @@ class DataInputElement extends AbstractFormElement
         parent::__construct($nodeFactory, $data);
         $this->readerService = GeneralUtility::makeInstance(ReaderService::class);
         $this->mappingService = GeneralUtility::makeInstance(ValueMappingService::class);
-
-        $this->params = $this->data['parameterArray'];
-        $this->config = $this->params['fieldConf']['config'];
-        $this->tca = $this->data['processedTca'];
+        $this->config = $this->data['parameterArray']['fieldConf']['config'];
 
         /** @var StandaloneView $view */
         $this->view = GeneralUtility::makeInstance(StandaloneView::class);
@@ -94,7 +81,7 @@ class DataInputElement extends AbstractFormElement
         $resultArray = $this->initializeResultArray();
 
         // upload fields hasn't been specified
-        if (array_key_exists($this->config['uploadField'], $this->tca['columns']) === false) {
+        if (array_key_exists($this->config['uploadField'], $this->data['processedTca']['columns']) === false) {
             $resultArray['html'] = $this->view->assign('missingUploadField', true)->render();
             return $resultArray;
         }
@@ -114,19 +101,17 @@ class DataInputElement extends AbstractFormElement
         ];
 
         try {
-            $valueObject = DsnValueObject::createFromDSN($this->params['itemFormElValue']);
+            $valueObject = DsnValueObject::createFromDSN($this->data['parameterArray']['itemFormElValue']);
         } catch (InvalidDataSourceNameException $exception) {
             $valueObject = '';
         }
 
         $this->view->assignMultiple(
             [
-                'items' => $references,
+                'inputName' => $this->data['parameterArray']['itemFormElName'],
+                'config' => $this->config,
+                'sheetFiles' => $references,
                 'sheetData' => json_encode($this->getFileReferencesSpreadsheetData($references)),
-                'sheetsOnly' => (bool)$this->config['sheetsOnly'],
-                'allowColumnExtraction' => (bool)$this->config['allowColumnExtraction'],
-                'inputName' => $this->params['itemFormElName'],
-                'inputNameHash' => md5($this->params['itemFormElName']),
                 'valueObject' => $valueObject,
             ]
         );

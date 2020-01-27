@@ -1,70 +1,80 @@
-import $ from 'jquery';
 import DSN from './dsn';
 import Selector from './selector';
 import Spreadsheet from './spreadsheet';
 
 class SpreadsheetDataInput {
     constructor(element) {
-        this.$inputWrapper = $(element);
+        this.element = element;
 
-        const sheetWrapper = this.$inputWrapper.find('.spreadsheet-sheets').get(0),
-            tableWrapper = this.$inputWrapper.find('.spreadsheet-table > .handsontable').get(0);
+        // evaluate all wrapper and inputs
+        this.sheetWrapper = this.element.querySelector('.spreadsheet-sheets');
+        this.tableWrapper = this.element.querySelector('.spreadsheet-table > .handsontable');
+        this.fileInput = this.element.querySelector('.spreadsheet-file-select');
+        this.directionInput = this.element.querySelector('.spreadsheet-input-direction');
+        this.resetInput = this.element.querySelector('.spreadsheet-reset-button');
 
-        this.dsn = new DSN(this.$inputWrapper.find('.spreadsheet-input-database').val());
-        this.spreadsheet = new Spreadsheet(this.dsn, this.$inputWrapper.data('spreadsheet'));
-        this.selector = new Selector(sheetWrapper, tableWrapper);
+        // data inputs
+        this.originalDataInput = this.element.querySelector('input.spreadsheet-input-original');
+        this.databaseDataInput = this.element.querySelector('input.spreadsheet-input-database');
+        this.formattedDataInput = this.element.querySelector('input.spreadsheet-input-formatted');
+
+        // calculate dsn spreadsheet data and build selector
+        this.dsn = new DSN(this.databaseDataInput.getAttribute('value'));
+        this.spreadsheet = new Spreadsheet(this.dsn, JSON.parse(this.element.getAttribute('data-spreadsheet')));
+        this.selector = new Selector(this.sheetWrapper, this.tableWrapper);
 
         // build sheet tabs and table for current selection
         this.updateSpreadsheet();
         this.updateInputValues();
-
-        this.initializeEvents(sheetWrapper, tableWrapper);
+        this.initializeEvents();
     }
 
-    initializeEvents(sheetWrapper, tableWrapper) {
+    initializeEvents() {
         // add events on other wrappers
-        sheetWrapper.addEventListener("changeIndex", (event) => {
+        this.sheetWrapper.addEventListener('changeIndex', (event) => {
             // update sheet index and rebuild table
             this.dsn.index = event.detail.index;
             this.updateSpreadsheet(false);
             this.updateInputValues();
         });
-        tableWrapper.addEventListener("changeSelection", (event) => {
+        this.tableWrapper.addEventListener('changeSelection', (event) => {
             // update selected range
             this.dsn.range = event.detail.start + ':' + event.detail.end;
             this.updateInputValues();
         });
 
         // bind change of file selection
-        this.$inputWrapper.on('change', '.spreadsheet-file-select', (event) => {
-            this.dsn.fileUid = event.target.value;
+        this.fileInput.addEventListener('change', (event) => {
+            this.dsn.fileUid = event.currentTarget.value;
             this.dsn.index = 0;
             this.dsn.range = '';
             this.updateSpreadsheet();
             this.updateInputValues();
         });
 
-        // bind click on reset button
-        this.$inputWrapper.on('click', '.spreadsheet-reset-button', () => {
-            this.dsn = new DSN(this.$inputWrapper.find('.spreadsheet-input-original').val());
-            this.updateSpreadsheet();
+        // bind click on column based extraction toggle
+        this.directionInput.addEventListener('click', (event) => {
+            const target = event.currentTarget;
+            const targetParentNode = target.parentNode;
+            this.dsn.direction = ((target.value || 'horizontal') === 'horizontal' ? 'vertical' : 'horizontal');
+
+            // update target value and text
+            target.setAttribute('value', this.dsn.direction);
+            if (this.dsn.direction !== 'horizontal') {
+                targetParentNode.querySelector('.direction-row').style.display = 'none';
+                targetParentNode.querySelector('.direction-column').style.display = 'block';
+            } else {
+                targetParentNode.querySelector('.direction-column').style.display = 'none';
+                targetParentNode.querySelector('.direction-row').style.display = 'block';
+            }
+
             this.updateInputValues();
         });
 
-        // bind click on column based extraction toggle
-        // TODO: maybe create a simple toggle button for this behaviour
-        this.$inputWrapper.on('click', '.spreadsheet-input-direction', (event) => {
-            this.dsn.direction = (event.target.value === 'horizontal' ? 'vertical' : 'horizontal');
-            if (this.dsn.direction !== 'horizontal') {
-                event.target.checked = true;
-                this.$inputWrapper.find('.spreadsheet-label-direction-row').hide();
-                this.$inputWrapper.find('.spreadsheet-label-direction-column').show();
-            } else {
-                event.target.checked = false;
-                this.$inputWrapper.find('.spreadsheet-label-direction-column').hide();
-                this.$inputWrapper.find('.spreadsheet-label-direction-row').show();
-            }
-
+        // bind click on reset button
+        this.resetInput.addEventListener('click', () => {
+            this.dsn = new DSN(this.originalDataInput.getAttribute('value'));
+            this.updateSpreadsheet();
             this.updateInputValues();
         });
     }
@@ -80,23 +90,22 @@ class SpreadsheetDataInput {
         let database = 'spreadsheet://' + this.dsn.fileUid + '?index=' + this.dsn.index;
 
         // check if table selection is enabled
-        if (this.$inputWrapper.find('.spreadsheet-table > .handsontable').length > 0 && this.dsn.range.length > 0) {
+        if (typeof this.tableWrapper !== 'undefined' && this.dsn.range.length > 0) {
             formatted += ' - ' + this.dsn.range;
             database += '&range=' + this.dsn.range;
         }
         // check if direction selection is enabled
-        if (this.$inputWrapper.find('.spreadsheet-table .spreadsheet-input-direction').length > 0) {
-            formatted += ' - ' + this.dsn.direction;
+        if (typeof this.directionInput !== 'undefined') {
             database += '&direction=' + this.dsn.direction;
         }
 
-        this.$inputWrapper.find('input.spreadsheet-input-formatted').val(formatted);
-        this.$inputWrapper.find('input.spreadsheet-input-database').val(database);
+        this.formattedDataInput.setAttribute('value', formatted);
+        this.databaseDataInput.setAttribute('value', database);
     }
 }
 
 // initialize all spreadsheet data inputs
-$('.spreadsheet-input-wrap').each((i, element) => {
+document.querySelectorAll('.spreadsheet-input-wrap').forEach((element) => {
     new SpreadsheetDataInput(element);
 });
 

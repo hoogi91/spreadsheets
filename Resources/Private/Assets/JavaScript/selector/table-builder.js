@@ -12,12 +12,12 @@ export default class TableBuilder {
      */
     buildHandsOnTable(spreadsheetData, currentSelectedRange) {
         const _this = this;
-        if (this.tableWrapper.length === 0) {
+        if (typeof this.tableWrapper === 'undefined') {
             // table cell selection is disabled => sheets only
             return;
         }
 
-        if (typeof this.handsOnTableInstance === 'object' && this.handsOnTableInstance !== null) {
+        if (typeof this.handsOnTableInstance === 'object') {
             this.tableWrapper.textContent = '';
         }
 
