@@ -49,7 +49,7 @@
 </f:section>
 
 <f:section name="DataInput">
-    <div class="form-control-wrap spreadsheet-input-wrap" data-spreadsheet="{sheetData}">
+    <div class="form-control-wrap spreadsheet-input-wrap" data-spreadsheet="{sheetData -> f:format.json()}">
         <div class="input-group" style="{f:if(condition: inputSize, then: 'width:{inputSize}%')}">
 			<span class="input-group-addon">
 				<c:icon identifier="mimetypes-open-document-spreadsheet"/>
@@ -98,10 +98,7 @@
 
         <f:if condition="{config.sheetsOnly}">
             <f:else>
-                <div class="spreadsheet-table"
-                     style="position:relative;width:100%;min-height:150px;max-height:300px;overflow:hidden;">
-                    <div class="handsontable"></div>
-                </div>
+                <div class="spreadsheet-table"></div>
             </f:else>
         </f:if>
     </div>

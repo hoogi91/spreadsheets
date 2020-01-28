@@ -1,9 +1,6 @@
-import TableBuilder from "./selector/table-builder";
-
-export default class Selector {
-    constructor(sheetWrapper, tableWrapper) {
-        this.sheetWrapper = sheetWrapper;
-        this.tableBuilder = new TableBuilder(tableWrapper);
+export default class SheetBuilder {
+    constructor(element) {
+        this.sheetWrapper = element;
 
         // bind click on another sheet
         this.sheetWrapper.addEventListener('click', (event) => {
@@ -23,7 +20,7 @@ export default class Selector {
         });
     }
 
-    buildSheetTabs(spreadsheetData, selectedSheetIndex) {
+    buildTabs(spreadsheetData, selectedSheetIndex) {
         this.sheetWrapper.textContent = "";
         if (spreadsheetData.getAllSheets().length <= 0) {
             this.sheetWrapper.style.display = 'none';
@@ -38,9 +35,5 @@ export default class Selector {
             }
             this.sheetWrapper.style.display = 'block';
         }
-    }
-
-    buildTable(spreadsheetData, currentSelectedRange) {
-        this.tableBuilder.buildHandsOnTable(spreadsheetData, currentSelectedRange);
     }
 }

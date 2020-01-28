@@ -8,7 +8,7 @@ export default class Helper {
     static getColHeader(index) {
         // charcode of "a" == 97
         // charcode of "z" == 122
-        const base24Str = (index + 1).toString(24); // string base (("z" == 122) - ("a" == 97) - 1)
+        const base24Str = index.toString(24); // string base (("z" == 122) - ("a" == 97) - 1)
         let excelStr = "";
         for (let i = 0; i < base24Str.length; i++) {
             let base24Char = base24Str[i];

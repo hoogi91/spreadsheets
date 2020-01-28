@@ -22,7 +22,7 @@
 				<source>Revert Changes</source>
 			</trans-unit>
 			<trans-unit id="formengine.spreadsheet.label.direction.row-based" xml:space="preserve">
-				<source>Row-based Extraction (Default)</source>
+				<source>Row-based Extraction</source>
 			</trans-unit>
 			<trans-unit id="formengine.spreadsheet.label.direction.column-based" xml:space="preserve">
 				<source>Column-based Extraction</source>

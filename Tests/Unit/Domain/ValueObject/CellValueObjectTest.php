@@ -56,7 +56,7 @@ class CellValueObjectTest extends UnitTestCase
 
         // assert data from value
         $this->assertEquals('2014', $cellValue->getCalculatedValue());
-        $this->assertEquals(DataType::TYPE_NUMERIC, $cellValue->getType());
+        $this->assertEquals(DataType::TYPE_NUMERIC, $cellValue->getDataType());
         $this->assertFalse($cellValue->isRichText());
         $this->assertFalse($cellValue->isSuperscript());
         $this->assertFalse($cellValue->isSubscript());
@@ -76,7 +76,7 @@ class CellValueObjectTest extends UnitTestCase
 
         // assert data from value
         $this->assertEquals('©™§∆', $cellValue->getCalculatedValue());
-        $this->assertEquals(DataType::TYPE_STRING, $cellValue->getType());
+        $this->assertEquals(DataType::TYPE_STRING, $cellValue->getDataType());
         $this->assertFalse($cellValue->isRichText());
         $this->assertFalse($cellValue->isSuperscript());
         $this->assertFalse($cellValue->isSubscript());
@@ -96,7 +96,7 @@ class CellValueObjectTest extends UnitTestCase
 
         // assert data from value
         $this->assertEquals('Test123', $cellValue->getCalculatedValue());
-        $this->assertEquals(DataType::TYPE_STRING, $cellValue->getType());
+        $this->assertEquals(DataType::TYPE_STRING, $cellValue->getDataType());
         $this->assertFalse($cellValue->isRichText());
         $this->assertFalse($cellValue->isSuperscript());
         $this->assertFalse($cellValue->isSubscript());
@@ -116,7 +116,7 @@ class CellValueObjectTest extends UnitTestCase
 
         // assert data from value
         $this->assertEquals('Link', $cellValue->getCalculatedValue());
-        $this->assertEquals(DataType::TYPE_STRING, $cellValue->getType());
+        $this->assertEquals(DataType::TYPE_STRING, $cellValue->getDataType());
         $this->assertFalse($cellValue->isRichText());
         $this->assertFalse($cellValue->isSuperscript());
         $this->assertFalse($cellValue->isSubscript());
@@ -136,7 +136,7 @@ class CellValueObjectTest extends UnitTestCase
 
         // assert data from value
         $this->assertEquals('Hoch', $cellValue->getCalculatedValue());
-        $this->assertEquals(DataType::TYPE_STRING, $cellValue->getType());
+        $this->assertEquals(DataType::TYPE_STRING, $cellValue->getDataType());
         $this->assertFalse($cellValue->isRichText());
         $this->assertTrue($cellValue->isSuperscript());
         $this->assertFalse($cellValue->isSubscript());
@@ -156,7 +156,7 @@ class CellValueObjectTest extends UnitTestCase
 
         // assert data from value
         $this->assertEquals('Hoch Test Tief', $cellValue->getCalculatedValue());
-        $this->assertEquals(DataType::TYPE_STRING, $cellValue->getType());
+        $this->assertEquals(DataType::TYPE_STRING, $cellValue->getDataType());
         $this->assertTrue($cellValue->isRichText());
         $this->assertFalse($cellValue->isSuperscript());
         $this->assertFalse($cellValue->isSubscript());

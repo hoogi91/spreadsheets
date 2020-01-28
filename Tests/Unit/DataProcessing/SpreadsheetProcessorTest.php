@@ -8,7 +8,6 @@ use Hoogi91\Spreadsheets\Service;
 use Hoogi91\Spreadsheets\Tests\Unit\ArrayAssertTrait;
 use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
 use Nimut\TestingFramework\TestCase\UnitTestCase;
-use PhpOffice\PhpSpreadsheet\Cell\Cell;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
@@ -81,7 +80,8 @@ class SpreadsheetProcessorTest extends UnitTestCase
             $readerService,
             new Service\CellService($styleService),
             new Service\SpanService(),
-            new Service\RangeService()
+            new Service\RangeService(),
+            new Service\ValueMappingService()
         );
 
         // instantiate spreadsheet processor
@@ -177,7 +177,7 @@ class SpreadsheetProcessorTest extends UnitTestCase
         $cellValueA1 = $result['bodyData'][1][1] ?? null;
 
         self::assertInstanceOf(CellDataValueObject::class, $cellValueA1);
-        self::assertEquals(DataType::TYPE_NUMERIC, $cellValueA1->getType());
-        self::assertEquals('2015.00', $cellValueA1->getCell()->getFormattedValue());
+        self::assertEquals(DataType::TYPE_NUMERIC, $cellValueA1->getDataType());
+        self::assertEquals('2015.00', $cellValueA1->getFormattedValue());
     }
 }

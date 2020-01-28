@@ -1,0 +1,48 @@
+.spreadsheet-table {
+    position: relative;
+    width: 100%;
+    min-height: 150px;
+    max-height: 300px;
+    overflow: auto;
+}
+
+.spreadsheet-table > table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #333;
+    background-color: #fff;
+    user-select: none;
+    overflow: scroll;
+}
+
+.spreadsheet-table td {
+    padding: 5px;
+    border: 1px solid #ccc;
+    vertical-align: top;
+}
+
+.spreadsheet-table thead,
+.spreadsheet-table td:first-child {
+    text-align: center;
+    background-color: #ddd;
+}
+
+.spreadsheet-table .align-c {
+    text-align: center;
+}
+
+.spreadsheet-table .align-r {
+    text-align: right;
+}
+
+.spreadsheet-table .align-j {
+    text-align: justify;
+}
+
+.spreadsheet-table .align-b {
+    vertical-align: bottom;
+}
+
+.spreadsheet-table .align-m {
+    vertical-align: middle;
+}

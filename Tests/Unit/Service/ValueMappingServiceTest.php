@@ -34,24 +34,24 @@ class ValueMappingServiceTest extends UnitTestCase
             ['border-style', Border::BORDER_MEDIUMDASHDOT, '2px dashed'],
             ['halign', Alignment::HORIZONTAL_LEFT, 'left'],
             ['halign', Alignment::HORIZONTAL_JUSTIFY, 'justify'],
-            ['halign-handsontable', Alignment::HORIZONTAL_LEFT, 'htLeft'],
-            ['halign-handsontable', Alignment::HORIZONTAL_JUSTIFY, 'htJustify'],
+            ['halign-backend', Alignment::HORIZONTAL_LEFT, null],
+            ['halign-backend', Alignment::HORIZONTAL_JUSTIFY, 'j'],
             ['valign', Alignment::VERTICAL_BOTTOM, 'bottom'],
             ['valign', Alignment::VERTICAL_JUSTIFY, 'middle'],
-            ['valign-handsontable', Alignment::VERTICAL_BOTTOM, 'htBottom'],
-            ['valign-handsontable', Alignment::VERTICAL_JUSTIFY, 'htMiddle'],
+            ['valign-backend', Alignment::VERTICAL_BOTTOM, 'b'],
+            ['valign-backend', Alignment::VERTICAL_JUSTIFY, 'm'],
         ];
     }
 
     /**
      * @param string $map
      * @param string $value
-     * @param string $expected
+     * @param string|null $expected
      * @param string|null $default
      *
      * @dataProvider valueMappingDataProvider
      */
-    public function testValueMapping(string $map, string $value, string $expected, ?string $default = null): void
+    public function testValueMapping(string $map, string $value, ?string $expected, ?string $default = null): void
     {
         $this->assertEquals($expected, $this->valueMappingService->convertValue($map, $value, $default));
     }
