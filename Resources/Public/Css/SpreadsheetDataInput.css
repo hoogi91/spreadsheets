@@ -4,6 +4,7 @@
     min-height: 150px;
     max-height: 300px;
     overflow: auto;
+    cursor: cell;
 }
 
 .spreadsheet-table > table {
@@ -11,14 +12,18 @@
     border-collapse: collapse;
     color: #333;
     background-color: #fff;
-    user-select: none;
     overflow: scroll;
 }
 
 .spreadsheet-table td {
     padding: 5px;
     border: 1px solid #ccc;
-    vertical-align: top;
+    vertical-align: bottom;
+    empty-cells: show;
+}
+
+.spreadsheet-table td::selection {
+    background: transparent;
 }
 
 .spreadsheet-table thead,
@@ -39,8 +44,8 @@
     text-align: justify;
 }
 
-.spreadsheet-table .align-b {
-    vertical-align: bottom;
+.spreadsheet-table .align-t {
+    vertical-align: top;
 }
 
 .spreadsheet-table .align-m {

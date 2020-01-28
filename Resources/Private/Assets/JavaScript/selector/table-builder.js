@@ -48,7 +48,7 @@ export default class TableBuilder {
 
                 // set alignment styles if set
                 if (typeof column.css !== 'undefined') {
-                    cell.setAttribute('class', column.css.split('-').map(x => 'align-' + x).join(' '));
+                    cell.setAttribute('class', column.css.split('-').filter(x => x.length > 0).map(x => 'align-' + x).join(' '));
                 }
 
                 // check if cell index needs a row- or col-span

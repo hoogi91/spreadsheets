@@ -274,6 +274,9 @@ class ExtractorService
                 'valign-backend',
                 $alignment->getVertical()
             );
+
+            // cleanup values if they are empty
+            $metaData['backendCellClasses'] = array_filter($metaData['backendCellClasses']);
         }
 
         return ValueObject\CellDataValueObject::create(

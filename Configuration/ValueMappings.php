@@ -48,8 +48,8 @@ return [
         Alignment::VERTICAL_JUSTIFY => 'middle',
     ],
     'valign-backend' => [
-        Alignment::VERTICAL_TOP => null, // default value => see CSS
-        Alignment::VERTICAL_BOTTOM => 'b',
+        Alignment::VERTICAL_BOTTOM => null, // default value => see CSS
+        Alignment::VERTICAL_TOP => 't',
         Alignment::VERTICAL_CENTER => 'm',
         Alignment::VERTICAL_JUSTIFY => 'm',
     ],
