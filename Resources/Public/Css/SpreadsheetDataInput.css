@@ -32,6 +32,11 @@
     background-color: #ddd;
 }
 
+.spreadsheet-table td:first-child {
+    width: 40px;
+    white-space: nowrap;
+}
+
 .spreadsheet-table .align-c {
     text-align: center;
 }

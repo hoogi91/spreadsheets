@@ -29,18 +29,6 @@ class SpreadsheetDataInput {
     }
 
     initializeEvents() {
-        // add events on other wrappers
-        this.sheetWrapper.addEventListener('changeIndex', (event) => {
-            // update sheet index and rebuild table
-            this.dsn.index = event.detail.index;
-            this.updateSpreadsheet(true);
-        });
-        this.tableWrapper.addEventListener('changeSelection', (event) => {
-            // update selected range
-            this.dsn.range = event.detail.start + ':' + event.detail.end;
-            this.updateSpreadsheet();
-        });
-
         // bind change of file selection
         this.fileInput.addEventListener('change', (event) => {
             this.dsn.fileUid = event.currentTarget.value;
@@ -49,23 +37,11 @@ class SpreadsheetDataInput {
             this.updateSpreadsheet(true);
         });
 
-        // bind click on column based extraction toggle
-        this.directionInput.addEventListener('click', (event) => {
-            const target = event.currentTarget;
-            const targetParentNode = target.parentNode;
-            this.dsn.direction = ((target.value || 'horizontal') === 'horizontal' ? 'vertical' : 'horizontal');
-
-            // update target value and text
-            target.setAttribute('value', this.dsn.direction);
-            if (this.dsn.direction !== 'horizontal') {
-                targetParentNode.querySelector('.direction-row').style.display = 'none';
-                targetParentNode.querySelector('.direction-column').style.display = 'block';
-            } else {
-                targetParentNode.querySelector('.direction-column').style.display = 'none';
-                targetParentNode.querySelector('.direction-row').style.display = 'block';
-            }
-
-            this.updateSpreadsheet();
+        // add events on other wrappers
+        this.sheetWrapper.addEventListener('changeIndex', (event) => {
+            // update sheet index and rebuild table
+            this.dsn.index = event.detail.index;
+            this.updateSpreadsheet(true);
         });
 
         // bind click on reset button
@@ -73,6 +49,36 @@ class SpreadsheetDataInput {
             this.dsn = new DSN(this.originalDataInput.getAttribute('value'));
             this.updateSpreadsheet(true);
         });
+
+        // only bind if table wrapper exists
+        if (this.tableWrapper !== null) {
+            this.tableWrapper.addEventListener('changeSelection', (event) => {
+                // update selected range
+                this.dsn.range = event.detail.start + ':' + event.detail.end;
+                this.updateSpreadsheet();
+            });
+        }
+
+        // bind click on column based extraction toggle when range and direction select are active/available
+        if (this.tableWrapper !== null && this.directionInput !== null) {
+            this.directionInput.addEventListener('click', (event) => {
+                const target = event.currentTarget;
+                const targetParentNode = target.parentNode;
+                this.dsn.direction = ((target.value || 'horizontal') === 'horizontal' ? 'vertical' : 'horizontal');
+
+                // update target value and text
+                target.setAttribute('value', this.dsn.direction);
+                if (this.dsn.direction !== 'horizontal') {
+                    targetParentNode.querySelector('.direction-row').style.display = 'none';
+                    targetParentNode.querySelector('.direction-column').style.display = 'block';
+                } else {
+                    targetParentNode.querySelector('.direction-column').style.display = 'none';
+                    targetParentNode.querySelector('.direction-row').style.display = 'block';
+                }
+
+                this.updateSpreadsheet();
+            });
+        }
     }
 
     updateSpreadsheet(rendering = false) {
@@ -90,13 +96,14 @@ class SpreadsheetDataInput {
         let formatted = this.spreadsheet.getSheetName();
         let database = 'spreadsheet://' + this.dsn.fileUid + '?index=' + this.dsn.index;
 
-        // check if table selection is enabled
-        if (typeof this.tableWrapper !== 'undefined' && this.dsn.range.length > 0) {
+        // set range information only if table was rendered
+        if (this.tableWrapper !== null && this.dsn.range.length > 0) {
             formatted += ' - ' + this.dsn.range;
             database += '&range=' + this.dsn.range;
         }
-        // check if direction selection is enabled
-        if (typeof this.directionInput !== 'undefined') {
+
+        // only set direction if range select and direction input is active/available
+        if (this.tableWrapper !== null && this.directionInput !== null) {
             database += '&direction=' + this.dsn.direction;
         }
 

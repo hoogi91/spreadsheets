@@ -71,20 +71,10 @@
                               value="" readonly="readonly"/>
 
             <span class="input-group-btn">
-                <f:if condition="{config.allowColumnExtraction}">
-                    <button type="button" class="btn btn-default spreadsheet-input-direction"
-                            value="{valueObject.directionOfSelection}">
-                        <span class="direction-column" style="display:none">
-                            <c:icon identifier="actions-arrow-down"/>
-                            <f:translate key="formengine.spreadsheet.label.direction.column-based"
-                                         extensionName="spreadsheets"/>
-                        </span>
-                        <span class="direction-row">
-                            <c:icon identifier="actions-arrow-right"/>
-                            <f:translate key="formengine.spreadsheet.label.direction.row-based"
-                                         extensionName="spreadsheets"/>
-                        </span>
-                    </button>
+                <f:if condition="{config.sheetsOnly}">
+                    <f:else>
+                        <f:render section="DirectionButton" arguments="{_all}"/>
+                    </f:else>
                 </f:if>
 
 				<button class="btn btn-default spreadsheet-reset-button" type="button"
@@ -94,16 +84,33 @@
 			</span>
         </div>
 
-        <div class="help-block">
-            <div class="btn-group spreadsheet-sheets" role="group" style="display:none;"></div>
-        </div>
-
+        <br/>
+        <ul class="nav {f:if(condition: config.sheetsOnly, then: 'nav-pills', else: 'nav-tabs')} spreadsheet-sheets"
+            style="display:none;"></ul>
         <f:if condition="{config.sheetsOnly}">
             <f:else>
                 <div class="spreadsheet-table"></div>
             </f:else>
         </f:if>
     </div>
+</f:section>
+
+<f:section name="DirectionButton">
+    <f:if condition="{config.allowColumnExtraction}">
+        <button type="button" class="btn btn-default spreadsheet-input-direction"
+                value="{valueObject.directionOfSelection}">
+            <span class="direction-column" style="display:none">
+                <c:icon identifier="actions-arrow-down"/>
+                <f:translate key="formengine.spreadsheet.label.direction.column-based"
+                             extensionName="spreadsheets"/>
+            </span>
+            <span class="direction-row">
+                <c:icon identifier="actions-arrow-right"/>
+                <f:translate key="formengine.spreadsheet.label.direction.row-based"
+                             extensionName="spreadsheets"/>
+            </span>
+        </button>
+    </f:if>
 </f:section>
 
 </html>
