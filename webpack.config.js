@@ -43,7 +43,5 @@ module.exports = (env, argv) => ({
     externals: {
         // require("jquery") is external and available on the global var jQuery
         "jquery": "jquery",
-        // require("jquery") is external and available on the global var jQuery
-        "handsontable": "Handsontable"
     }
 });

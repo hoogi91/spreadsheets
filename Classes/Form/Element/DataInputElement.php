@@ -8,7 +8,6 @@ use Hoogi91\Spreadsheets\Domain\ValueObject\DsnValueObject;
 use Hoogi91\Spreadsheets\Exception\InvalidDataSourceNameException;
 use Hoogi91\Spreadsheets\Service\ExtractorService;
 use Hoogi91\Spreadsheets\Service\ReaderService;
-use Hoogi91\Spreadsheets\Service\ValueMappingService;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -39,11 +38,6 @@ class DataInputElement extends AbstractFormElement
     private $extractorService;
 
     /**
-     * @var ValueMappingService
-     */
-    private $mappingService;
-
-    /**
      * @var array
      */
     private $config;
@@ -64,7 +58,6 @@ class DataInputElement extends AbstractFormElement
         parent::__construct($nodeFactory, $data);
         $this->readerService = GeneralUtility::makeInstance(ReaderService::class);
         $this->extractorService = GeneralUtility::makeInstance(ExtractorService::class);
-        $this->mappingService = GeneralUtility::makeInstance(ValueMappingService::class);
         $this->config = $this->data['parameterArray']['fieldConf']['config'];
 
         /** @var StandaloneView $view */
@@ -98,7 +91,6 @@ class DataInputElement extends AbstractFormElement
         }
 
         // register additional assets only when input will be rendered
-        // add own requireJS module that uses above dependency and additional styling for handsontable
         $resultArray['requireJsModules'] = ['TYPO3/CMS/Spreadsheets/SpreadsheetDataInput'];
         $resultArray['stylesheetFiles'] = ['EXT:spreadsheets/Resources/Public/Css/SpreadsheetDataInput.css'];
 
