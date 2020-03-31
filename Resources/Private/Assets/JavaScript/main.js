@@ -1,6 +1,7 @@
 import DSN from './dsn';
 import Renderer from './renderer';
 import Spreadsheet from './spreadsheet';
+import Selector from "./selector";
 
 class SpreadsheetDataInput {
     constructor(element) {
@@ -22,6 +23,7 @@ class SpreadsheetDataInput {
         this.dsn = new DSN(this.databaseDataInput.getAttribute('value'));
         this.spreadsheet = new Spreadsheet(this.dsn, JSON.parse(this.element.getAttribute('data-spreadsheet')));
         this.renderer = new Renderer(this.sheetWrapper, this.tableWrapper);
+        this.selector = new Selector(this.tableWrapper);
 
         // build sheet tabs and table for current selection
         this.updateSpreadsheet(true);
