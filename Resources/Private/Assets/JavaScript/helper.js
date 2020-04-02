@@ -22,16 +22,31 @@ export default class Helper {
         return excelStr.toUpperCase();
     }
 
-    static getCellRepresentation(cellElement) {
+    static getCellRepresentation(cellElement, selectMode = null) {
+        // first check if we can provide single col header on column select mode
+        const possibleTHeadRow = cellElement.parentNode;
+        if (selectMode === 'column' && possibleTHeadRow.parentNode.nodeName.toLowerCase() === 'thead') {
+            const colIndex = Array.from(possibleTHeadRow.childNodes.values()).indexOf(cellElement);
+            return this.getColHeader(colIndex);
+        }
+
         const trow = cellElement.parentNode;
         const tbody = cellElement.parentNode.parentNode;
         if (trow.nodeName.toLowerCase() !== 'tr' || tbody.nodeName.toLowerCase() !== 'tbody') {
+            // issue that should normally not be happen
             return '';
         }
 
         // find indexes by cell element and table row
         const colIndex = Array.from(trow.childNodes.values()).indexOf(cellElement);
         const rowIndex = Array.from(tbody.childNodes.values()).indexOf(trow);
+
+        // return only row index or column header based on select mode
+        if (selectMode === 'row') {
+            return rowIndex + 1;
+        } else if (selectMode === 'column') {
+            return this.getColHeader(colIndex);
+        }
 
         return this.getColHeader(colIndex) + (rowIndex + 1);
     }

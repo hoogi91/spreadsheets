@@ -5,6 +5,7 @@
     max-height: 300px;
     overflow: auto;
     cursor: cell;
+    user-select: none;
 }
 
 .spreadsheet-table > table {
