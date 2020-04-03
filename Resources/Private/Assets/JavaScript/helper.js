@@ -22,33 +22,32 @@ export default class Helper {
         return excelStr.toUpperCase();
     }
 
-    static getCellRepresentation(cellElement, selectMode = null) {
-        // first check if we can provide single col header on column select mode
-        const possibleTHeadRow = cellElement.parentNode;
-        if (selectMode === 'column' && possibleTHeadRow.parentNode.nodeName.toLowerCase() === 'thead') {
-            const colIndex = Array.from(possibleTHeadRow.childNodes.values()).indexOf(cellElement);
-            return this.getColHeader(colIndex);
+    /**
+     * Return cell representation based on selection mode
+     *
+     * @param {Element} cellElement
+     * @param {string|null} selectMode
+     * @param {boolean} calculateSpans
+     * @returns {string|int}
+     */
+    static getCellRepresentation(cellElement, selectMode = null, calculateSpans = true) {
+        let colIndex = parseInt(cellElement.getAttribute('data-col'));
+        if (calculateSpans === true && cellElement.hasAttribute('colspan') === true) {
+            colIndex += parseInt(cellElement.getAttribute('colspan')) - 1;
         }
 
-        const trow = cellElement.parentNode;
-        const tbody = cellElement.parentNode.parentNode;
-        if (trow.nodeName.toLowerCase() !== 'tr' || tbody.nodeName.toLowerCase() !== 'tbody') {
-            // issue that should normally not be happen
-            return '';
+        let rowIndex = parseInt(cellElement.getAttribute('data-row'));
+        if (calculateSpans === true && cellElement.hasAttribute('rowspan') === true) {
+            rowIndex += parseInt(cellElement.getAttribute('rowspan')) - 1;
         }
 
-        // find indexes by cell element and table row
-        const colIndex = Array.from(trow.childNodes.values()).indexOf(cellElement);
-        const rowIndex = Array.from(tbody.childNodes.values()).indexOf(trow);
-
-        // return only row index or column header based on select mode
         if (selectMode === 'row') {
-            return rowIndex + 1;
+            return rowIndex;
         } else if (selectMode === 'column') {
             return this.getColHeader(colIndex);
         }
 
-        return this.getColHeader(colIndex) + (rowIndex + 1);
+        return this.getColHeader(colIndex) + rowIndex;
     }
 
     /**

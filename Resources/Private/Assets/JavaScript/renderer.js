@@ -83,7 +83,9 @@ export default class Renderer {
         for (let colIndex = 0; colIndex <= columnCount; colIndex++) {
             if (colIndex > 0) {
                 // insert new cell with column header naming
-                headerRow.insertCell().innerText = Helper.getColHeader(colIndex);
+                const cell = headerRow.insertCell();
+                cell.innerText = Helper.getColHeader(colIndex);
+                cell.setAttribute('data-col', colIndex);
             } else {
                 // left/top corner is the row number column and has no text
                 headerRow.insertCell();
@@ -94,10 +96,17 @@ export default class Renderer {
     buildTableBody(table, data) {
         // build tbody before adding rows
         const body = table.createTBody();
+        let ignoredCells = [];
+
         data.forEach((row, rowIndex) => {
             // build new table row
             const tableRow = body.insertRow();
-            tableRow.insertCell().innerText = rowIndex + 1;
+            const cell = tableRow.insertCell();
+            cell.innerText = rowIndex + 1;
+            cell.setAttribute('data-row', rowIndex + 1);
+
+            // reset real column index on new rows
+            let colIndex = 0;
 
             // column object => {val: "value", css: "style classes", row: "rowspan", col: "rowspan"}
             row.forEach((column) => {
@@ -110,13 +119,42 @@ export default class Renderer {
                     cell.setAttribute('class', column.css.split('-').filter(x => x.length > 0).map(x => 'align-' + x).join(' '));
                 }
 
-                // check if cell index needs a row- or col-span
-                if (typeof column.row !== 'undefined') {
-                    cell.setAttribute('rowspan', column.row);
-                }
+                // check if cell index needs a col- and/or rowspan
                 if (typeof column.col !== 'undefined') {
                     cell.setAttribute('colspan', column.col);
+
+                    // update ignored cells
+                    for (let i = 1; i < column.col; i++) {
+                        ignoredCells.push(rowIndex + '-' + (colIndex + i));
+                    }
                 }
+                if (typeof column.row !== 'undefined') {
+                    cell.setAttribute('rowspan', column.row);
+
+                    // update ignored cells
+                    for (let i = 1; i < column.row; i++) {
+                        ignoredCells.push((rowIndex + i) + '-' + colIndex);
+
+                        // additionally add colspan to every rowspan if available
+                        if (typeof column.col !== 'undefined') {
+                            for (let j = 1; j < column.col; j++) {
+                                ignoredCells.push((rowIndex + i) + '-' + (colIndex + j));
+                            }
+                        }
+                    }
+                }
+
+                // extend real column index until cell is not ignored to find correct index
+                while (ignoredCells.indexOf(rowIndex + '-' + colIndex) !== -1) {
+                    colIndex++;
+                }
+
+                // define column and header data
+                cell.setAttribute('data-col', colIndex + 1);
+                cell.setAttribute('data-row', rowIndex + 1);
+
+                // increase colIndex
+                colIndex++;
             });
         });
     }

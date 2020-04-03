@@ -88,8 +88,8 @@ export default class Selector {
         );
 
         this.properties.selection = {
-            start: Helper.getCellRepresentation(startElement, this.cursor.selectMode),
-            end: Helper.getCellRepresentation(endElement, this.cursor.selectMode),
+            start: Helper.getCellRepresentation(startElement, this.cursor.selectMode, false),
+            end: Helper.getCellRepresentation(endElement, this.cursor.selectMode, startElement !== endElement),
             elements: {
                 start: startElement,
                 end: endElement,
