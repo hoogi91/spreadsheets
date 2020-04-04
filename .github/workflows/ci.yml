@@ -1,0 +1,69 @@
+name: CI
+on:
+  push:
+    branches:
+      - master
+      - develop
+      - release/*
+      - feature/*
+  pull_request:
+    branches:
+      - master
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php_version: ['7.2', '7.3', '7.4']
+        typo3_version: ['^10.0', 'dev-master']
+        exclude:
+          # exclude dev-master from old PHP versions
+          - typo3_version: 'dev-master'
+            php_version: '7.3'
+          - typo3_version: 'dev-master'
+            php_version: '7.2'
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '${{ matrix.php_version }}'
+          tools: composer
+          extensions: json, mbstring
+
+      - name: Install project testing dependencies
+        run: |
+          if [[ "${{ matrix.typo3_version }}" = *"dev"* ]]; then
+            composer config minimum-stability dev;
+            composer config prefer-stable true;
+            composer require typo3/cms-core:"@dev" --no-update;
+          fi
+          composer require nimut/typo3-complete:"${{ matrix.typo3_version }}"
+          export TYPO3_PATH_ROOT=$GITHUB_WORKSPACE/.Build/web
+          export typo3DatabaseName=typo3
+          export typo3DatabaseHost=localhost
+          export typo3DatabaseUsername=root
+          export typo3DatabasePassword=
+
+      - name: Executing PHP code sniffer
+        run: .Build/bin/phpcs -p --standard=PSR2 Classes/
+
+      - name: Executing PHPStan
+        run: .Build/bin/phpstan analyse --level 5 Classes/
+
+      - name: Running unit tests (if exists)
+        run: |
+          if [ -d "Tests/Unit" ]; then
+            .Build/bin/phpunit --bootstrap .Build/vendor/nimut/testing-framework/res/Configuration/UnitTestsBootstrap.php Tests/Unit/;
+          fi
+
+      - name: Running functional tests (if exists)
+        run: |
+          if [ -d "Tests/Functional" ]; then
+            find 'Tests/Functional' -wholename '*Test.php' | parallel --gnu 'echo; echo "Running functional test suite {}"; .Build/bin/phpunit --bootstrap .Build/vendor/nimut/testing-framework/res/Configuration/FunctionalTestsBootstrap.php {}';
+          fi

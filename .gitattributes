@@ -6,7 +6,6 @@
 /.editorconfig export-ignore
 /.eslintignore export-ignore
 /.eslintrc.js export-ignore
-/.travis.yml export-ignore
 /package.json export-ignore
 /package-lock.json export-ignore
 /webpack.config.js export-ignore
