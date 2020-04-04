@@ -51,7 +51,7 @@ jobs:
           export typo3DatabasePassword=
 
       - name: Executing PHP code sniffer
-        run: .Build/bin/phpcs --runtime-set ignore_warnings_on_exit true --standard=PSR2 Classes/
+        run: .Build/bin/phpcs -p --standard=PSR2 Classes/
 
       - name: Executing PHPStan
         run: .Build/bin/phpstan analyse --level 5 Classes/
