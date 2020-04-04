@@ -54,8 +54,12 @@ export default class Selector {
                 }
 
                 // set selection by cursor start end mouse event end position
-                this.cursor.end = target;
-                this.selection = [this.cursor.start, this.cursor.end];
+                if (target !== this.cursor.start) {
+                    this.cursor.end = target;
+                    this.selection = [this.cursor.start, this.cursor.end];
+                } else {
+                    this.selection = [this.cursor.start];
+                }
 
                 // calculate merge cell information and highlight selection
                 this.calculateMergeCells();
@@ -79,53 +83,49 @@ export default class Selector {
     }
 
     set selection(elements) {
-        if (elements.length <= 1) {
+        if (elements.length <= 0) {
             return;
         }
 
         // iterate elements to find col- and row-index
-        let startElement = null, endElement = null;
         let colIndex = {min: null, max: null};
         let rowIndex = {min: null, max: null};
         elements.forEach((element) => {
             const i = calculateCellIndexes(element, false);
             if (colIndex.min === null || colIndex.min > i.colIndex) {
                 colIndex.min = i.colIndex;
-                startElement = element;
             }
             if (rowIndex.min === null || rowIndex.min > i.rowIndex) {
                 rowIndex.min = i.rowIndex;
-                startElement = element;
             }
 
             const span = calculateCellIndexes(element, true);
             if (colIndex.max === null || colIndex.max < span.colIndex) {
                 colIndex.max = span.colIndex;
-                endElement = element;
             }
             if (rowIndex.max === null || rowIndex.max < span.rowIndex) {
                 rowIndex.max = span.rowIndex;
-                endElement = element;
             }
         });
 
-        if (startElement === endElement) {
-            colIndex.max = colIndex.min;
-            rowIndex.max = rowIndex.min;
-        }
-
+        // set properties
         this.properties.selection = {
-            start: cellRepresentation(colIndex.min, rowIndex.min, this.cursor.selectMode),
-            end: cellRepresentation(colIndex.max, rowIndex.max, this.cursor.selectMode),
-            elements: {
-                start: startElement,
-                end: endElement,
-            },
+            elements: elements,
             indexes: {
                 col: colIndex,
                 row: rowIndex,
             },
         };
+
+        // set selection start/end cell representation
+        this.properties.selection.start = cellRepresentation(colIndex.min, rowIndex.min, this.cursor.selectMode);
+        if (elements.length === 1) {
+            this.properties.selection.end = this.properties.selection.start;
+        } else {
+            this.properties.selection.end = cellRepresentation(colIndex.max, rowIndex.max, this.cursor.selectMode);
+        }
+
+
     }
 
     isInsideTable(target) {
@@ -146,9 +146,9 @@ export default class Selector {
         let colIndexes = this.selection.indexes.col;
         let rowIndexes = this.selection.indexes.row;
         if (this.cursor.selectMode === 'row') {
-            colIndexes = {min: 0, max: this.tableWrapper.querySelector('table').rows[0].cells.length};
+            colIndexes = {min: 1, max: this.tableWrapper.querySelector('table').rows[0].cells.length};
         } else if (this.cursor.selectMode === 'column') {
-            rowIndexes = {min: 0, max: this.tableWrapper.querySelector('table').rows.length};
+            rowIndexes = {min: 1, max: this.tableWrapper.querySelector('table').rows.length};
         }
 
         //   1. iterate current selection
@@ -179,7 +179,7 @@ export default class Selector {
                 const mergeCellSpanIndex = calculateCellIndexes(mergeCell, true);
                 if (mergeCellSpanIndex.colIndex > colIndexes.max || mergeCellSpanIndex.rowIndex > rowIndexes.max) {
                     // 1. extend existing selection by cell
-                    this.selection = [this.selection.elements.start, this.selection.elements.end, mergeCell];
+                    this.selection = [...this.selection.elements, mergeCell];
                     // 2. add merge cell index to already processed indexes and re-calculate
                     this.calculateMergeCells(alreadyProcessedIndexes);
                     // 3. break current loop cause new one is started
@@ -204,12 +204,12 @@ export default class Selector {
 
             // check if cell needs to be merged
             const mergeCellSpanIndex = calculateCellIndexes(mergeCell, true);
-            if (
-                (mergeCellIndex.colIndex < colIndexes.min || mergeCellIndex.rowIndex < rowIndexes.min) &&
-                (mergeCellSpanIndex.colIndex >= colIndexes.min && mergeCellSpanIndex.rowIndex >= rowIndexes.min)
+            if ((mergeCellIndex.colIndex < colIndexes.min && this.cursor.selectMode === 'column'
+                || mergeCellIndex.rowIndex < rowIndexes.min && this.cursor.selectMode === 'row')
+                && (mergeCellSpanIndex.colIndex >= colIndexes.min && mergeCellSpanIndex.rowIndex >= rowIndexes.min)
             ) {
                 // 1. extend existing selection by cell
-                this.selection = [this.selection.elements.start, this.selection.elements.end, mergeCell];
+                this.selection = [...this.selection.elements, mergeCell];
                 // 2. add merge cell index to already processed indexes and re-calculate
                 this.calculateMergeCells(alreadyProcessedIndexes);
                 // 3. break current loop cause new one is started
