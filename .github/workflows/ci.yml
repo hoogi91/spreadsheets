@@ -30,15 +30,21 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '${{ matrix.php_version }}'
+          tools: composer
+          extensions: json, mbstring
+
       - name: Install project testing dependencies
         run: |
-          if [[ "$TYPO3" = *"dev"* ]]; then
+          if [[ "${{ matrix.typo3_version }}" = *"dev"* ]]; then
             composer config minimum-stability dev;
             composer config prefer-stable true;
             composer require typo3/cms-core:"@dev" --no-update;
           fi
-          composer require nimut/typo3-complete:"$TYPO3"
-          export TYPO3_PATH_ROOT=$PWD/.Build/web
+          composer require nimut/typo3-complete:"${{ matrix.typo3_version }}"
+          export TYPO3_PATH_ROOT=$GITHUB_WORKSPACE/.Build/web
           export typo3DatabaseName=typo3
           export typo3DatabaseHost=localhost
           export typo3DatabaseUsername=root
