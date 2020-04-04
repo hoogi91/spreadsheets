@@ -5,7 +5,6 @@
     max-height: 300px;
     overflow: auto;
     cursor: cell;
-    user-select: none;
 }
 
 .spreadsheet-table > table {
@@ -27,10 +26,19 @@
     background: transparent;
 }
 
+.spreadsheet-table td.highlight {
+    background: rgba(0, 94, 255, 0.1);
+}
+
 .spreadsheet-table thead,
 .spreadsheet-table td:first-child {
     text-align: center;
-    background-color: #ddd;
+    background-color: #f0f0f0;
+}
+
+.spreadsheet-table thead td.highlight,
+.spreadsheet-table td.highlight:first-child {
+    background-color: #dcdcdc;
 }
 
 .spreadsheet-table td:first-child {

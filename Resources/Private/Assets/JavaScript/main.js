@@ -55,8 +55,15 @@ class SpreadsheetDataInput {
         // only bind if table wrapper exists
         if (this.tableWrapper !== null) {
             this.tableWrapper.addEventListener('changeSelection', (event) => {
-                // update selected range
-                this.dsn.range = event.detail.start + ':' + event.detail.end;
+                if (typeof event.detail.start === 'string'
+                    && event.detail.start === event.detail.end
+                    && event.detail.start.match(/^(?=.*\d)(?=.*[A-Z]).+$/)) {
+                    // single cell selected
+                    this.dsn.range = event.detail.start;
+                } else {
+                    // otherwise (column, row or custom selection)
+                    this.dsn.range = event.detail.start + ':' + event.detail.end;
+                }
                 this.updateSpreadsheet();
             });
         }

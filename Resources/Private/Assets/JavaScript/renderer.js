@@ -1,5 +1,5 @@
 import DSN from "./dsn";
-import Helper from "./helper";
+import {colHeaderByIndex} from "./helper";
 
 export default class Renderer {
     constructor(sheetWrapper, tableWrapper) {
@@ -84,7 +84,7 @@ export default class Renderer {
             if (colIndex > 0) {
                 // insert new cell with column header naming
                 const cell = headerRow.insertCell();
-                cell.innerText = Helper.getColHeader(colIndex);
+                cell.innerText = colHeaderByIndex(colIndex);
                 cell.setAttribute('data-col', colIndex);
             } else {
                 // left/top corner is the row number column and has no text

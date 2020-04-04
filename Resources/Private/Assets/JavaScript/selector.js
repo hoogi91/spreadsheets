@@ -1,74 +1,76 @@
-import Helper, {throttle} from "./helper";
+import {calculateCellIndexes, cellRepresentation, throttle, unselectEverything} from "./helper";
 
 export default class Selector {
     constructor(tableWrapper) {
-        this.cursor = {};
+        this.cursor = {
+            isSelecting: false,
+            selectMode: null,
+        };
         this.properties = {};
+        this.tableWrapper = tableWrapper;
 
-        if (tableWrapper !== null) {
-            tableWrapper.addEventListener('mousedown', (mouseEvent) => {
-                this.isSelecting = true;
-                this.cursor.startX = mouseEvent.x;
-                this.cursor.startY = mouseEvent.y;
+        if (this.tableWrapper !== null) {
+            this.tableWrapper.addEventListener('mousedown', (mouseEvent) => {
+                const target = document.elementFromPoint(mouseEvent.x, mouseEvent.y);
+
+                this.cursor.isSelecting = true;
+                this.cursor.start = target;
 
                 this.cursor.selectMode = null;
-                if (this.isTableColumnHeaderPosition(mouseEvent.x, mouseEvent.y)) {
+                if (this.reachedColumnHeader(target)) {
                     this.cursor.selectMode = 'column';
-                } else if (this.isTableRowHeaderPosition(mouseEvent.x, mouseEvent.y)) {
+                } else if (this.reachedRowHeader(target)) {
                     this.cursor.selectMode = 'row';
                 }
             });
-            tableWrapper.addEventListener('mouseleave', () => {
-                this.isSelecting = false; // just end selecting and use last selection
-            });
 
             const moveEvent = (mouseEvent) => {
-                if (this.isSelecting !== true) {
+                if (this.cursor.isSelecting !== true) {
                     // stop if we are not selecting
                     return false;
+                } else if (mouseEvent.type === 'mouseup') {
+                    // stop selecting on mouse up
+                    this.cursor.isSelecting = false;
+                    unselectEverything();
                 }
 
-                const reachedTableColumnHeaders = this.isTableColumnHeaderPosition(mouseEvent.x, mouseEvent.y);
-                const reachedTableRowHeaders = this.isTableRowHeaderPosition(mouseEvent.x, mouseEvent.y);
-                if (reachedTableColumnHeaders && reachedTableRowHeaders) {
-                    this.isSelecting = false; // stop selection immediately if left/top corner is hovered
+                // stop processing if we are not inside table or we are moving over col/row header
+                const target = document.elementFromPoint(mouseEvent.x, mouseEvent.y);
+                if (this.isInsideTable(target) === false) {
+                    // we are outside the table
                     return false;
-                }
-
-                if (this.cursor.selectMode === 'column' && reachedTableRowHeaders === true) {
+                } else if (this.reachedColumnHeader(target) && this.reachedRowHeader(target)) {
+                    // we reached the top/left corner
+                    return false;
+                } else if (this.cursor.selectMode === 'column' && this.reachedRowHeader(target)) {
                     // stop if column select reaches table row headers
                     return false;
-                } else if (this.cursor.selectMode === 'row' && reachedTableColumnHeaders === true) {
+                } else if (this.cursor.selectMode === 'row' && this.reachedColumnHeader(target)) {
                     // stop if row select reaches table column headers
                     return false;
-                } else if (this.cursor.selectMode === null && (reachedTableColumnHeaders === true || reachedTableRowHeaders === true)) {
+                } else if (this.cursor.selectMode === null && (this.reachedColumnHeader(target) || this.reachedRowHeader(target))) {
                     // stop if default select mode reaches row or column headers
                     return false;
                 }
 
-                // stop selecting on mouse up
-                if (mouseEvent.type === 'mouseup') {
-                    this.isSelecting = false;
-                }
+                // set selection by cursor start end mouse event end position
+                this.cursor.end = target;
+                this.selection = [this.cursor.start, this.cursor.end];
 
-                // update cursor position for calculation
-                this.cursor.endX = mouseEvent.x;
-                this.cursor.endY = mouseEvent.y;
-
-                // always re-render overlay
-                this.calculateSelection(tableWrapper);
-                this.renderOverlay(tableWrapper);
+                // calculate merge cell information and highlight selection
+                this.calculateMergeCells();
+                this.highlightSelection();
 
                 // dispatch change selection event with start/end point value
-                tableWrapper.dispatchEvent(new CustomEvent("changeSelection", {
+                this.tableWrapper.dispatchEvent(new CustomEvent("changeSelection", {
                     detail: {
                         start: this.selection.start,
                         end: this.selection.end,
                     }
                 }));
             };
-            tableWrapper.addEventListener('mousemove', throttle(60, moveEvent));
-            tableWrapper.addEventListener('mouseup', moveEvent);
+            this.tableWrapper.addEventListener('mousemove', throttle(60, moveEvent));
+            this.tableWrapper.addEventListener('mouseup', moveEvent);
         }
     }
 
@@ -76,130 +78,180 @@ export default class Selector {
         return this.properties.selection;
     }
 
-    set selection(data) {
-        // find starting and ending elements by offset values
-        const startElement = document.elementFromPoint(
-            Math.min(...data.offsetsX),
-            Math.min(...data.offsetsY),
-        );
-        const endElement = document.elementFromPoint(
-            Math.max(...data.offsetsX),
-            Math.max(...data.offsetsY),
-        );
+    set selection(elements) {
+        if (elements.length <= 1) {
+            return;
+        }
+
+        // iterate elements to find col- and row-index
+        let startElement = null, endElement = null;
+        let colIndex = {min: null, max: null};
+        let rowIndex = {min: null, max: null};
+        elements.forEach((element) => {
+            const i = calculateCellIndexes(element, false);
+            if (colIndex.min === null || colIndex.min > i.colIndex) {
+                colIndex.min = i.colIndex;
+                startElement = element;
+            }
+            if (rowIndex.min === null || rowIndex.min > i.rowIndex) {
+                rowIndex.min = i.rowIndex;
+                startElement = element;
+            }
+
+            const span = calculateCellIndexes(element, true);
+            if (colIndex.max === null || colIndex.max < span.colIndex) {
+                colIndex.max = span.colIndex;
+                endElement = element;
+            }
+            if (rowIndex.max === null || rowIndex.max < span.rowIndex) {
+                rowIndex.max = span.rowIndex;
+                endElement = element;
+            }
+        });
+
+        if (startElement === endElement) {
+            colIndex.max = colIndex.min;
+            rowIndex.max = rowIndex.min;
+        }
 
         this.properties.selection = {
-            start: Helper.getCellRepresentation(startElement, this.cursor.selectMode, false),
-            end: Helper.getCellRepresentation(endElement, this.cursor.selectMode, startElement !== endElement),
+            start: cellRepresentation(colIndex.min, rowIndex.min, this.cursor.selectMode),
+            end: cellRepresentation(colIndex.max, rowIndex.max, this.cursor.selectMode),
             elements: {
                 start: startElement,
                 end: endElement,
             },
-            offsets: {
-                top: startElement.offsetTop,
-                left: startElement.offsetLeft,
-                bottom: this.cursor.selectMode === 'column'
-                    ? Number.MAX_SAFE_INTEGER
-                    : (endElement.offsetTop + endElement.clientHeight),
-                right: this.cursor.selectMode === 'row'
-                    ? Number.MAX_SAFE_INTEGER
-                    : (endElement.offsetLeft + endElement.clientWidth),
-            }
+            indexes: {
+                col: colIndex,
+                row: rowIndex,
+            },
         };
     }
 
-    set mergeCell(element) {
-        const rect = element.getBoundingClientRect();
-        const startElement = this.selection.elements.start;
-        const startRect = startElement.getBoundingClientRect();
-        const endElement = this.selection.elements.end;
-        const endRect = endElement.getBoundingClientRect();
-
-        this.selection = {
-            offsetsX: [
-                startRect.left,
-                endRect.left + endElement.clientWidth,
-                rect.left,
-                rect.left + element.clientWidth
-            ],
-            offsetsY: [
-                startRect.top,
-                endRect.top + endElement.clientHeight,
-                rect.top,
-                rect.top + element.clientHeight
-            ]
-        };
+    isInsideTable(target) {
+        return target !== null ? (target.closest('table') !== null) : false;
     }
 
-    isTableColumnHeaderPosition(x, y) {
-        const target = document.elementFromPoint(x, y);
-        return target.parentNode.parentNode.nodeName.toLowerCase() === 'thead';
+    reachedColumnHeader(target) {
+        return target !== null ? (target.closest('thead') !== null) : false;
     }
 
-    isTableRowHeaderPosition(x, y) {
-        const target = document.elementFromPoint(x, y);
-        return target.nodeName.toLowerCase() === 'td' && target.parentNode.firstChild === target;
+    reachedRowHeader(target) {
+        // check parent row first child is target
+        return target !== null ? (target.closest('tr').querySelector('td') === target) : false;
     }
 
-    calculateSelection(tableWrapper) {
-        // set selection by cursor values
-        this.selection = {
-            offsetsX: [this.cursor.startX, this.cursor.endX],
-            offsetsY: [this.cursor.startY, this.cursor.endY]
-        };
-
-        // process merged cells to get final selection
-        const mergedCells = tableWrapper.querySelectorAll('td[colspan], td[rowspan]');
-        if (mergedCells.length > 0) {
-            mergedCells.forEach((element) => {
-                if (this.isElementInSelection(element) === true) {
-                    this.mergeCell = element;
-                }
-            });
-        }
-    }
-
-    isElementInSelection(element) {
-        const current = {
-            top: element.offsetTop,
-            left: element.offsetLeft,
-            right: element.offsetLeft + element.clientWidth,
-            bottom: element.offsetTop + element.clientHeight
-        };
-
-        // if one or more expressions in the parentheses are true, there's no overlapping
-        // if all are false, there must be an overlapping
-        return !(
-            this.selection.offsets.top >= current.bottom ||
-            this.selection.offsets.left >= current.right ||
-            this.selection.offsets.right <= current.left ||
-            this.selection.offsets.bottom <= current.top
-        );
-    }
-
-    renderOverlay(tableWrapper) {
-        let overlay = tableWrapper.querySelector('#table-overlay');
-        if (overlay === null) {
-            // create new overlay
-            overlay = document.createElement('div');
-            overlay.id = 'table-overlay';
-            overlay.style.position = 'absolute';
-            overlay.style.background = 'rgba(255, 0, 0, 0.5)';
-            overlay.style.pointerEvents = 'none';
-            tableWrapper.appendChild(overlay);
-        }
-
-        // update overlay
-        overlay.style.top = this.selection.offsets.top + 'px';
-        overlay.style.left = this.selection.offsets.left + 'px';
+    calculateMergeCells(alreadyProcessedIndexes = []) {
+        // calculate current active col/row indexes
+        let colIndexes = this.selection.indexes.col;
+        let rowIndexes = this.selection.indexes.row;
         if (this.cursor.selectMode === 'row') {
-            overlay.style.width = '100%';
-        } else {
-            overlay.style.width = (this.selection.offsets.right - this.selection.offsets.left) + 'px';
+            colIndexes = {min: 0, max: this.tableWrapper.querySelector('table').rows[0].cells.length};
+        } else if (this.cursor.selectMode === 'column') {
+            rowIndexes = {min: 0, max: this.tableWrapper.querySelector('table').rows.length};
         }
-        if (this.cursor.selectMode === 'column') {
-            overlay.style.height = '100%';
-        } else {
-            overlay.style.height = (this.selection.offsets.bottom - this.selection.offsets.top) + 'px';
+
+        //   1. iterate current selection
+        //   1a. find merge cell which overlaps selection at bottom or right
+        //      => set as end element
+        //      => update selection and restart method
+
+        // iterate current selection to find merge cells in bottom/right position of selection
+        mergeCellLoop: for (let r = rowIndexes.min; r <= rowIndexes.max; r++) {
+            for (let c = colIndexes.min; c <= colIndexes.max; c++) {
+                if (alreadyProcessedIndexes.indexOf(c + '-' + r) !== -1) {
+                    continue;
+                }
+
+                const mergeCell = this.tableWrapper.querySelector(
+                    'td[data-col="' + c + '"][data-row="' + r + '"][colspan],' +
+                    'td[data-col="' + c + '"][data-row="' + r + '"][rowspan]'
+                );
+                if (mergeCell === null) {
+                    continue;
+                }
+
+                // get cell index and save as already processed
+                const mergeCellIndex = calculateCellIndexes(mergeCell, false);
+                alreadyProcessedIndexes.push(mergeCellIndex.colIndex + '-' + mergeCellIndex.rowIndex);
+
+                // check if cell needs to be merged
+                const mergeCellSpanIndex = calculateCellIndexes(mergeCell, true);
+                if (mergeCellSpanIndex.colIndex > colIndexes.max || mergeCellSpanIndex.rowIndex > rowIndexes.max) {
+                    // 1. extend existing selection by cell
+                    this.selection = [this.selection.elements.start, this.selection.elements.end, mergeCell];
+                    // 2. add merge cell index to already processed indexes and re-calculate
+                    this.calculateMergeCells(alreadyProcessedIndexes);
+                    // 3. break current loop cause new one is started
+                    break mergeCellLoop;
+                }
+            }
         }
+
+        //   2. iterate merged cells
+        //   2a. find merge cell which overlaps selection at top or left
+        //      => set as start element
+        //      => update selection and restart method
+
+        // iterate merged cells to find merged cells in top/left position of selection
+        const mergedCells = this.tableWrapper.querySelectorAll('td[colspan], td[rowspan]');
+        for (let i = 0; i < mergedCells.length; ++i) {
+            const mergeCell = mergedCells[i];
+            const mergeCellIndex = calculateCellIndexes(mergeCell, false);
+            if (alreadyProcessedIndexes.indexOf(mergeCellIndex.colIndex + '-' + mergeCellIndex.rowIndex) !== -1) {
+                continue;
+            }
+
+            // check if cell needs to be merged
+            const mergeCellSpanIndex = calculateCellIndexes(mergeCell, true);
+            if (
+                (mergeCellIndex.colIndex < colIndexes.min || mergeCellIndex.rowIndex < rowIndexes.min) &&
+                (mergeCellSpanIndex.colIndex >= colIndexes.min && mergeCellSpanIndex.rowIndex >= rowIndexes.min)
+            ) {
+                // 1. extend existing selection by cell
+                this.selection = [this.selection.elements.start, this.selection.elements.end, mergeCell];
+                // 2. add merge cell index to already processed indexes and re-calculate
+                this.calculateMergeCells(alreadyProcessedIndexes);
+                // 3. break current loop cause new one is started
+                break;
+            }
+        }
+    }
+
+    highlightSelection() {
+        // get col/row indexes from selection
+        const colIndexes = this.selection.indexes.col;
+        const rowIndexes = this.selection.indexes.row;
+
+        // check if selected rows/columns have to be highlighted
+        const nodeList = [];
+        if (this.cursor.selectMode === 'row') {
+            // iterate only rows
+            for (let r = rowIndexes.min; r <= rowIndexes.max; r++) {
+                nodeList.push(...this.tableWrapper.querySelectorAll('td[data-row="' + r + '"]'));
+            }
+        } else if (this.cursor.selectMode === 'column') {
+            // iterate only columns
+            for (let c = colIndexes.min; c <= colIndexes.max; c++) {
+                nodeList.push(...this.tableWrapper.querySelectorAll('td[data-col="' + c + '"]'));
+            }
+        } else {
+            // iterate all cells of selection
+            for (let c = colIndexes.min; c <= colIndexes.max; c++) {
+                for (let r = rowIndexes.min; r <= rowIndexes.max; r++) {
+                    nodeList.push(this.tableWrapper.querySelector('td[data-col="' + c + '"][data-row="' + r + '"]'));
+                }
+            }
+        }
+
+        // deselect current highlighted cells
+        Array.from(document.querySelectorAll('td.highlight'))
+            .filter(x => x !== null)
+            .forEach(x => x.classList.remove('highlight'));
+
+        // apply highlight class to selected cells
+        nodeList
+            .filter(x => x !== null)
+            .forEach(x => x.classList.add('highlight'));
     }
 }
