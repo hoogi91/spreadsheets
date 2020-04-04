@@ -1,3 +1,5 @@
+import {colHeaderToIndex} from "./helper";
+
 export default class DSN {
     constructor(value) {
         const matches = value.match(/^spreadsheet:\/\/(\d+)(?:\?(.+))?/);
@@ -18,8 +20,10 @@ export default class DSN {
 
             this.properties.fileUid = matches[1];
             this.properties.index = query['index'] || 0;
-            this.properties.range = query['range'] || '';
             this.properties.direction = query['direction'] || 'horizontal';
+
+            // set range via setter
+            this.range = query['range'] || '';
         }
     }
 
@@ -52,6 +56,13 @@ export default class DSN {
     }
 
     /**
+     * @returns {{startCol: number, startRow: number, endCol: number, endRow: number} | null}
+     */
+    get coordinates() {
+        return this.properties.coordinates || null;
+    }
+
+    /**
      * @returns {string}
      */
     get range() {
@@ -63,6 +74,34 @@ export default class DSN {
      */
     set range(range) {
         this.properties.range = range;
+
+        const matches = Array.from(range.match(/^([A-Z]+|\d+)(\d+)?:([A-Z]+|\d+)(\d+)?$/)).slice(1);
+        if (matches === null) {
+            return;
+        }
+
+        if (!Number.isNaN(parseInt(matches[0]))) {
+            matches[1] = parseInt(matches[0]);
+            matches[0] = null;
+        }
+        if (!Number.isNaN(parseInt(matches[2]))) {
+            matches[3] = parseInt(matches[2]);
+            matches[2] = null;
+        }
+
+        // equalize col indexes
+        matches[0] = matches[0] || (matches[2] || null);
+        matches[2] = matches[2] || matches[0];
+        // equalize row indexes
+        matches[1] = matches[1] || (matches[3] || null);
+        matches[3] = matches[3] || matches[1];
+
+        this.properties.coordinates = {
+            startCol: matches[0] !== null ? colHeaderToIndex(matches[0]) : null,
+            startRow: matches[1] !== null ? parseInt(matches[1]) : null,
+            endCol: matches[2] !== null ? colHeaderToIndex(matches[2]) : null,
+            endRow: matches[3] !== null ? parseInt(matches[3]) : null,
+        };
     }
 
     /**

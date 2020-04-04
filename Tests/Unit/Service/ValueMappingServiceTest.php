@@ -38,7 +38,7 @@ class ValueMappingServiceTest extends UnitTestCase
             ['halign-backend', Alignment::HORIZONTAL_JUSTIFY, 'j'],
             ['valign', Alignment::VERTICAL_BOTTOM, 'bottom'],
             ['valign', Alignment::VERTICAL_JUSTIFY, 'middle'],
-            ['valign-backend', Alignment::VERTICAL_BOTTOM, 'b'],
+            ['valign-backend', Alignment::VERTICAL_BOTTOM, null],
             ['valign-backend', Alignment::VERTICAL_JUSTIFY, 'm'],
         ];
     }

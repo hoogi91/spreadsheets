@@ -31,9 +31,8 @@ export default class Renderer {
             throw new Error('Renderer class "update" method expects parameter to be type of a DSN class');
         }
 
-        // TODO: we need to update tabs and table only if required
         this.buildTabs(spreadsheetData, currentDSN.index);
-        this.buildTable(spreadsheetData, currentDSN.range.split(':'));
+        this.buildTable(spreadsheetData, currentDSN.coordinates);
     }
 
     buildTabs(spreadsheetData, selectedSheetIndex) {
@@ -60,7 +59,7 @@ export default class Renderer {
         }
     }
 
-    buildTable(spreadsheetData) {
+    buildTable(spreadsheetData, selectedBoundaries = null) {
         if (typeof this.tableWrapper === 'undefined' || this.tableWrapper === null) {
             return;
         }
@@ -69,7 +68,7 @@ export default class Renderer {
         const sheetData = Object.values(spreadsheetData.getSheetData()).map(x => Object.values(x));
         const table = document.createElement('table');
         this.buildTableHeader(table, Math.max(...sheetData.map(x => x.length)));
-        this.buildTableBody(table, sheetData);
+        this.buildTableBody(table, sheetData, selectedBoundaries);
 
         // empty table wrapper and append new table element
         this.tableWrapper.textContent = '';
@@ -93,7 +92,7 @@ export default class Renderer {
         }
     }
 
-    buildTableBody(table, data) {
+    buildTableBody(table, data, selectedBoundaries = null) {
         // build tbody before adding rows
         const body = table.createTBody();
         let ignoredCells = [];
@@ -152,6 +151,14 @@ export default class Renderer {
                 // define column and header data
                 cell.setAttribute('data-col', colIndex + 1);
                 cell.setAttribute('data-row', rowIndex + 1);
+
+                // check if current active selected class needs to be set
+                if (selectedBoundaries !== null) {
+                    if (selectedBoundaries.startRow <= (rowIndex + 1) && selectedBoundaries.endRow >= (rowIndex + 1)
+                        && selectedBoundaries.startCol <= (colIndex + 1) && selectedBoundaries.endCol >= (colIndex + 1)) {
+                        cell.classList.add('highlight');
+                    }
+                }
 
                 // increase colIndex
                 colIndex++;

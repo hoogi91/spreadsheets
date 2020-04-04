@@ -37,6 +37,21 @@ export function colHeaderByIndex(index) {
 }
 
 /**
+ * Get column index from header string
+ * @param {string} headerString
+ * @returns {number}
+ */
+export function colHeaderToIndex(headerString) {
+    const base = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+    let result = 0;
+    for (let i = 0, j = headerString.length - 1; i < headerString.length; i += 1, j -= 1) {
+        result += Math.pow(base.length, j) * (base.indexOf(headerString[i]) + 1);
+    }
+    return result;
+}
+
+/**
  * Return cell representation based on selection mode
  *
  * @param {Number} colIndex
