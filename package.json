@@ -14,23 +14,20 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@babel/core": "^7.7.7",
-    "@babel/polyfill": "^7.7.0",
-    "@babel/preset-env": "^7.7.7",
-    "babel-loader": "^8.0.6",
-    "core-js": "^3.6.2",
-    "npm": "^6.13.6",
-    "webpack": "^4.41.5"
-  },
-  "devDependencies": {
-    "@babel/plugin-proposal-class-properties": "^7.7.4",
-    "@babel/plugin-transform-object-assign": "^7.7.4",
-    "@babel/plugin-transform-parameters": "^7.7.7",
-    "babel-eslint": "^10.0.3",
+    "@babel/core": "^7.9.0",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-transform-object-assign": "^7.8.3",
+    "@babel/plugin-transform-parameters": "^7.9.3",
+    "@babel/polyfill": "^7.8.7",
+    "@babel/preset-env": "^7.9.0",
+    "babel-eslint": "^10.1.0",
+    "babel-loader": "^8.1.0",
+    "core-js": "^3.6.4",
     "eslint": "^6.8.0",
-    "eslint-loader": "^3.0.3",
-    "terser-webpack-plugin": "^2.3.2",
-    "webpack-cli": "^3.3.10"
+    "eslint-loader": "^3.0.4",
+    "terser-webpack-plugin": "^2.3.5",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
   },
   "browserslist": [
     "> 1% and last 2 versions",
