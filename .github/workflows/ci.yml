@@ -58,7 +58,7 @@ jobs:
         run: .Build/bin/phpstan analyse --level 5 Classes/
 
       - name: Running unit tests
-        if: !(matrix.php_version == '7.4' && matrix.typo3_version == '^10.0')
+        if: (matrix.php_version == '7.4' && matrix.typo3_version == '^10.0') == false
         run: |
           if [ -d "Tests/Unit" ]; then
             .Build/bin/phpunit --bootstrap .Build/vendor/nimut/testing-framework/res/Configuration/UnitTestsBootstrap.php Tests/Unit/
