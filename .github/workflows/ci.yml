@@ -33,6 +33,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '${{ matrix.php_version }}'
+          coverage: xdebug
           tools: composer
           extensions: json, mbstring
 
@@ -56,14 +57,30 @@ jobs:
       - name: Executing PHPStan
         run: .Build/bin/phpstan analyse --level 5 Classes/
 
-      - name: Running unit tests (if exists)
+      - name: Running unit tests
+        if: (matrix.php_version == '7.4' && matrix.typo3_version == '^10.0') == false
         run: |
           if [ -d "Tests/Unit" ]; then
-            .Build/bin/phpunit --bootstrap .Build/vendor/nimut/testing-framework/res/Configuration/UnitTestsBootstrap.php Tests/Unit/;
+            .Build/bin/phpunit --bootstrap .Build/vendor/nimut/testing-framework/res/Configuration/UnitTestsBootstrap.php Tests/Unit/
           fi
 
-      - name: Running functional tests (if exists)
+      - name: Running unit tests with coverage report
+        if: matrix.php_version == '7.4' && matrix.typo3_version == '^10.0'
+        run: |
+          if [ -d "Tests/Unit" ]; then
+            .Build/bin/phpunit --bootstrap .Build/vendor/nimut/testing-framework/res/Configuration/UnitTestsBootstrap.php Tests/Unit/ --coverage-clover=./coverage.xml --whitelist=./Classes/
+          fi
+
+      - name: Running functional tests
         run: |
           if [ -d "Tests/Functional" ]; then
-            find 'Tests/Functional' -wholename '*Test.php' | parallel --gnu 'echo; echo "Running functional test suite {}"; .Build/bin/phpunit --bootstrap .Build/vendor/nimut/testing-framework/res/Configuration/FunctionalTestsBootstrap.php {}';
+            find 'Tests/Functional' -wholename '*Test.php' | parallel --gnu 'echo; echo "Running functional test suite {}"; .Build/bin/phpunit --bootstrap .Build/vendor/nimut/testing-framework/res/Configuration/FunctionalTestsBootstrap.php {}'
           fi
+
+      - name: Upload coverage report to codecov
+        uses: codecov/codecov-action@v1
+        if: matrix.php_version == '7.4' && matrix.typo3_version == '^10.0'
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
+          flags: phpunit
