@@ -5,6 +5,7 @@ ansible/
 config/
 vendor/
 var/
+node_modules/
 Resources/Private/Composer/
 composer.phar
 composer.lock

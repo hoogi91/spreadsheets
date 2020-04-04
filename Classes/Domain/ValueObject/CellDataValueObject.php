@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Domain\ValueObject;
 
+use JsonSerializable;
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\RichText\RichText;
@@ -12,22 +13,23 @@ use PhpOffice\PhpSpreadsheet\RichText\RichText;
  * Class CellDataValueObject
  * @package Hoogi91\Spreadsheets\Domain\ValueObject
  */
-class CellDataValueObject
+class CellDataValueObject implements JsonSerializable
 {
-    /**
-     * @var Cell
-     */
-    private $cell;
 
     /**
      * @var string
      */
-    private $type;
+    private $calculatedValue;
 
     /**
      * @var string
      */
     private $formattedValue;
+
+    /**
+     * @var string
+     */
+    private $renderedValue;
 
     /**
      * @var int
@@ -40,14 +42,19 @@ class CellDataValueObject
     private $colspan;
 
     /**
-     * @var int
-     */
-    private $styleIndex;
-
-    /**
      * @var array
      */
     private $additionalStyleIndexes;
+
+    /**
+     * @var string
+     */
+    private $dataType;
+
+    /**
+     * @var int
+     */
+    private $styleIndex;
 
     /**
      * @var bool
@@ -75,30 +82,40 @@ class CellDataValueObject
     private $hyperlinkTitle = '';
 
     /**
+     * @var array
+     */
+    private $metaData = [];
+
+    /**
      * CellDataValueObject constructor.
      *
      * @param Cell $cell
      *
-     * @param string $formattedValue
+     * @param string $renderedValue
      * @param int $rowspan
      * @param int $colspan
      * @param array $additionalStyles
+     * @param array $metaData
      * @throws SpreadsheetException
      */
     public function __construct(
         Cell $cell,
-        string $formattedValue,
+        string $renderedValue,
         int $rowspan = 0,
         int $colspan = 0,
-        array $additionalStyles = []
+        array $additionalStyles = [],
+        array $metaData = []
     ) {
-        $this->cell = $cell;
-        $this->type = $cell->getDataType();
-        $this->formattedValue = $formattedValue;
+        $this->calculatedValue = $cell->getCalculatedValue();
+        $this->formattedValue = $cell->getFormattedValue();
+        $this->renderedValue = $renderedValue;
         $this->rowspan = $rowspan;
         $this->colspan = $colspan;
+
+        $this->dataType = $cell->getDataType();
         $this->styleIndex = $cell->getXfIndex();
         $this->additionalStyleIndexes = $additionalStyles;
+        $this->metaData = $metaData;
 
         // check for super- and subscript
         if ($cell->getValue() instanceof RichText) {
@@ -118,44 +135,45 @@ class CellDataValueObject
 
     /**
      * @param Cell $cell
-     * @param string $formattedValue
+     * @param string $renderedValue
      * @param int $rowspan
      * @param int $colspan
      * @param array $additionalStyles
+     * @param array $metaData
      * @return CellDataValueObject
      * @throws SpreadsheetException
      */
     public static function create(
         Cell $cell,
-        string $formattedValue,
+        string $renderedValue,
         int $rowspan = 0,
         int $colspan = 0,
-        array $additionalStyles = []
+        array $additionalStyles = [],
+        array $metaData = []
     ): CellDataValueObject {
-        return new self($cell, $formattedValue, $rowspan, $colspan, $additionalStyles);
-    }
-
-    /**
-     * @return Cell
-     */
-    public function getCell(): Cell
-    {
-        return $this->cell;
-    }
-
-    /**
-     * @return string|int|float|mixed
-     * @throws SpreadsheetException
-     */
-    public function getCalculatedValue()
-    {
-        return $this->cell->getCalculatedValue();
+        return new self($cell, $renderedValue, $rowspan, $colspan, $additionalStyles, $metaData);
     }
 
     /**
      * @return string
      */
-    public function getFormattedValue(): string
+    public function getDataType(): string
+    {
+        return $this->dataType;
+    }
+
+    /**
+     * @return string|int|float|mixed
+     */
+    public function getCalculatedValue()
+    {
+        return $this->calculatedValue;
+    }
+
+    /**
+     * @return string|int|float|mixed
+     */
+    public function getFormattedValue()
     {
         return $this->formattedValue;
     }
@@ -163,9 +181,9 @@ class CellDataValueObject
     /**
      * @return string
      */
-    public function getType(): string
+    public function getRenderedValue(): string
     {
-        return $this->type;
+        return $this->renderedValue;
     }
 
     /**
@@ -246,12 +264,43 @@ class CellDataValueObject
     public function getClass(): string
     {
         $cellClass = 'cell';
-        $cellClass .= sprintf(' cell-type-%s', $this->getType());
-        $cellClass .= sprintf(' cell-style-%d', $this->getStyleIndex());
+        $cellClass .= sprintf(' cell-type-%s', $this->dataType);
+        $cellClass .= sprintf(' cell-style-%d', $this->styleIndex);
 
         foreach ($this->getAdditionalStyleIndexes() as $indexes) {
             $cellClass .= sprintf(' cell-style-%d', $indexes);
         }
         return $cellClass;
+    }
+
+    /**
+     * @param string $name
+     * @param mixed|null $default
+     * @return mixed|null
+     */
+    private function getMetaData(string $name, $default = null)
+    {
+        return $this->metaData[$name] ?? $default;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function jsonSerialize()
+    {
+        $data = ['val' => $this->getFormattedValue()];
+        if ($this->getRowspan() > 1) {
+            $data['row'] = $this->getRowspan();
+        }
+        if ($this->getColspan() > 1) {
+            $data['col'] = $this->getColspan();
+        }
+
+        $css = $this->getMetaData('backendCellClasses');
+        if (empty($css) === false) {
+            $data['css'] = implode('-', $css);
+        }
+
+        return $data;
     }
 }

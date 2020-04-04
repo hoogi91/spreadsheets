@@ -1,0 +1,41 @@
+{
+  "name": "asset-build",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "node_modules/.bin/webpack -p --mode production",
+    "build-watch": "node_modules/.bin/webpack --watch -p --mode production",
+    "build-dev": "node_modules/.bin/webpack -p --mode development --display-modules",
+    "build-dev-watch": "node_modules/.bin/webpack --watch -p --mode development --display-modules",
+    "lint": "node_modules/.bin/eslint --ext .js Resources/Private/Assets/JavaScript/",
+    "lint-fix": "node_modules/.bin/eslint --fix --ext .js Resources/Private/Assets/JavaScript/",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@babel/core": "^7.7.7",
+    "@babel/polyfill": "^7.7.0",
+    "@babel/preset-env": "^7.7.7",
+    "babel-loader": "^8.0.6",
+    "core-js": "^3.6.2",
+    "npm": "^6.13.6",
+    "webpack": "^4.41.5"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/plugin-transform-object-assign": "^7.7.4",
+    "@babel/plugin-transform-parameters": "^7.7.7",
+    "babel-eslint": "^10.0.3",
+    "eslint": "^6.8.0",
+    "eslint-loader": "^3.0.3",
+    "terser-webpack-plugin": "^2.3.2",
+    "webpack-cli": "^3.3.10"
+  },
+  "browserslist": [
+    "> 1% and last 2 versions",
+    "Firefox ESR",
+    "not ie <= 11",
+    "not dead"
+  ]
+}

@@ -1,0 +1,67 @@
+.spreadsheet-table {
+    position: relative;
+    width: 100%;
+    min-height: 150px;
+    max-height: 300px;
+    overflow: auto;
+    cursor: cell;
+}
+
+.spreadsheet-table > table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #333;
+    background-color: #fff;
+    overflow: scroll;
+}
+
+.spreadsheet-table td {
+    padding: 5px;
+    border: 1px solid #ccc;
+    vertical-align: bottom;
+    empty-cells: show;
+}
+
+.spreadsheet-table td::selection {
+    background: transparent;
+}
+
+.spreadsheet-table td.highlight {
+    background: rgba(0, 94, 255, 0.1);
+}
+
+.spreadsheet-table thead,
+.spreadsheet-table td:first-child {
+    text-align: center;
+    background-color: #f0f0f0;
+}
+
+.spreadsheet-table thead td.highlight,
+.spreadsheet-table td.highlight:first-child {
+    background-color: #dcdcdc;
+}
+
+.spreadsheet-table td:first-child {
+    width: 40px;
+    white-space: nowrap;
+}
+
+.spreadsheet-table .align-c {
+    text-align: center;
+}
+
+.spreadsheet-table .align-r {
+    text-align: right;
+}
+
+.spreadsheet-table .align-j {
+    text-align: justify;
+}
+
+.spreadsheet-table .align-t {
+    vertical-align: top;
+}
+
+.spreadsheet-table .align-m {
+    vertical-align: middle;
+}

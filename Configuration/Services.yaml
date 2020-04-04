@@ -9,3 +9,6 @@ services:
 
   Hoogi91\Spreadsheets\DataProcessing\SpreadsheetProcessor:
     public: true
+
+  Hoogi91\Spreadsheets\Service\ExtractorService:
+    public: true

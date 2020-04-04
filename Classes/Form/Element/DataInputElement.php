@@ -6,14 +6,11 @@ namespace Hoogi91\Spreadsheets\Form\Element;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\DsnValueObject;
 use Hoogi91\Spreadsheets\Exception\InvalidDataSourceNameException;
+use Hoogi91\Spreadsheets\Service\ExtractorService;
 use Hoogi91\Spreadsheets\Service\ReaderService;
-use Hoogi91\Spreadsheets\Service\ValueMappingService;
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
-use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
-use PhpOffice\PhpSpreadsheet\Style\Style;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 use TYPO3\CMS\Backend\Form\NodeFactory;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -36,24 +33,14 @@ class DataInputElement extends AbstractFormElement
     private $readerService;
 
     /**
-     * @var ValueMappingService
+     * @var ExtractorService
      */
-    private $mappingService;
-
-    /**
-     * @var array
-     */
-    private $params;
+    private $extractorService;
 
     /**
      * @var array
      */
     private $config;
-
-    /**
-     * @var array
-     */
-    private $tca;
 
     /**
      * @var StandaloneView
@@ -70,11 +57,8 @@ class DataInputElement extends AbstractFormElement
     {
         parent::__construct($nodeFactory, $data);
         $this->readerService = GeneralUtility::makeInstance(ReaderService::class);
-        $this->mappingService = GeneralUtility::makeInstance(ValueMappingService::class);
-
-        $this->params = $this->data['parameterArray'];
-        $this->config = $this->params['fieldConf']['config'];
-        $this->tca = $this->data['processedTca'];
+        $this->extractorService = GeneralUtility::makeInstance(ExtractorService::class);
+        $this->config = $this->data['parameterArray']['fieldConf']['config'];
 
         /** @var StandaloneView $view */
         $this->view = GeneralUtility::makeInstance(StandaloneView::class);
@@ -94,7 +78,7 @@ class DataInputElement extends AbstractFormElement
         $resultArray = $this->initializeResultArray();
 
         // upload fields hasn't been specified
-        if (array_key_exists($this->config['uploadField'], $this->tca['columns']) === false) {
+        if (array_key_exists($this->config['uploadField'], $this->data['processedTca']['columns']) === false) {
             $resultArray['html'] = $this->view->assign('missingUploadField', true)->render();
             return $resultArray;
         }
@@ -107,26 +91,21 @@ class DataInputElement extends AbstractFormElement
         }
 
         // register additional assets only when input will be rendered
-        // add own requireJS module that uses above dependency and additional styling for handsontable
         $resultArray['requireJsModules'] = ['TYPO3/CMS/Spreadsheets/SpreadsheetDataInput'];
-        $resultArray['stylesheetFiles'] = [
-            'EXT:spreadsheets/Resources/Public/Css/HandsOnTable/handsontable.full.min.css',
-        ];
+        $resultArray['stylesheetFiles'] = ['EXT:spreadsheets/Resources/Public/Css/SpreadsheetDataInput.css'];
 
         try {
-            $valueObject = DsnValueObject::createFromDSN($this->params['itemFormElValue']);
+            $valueObject = DsnValueObject::createFromDSN($this->data['parameterArray']['itemFormElValue']);
         } catch (InvalidDataSourceNameException $exception) {
             $valueObject = '';
         }
 
         $this->view->assignMultiple(
             [
-                'items' => $references,
-                'sheetData' => json_encode($this->getFileReferencesSpreadsheetData($references)),
-                'sheetsOnly' => (bool)$this->config['sheetsOnly'],
-                'allowColumnExtraction' => (bool)$this->config['allowColumnExtraction'],
-                'inputName' => $this->params['itemFormElName'],
-                'inputNameHash' => md5($this->params['itemFormElName']),
+                'inputName' => $this->data['parameterArray']['itemFormElName'],
+                'config' => $this->config,
+                'sheetFiles' => $references,
+                'sheetData' => $this->getFileReferencesSpreadsheetData($references),
                 'valueObject' => $valueObject,
             ]
         );
@@ -156,7 +135,7 @@ class DataInputElement extends AbstractFormElement
     /**
      * @param string $fieldName
      *
-     * @return array
+     * @return FileReference[]
      */
     private function getValidFileReferences(string $fieldName): array
     {
@@ -170,62 +149,35 @@ class DataInputElement extends AbstractFormElement
         }
 
         // filter references by allowed types
-        $references = array_filter(
+        return array_filter(
             $references,
             static function ($reference) {
                 /** @var FileReference $reference */
                 return in_array($reference->getExtension(), ReaderService::ALLOWED_EXTENSIONS, true);
             }
         );
-
-        // update key values of file references
-        foreach ($references as $key => $reference) {
-            $references['file:' . $key] = $reference;
-            unset($references[$key]);
-        }
-        return $references;
     }
 
     /**
      * @param FileReference[] $references
-     *
      * @return array
      */
     private function getFileReferencesSpreadsheetData(array $references): array
     {
-        if (empty($references)) {
-            return [];
-        }
+        // read all spreadsheet from valid file references and filter out invalid references
+        $spreadsheets = $this->getSpreadsheetsByFileReferences($references);
 
         // get data from file references
         $sheetData = [];
-        $reference = array_shift($references);
-        while ($reference instanceof FileReference) {
-            try {
-                foreach ($this->readerService->getSpreadsheet($reference)->getAllSheets() as $sheet) {
-                    try {
-                        $sheetIndex = $sheet->getParent()->getIndex($sheet);
-                        $sheetData[$reference->getUid()][$sheetIndex] = [
-                            'name' => $sheet->getTitle(),
-                            'data' => $sheet->toArray(),
-                            'metaData' => $this->getCellStyles($sheet),
-                            'mergeData' => $this->getMergeCells($sheet),
-                        ];
-                    } catch (SpreadsheetException $e) {
-                        // ignore sheet when an exception occurs
-                    }
-                }
-            } catch (ReaderException $e) {
-                // ignore reading non-existing or invalid file reference
-            }
-            $reference = array_shift($references);
+        foreach ($spreadsheets as $fileUid => $spreadsheet) {
+            $sheetData[$fileUid] = $this->getWorksheetDataFromSpreadsheet($spreadsheet);
         }
 
         // convert whole sheet data content to UTF-8
         array_walk_recursive(
             $sheetData,
             static function (&$item) {
-                if (is_string($item) && !mb_detect_encoding($item, 'utf-8', true)) {
+                if (is_string($item) && mb_detect_encoding($item, 'utf-8', true) === false) {
                     $item = utf8_encode($item);
                 }
             }
@@ -234,90 +186,41 @@ class DataInputElement extends AbstractFormElement
     }
 
     /**
-     * @param Worksheet $sheet
-     *
-     * @return array
-     * @throws SpreadsheetException
+     * @param FileReference[] $references
+     * @return Spreadsheet[]
      */
-    private function getCellStyles(Worksheet $sheet): array
+    private function getSpreadsheetsByFileReferences(array $references): array
     {
-        $metaData = [];
-        foreach ($sheet->getRowIterator() as $row) {
-            $cellIterator = $row->getCellIterator();
-            $cellIterator->setIterateOnlyExistingCells(false); // get all cells
-            foreach ($cellIterator as $cell) {
-                // get cell style by style index
-                $cellStyle = $sheet->getParent()->getCellXfByIndex($cell->getXfIndex());
-
-                // try to find alignment classes
-                $horizontalClass = $verticalClass = '';
-                if ($cellStyle instanceof Style) {
-                    // set default mapping based on type
-                    $horizontalClass = $this->mappingService->convertValue(
-                        'halign-handsontable',
-                        $cellStyle->getAlignment()->getHorizontal(),
-                        $this->getDefaultHorizontalClassByCellType($cell->getDataType())
-                    );
-
-
-                    $verticalClass = $this->mappingService->convertValue(
-                        'valign-handsontable',
-                        $cellStyle->getAlignment()->getVertical()
-                    );
-                }
-
-                $metaData[trim($horizontalClass . ' ' . $verticalClass)][] = [
-                    'row' => ($cell->getRow() - 1),
-                    'col' => Coordinate::columnIndexFromString($cell->getColumn()) - 1,
-                ];
+        $spreadsheets = [];
+        foreach ($references as $reference) {
+            try {
+                $spreadsheets[$reference->getUid()] = $this->readerService->getSpreadsheet($reference);
+            } catch (ReaderException $e) {
+                // ignore reading non-existing or invalid file reference
             }
         }
-        return $metaData;
+
+        return $spreadsheets;
     }
 
     /**
-     * @param string $dataType
-     * @return string|null
-     */
-    private function getDefaultHorizontalClassByCellType(string $dataType): ?string
-    {
-        switch ($dataType) {
-            case DataType::TYPE_BOOL:
-            case DataType::TYPE_ERROR:
-                return 'htCenter';
-            case DataType::TYPE_FORMULA:
-            case DataType::TYPE_NUMERIC:
-                return 'htRight';
-            default:
-                return null;
-        }
-    }
-
-    /**
-     * @param Worksheet $sheet
-     *
+     * @param Spreadsheet $spreadsheet
      * @return array
      */
-    private function getMergeCells(Worksheet $sheet): array
+    private function getWorksheetDataFromSpreadsheet(Spreadsheet $spreadsheet): array
     {
-        return array_values(
-            array_map(
-                static function (string $cells) {
-                    $coordinates = explode(':', $cells, 2);
-                    [$startColumn, $startRow] = Coordinate::coordinateFromString($coordinates[0]);
-                    [$endColumn, $endRow] = Coordinate::coordinateFromString($coordinates[1]);
-
-                    $startIndex = Coordinate::columnIndexFromString($startColumn);
-                    $endIndex = Coordinate::columnIndexFromString($endColumn);
-                    return [
-                        'row' => (int)$startRow - 1,
-                        'col' => $startIndex - 1,
-                        'rowspan' => (int)$endRow - (int)$startRow + 1,
-                        'colspan' => $endIndex - $startIndex + 1,
-                    ];
-                },
-                $sheet->getMergeCells()
-            )
-        );
+        $sheetData = [];
+        foreach ($spreadsheet->getAllSheets() as $sheetIndex => $worksheet) {
+            try {
+                $worksheetRange = 'A1:' . $worksheet->getHighestColumn() . $worksheet->getHighestRow();
+                $sheetData[$sheetIndex] = [
+                    'name' => $worksheet->getTitle(),
+                    'cells' => $this->extractorService->rangeToCellArray($worksheet, $worksheetRange),
+                ];
+            } catch (SpreadsheetException $e) {
+                // ignore sheet when an exception occurs
+            }
+        }
+        return $sheetData;
     }
 }

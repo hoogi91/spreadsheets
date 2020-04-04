@@ -8,26 +8,12 @@
                    class="table{f:if(condition: '{data.tx_spreadsheets_ignore_styles} && {data.table_class}', then: ' table-{data.table_class}')}">
                 <f:if condition="{spreadsheet.headData}">
                     <thead>
-                    <f:for each="{spreadsheet.headData}" key="row" as="rowData" iteration="rowIterator">
-                        <th>
-                            <f:for each="{rowData}" key="column" as="value" iteration="columnIterator">
-                                <f:render partial="Cell" section="Main"
-                                          arguments="{cell: value, row: row, column: column, rowIterator: rowIterator, columnIterator: columnIterator}"/>
-                            </f:for>
-                        </th>
-                    </f:for>
+                    <f:render partial="Rows" section="Main" arguments="{rowsData: spreadsheet.headData}"/>
                     </thead>
                 </f:if>
                 <f:if condition="{spreadsheet.bodyData}">
                     <tbody>
-                    <f:for each="{spreadsheet.bodyData}" key="row" as="rowData" iteration="rowIterator">
-                        <tr>
-                            <f:for each="{rowData}" key="column" as="value" iteration="columnIterator">
-                                <f:render partial="Cell" section="Main"
-                                          arguments="{cell: value, row: row, column: column, rowIterator: rowIterator, columnIterator: columnIterator}"/>
-                            </f:for>
-                        </tr>
-                    </f:for>
+                    <f:render partial="Rows" section="Main" arguments="{rowsData: spreadsheet.bodyData}"/>
                     </tbody>
                 </f:if>
             </table>

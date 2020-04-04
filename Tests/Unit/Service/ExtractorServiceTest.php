@@ -49,7 +49,8 @@ class ExtractorServiceTest extends UnitTestCase
             $this->readerService,
             new Service\CellService(new Service\StyleService(new Service\ValueMappingService())),
             new Service\SpanService(),
-            new Service\RangeService()
+            new Service\RangeService(),
+            new Service\ValueMappingService()
         );
     }
 
@@ -99,7 +100,7 @@ class ExtractorServiceTest extends UnitTestCase
         /** @var CellDataValueObject $cellValueA1 */
         $cellValueA1 = $bodyData[1][1];
         $this->assertInstanceOf(CellDataValueObject::class, $cellValueA1);
-        $this->assertEquals('2014', $cellValueA1->getFormattedValue());
+        $this->assertEquals('2014', $cellValueA1->getRenderedValue());
 
 
         /** @var CellDataValueObject $cellValueD5 */
@@ -107,7 +108,7 @@ class ExtractorServiceTest extends UnitTestCase
         $this->assertInstanceOf(CellDataValueObject::class, $cellValueD5);
         $this->assertEquals(
             '<span style="color:#000000"><sup>Hoch</sup></span><span style="color:#000000"> Test </span><span style="color:#000000"><sub>Tief</sub></span>',
-            $cellValueD5->getFormattedValue()
+            $cellValueD5->getRenderedValue()
         );
     }
 
@@ -132,7 +133,7 @@ class ExtractorServiceTest extends UnitTestCase
             $cellValueA1 = $cellRef === false ? $data['B'][1] : $data[2][1];
         }
         $this->assertInstanceOf(CellDataValueObject::class, $cellValueA1);
-        $this->assertEquals('2015', $cellValueA1->getFormattedValue());
+        $this->assertEquals('2015', $cellValueA1->getRenderedValue());
 
         /** @var CellDataValueObject $cellValueE5 */
         if ($direction === Service\ExtractorService::EXTRACT_DIRECTION_HORIZONTAL) {
@@ -143,7 +144,7 @@ class ExtractorServiceTest extends UnitTestCase
         $this->assertInstanceOf(CellDataValueObject::class, $cellValueE5);
         $this->assertEquals(
             '<span style="color:#000000"><sup>Hoch</sup></span><span style="color:#000000"> Test </span><span style="color:#000000"><sub>Tief</sub></span>',
-            $cellValueE5->getFormattedValue()
+            $cellValueE5->getRenderedValue()
         );
     }
 

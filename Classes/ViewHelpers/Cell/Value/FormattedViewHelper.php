@@ -71,7 +71,7 @@ class FormattedViewHelper extends AbstractViewHelper
         }
 
         // get formatted value to simple html
-        $value = $cell->getFormattedValue();
+        $value = $cell->getRenderedValue();
         if ($cell->isRichText() !== true) {
             // convert html special chars if we do not have rich text content
             $value = htmlspecialchars($value, ENT_QUOTES);

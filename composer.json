@@ -26,7 +26,7 @@
     "typo3/cms-frontend": "^10.2"
   },
   "require-dev": {
-    "nimut/testing-framework": "5.x-dev as 5.0.0",
+    "nimut/testing-framework": "^5.0",
     "phpstan/phpstan": "^0.12.1",
     "phpunit/phpunit": "^7.0",
     "roave/security-advisories": "dev-master",
@@ -60,11 +60,9 @@
     ],
     "extension-cleanup-for-release": [
       "@extension-spreadsheet-fallback",
-      "rm -rf Tests/",
-      "rm -f .gitattributes",
-      "rm -f .gitignore",
-      "rm -f .travis.yml",
-      "rm -f composer.lock"
+      "rm -rf .github/ Tests/",
+      "rm -f .gitattributes .gitignore .editorconfig .travis.yml composer.lock",
+      "rm -f .babelrc .eslintignore .eslintrc.js package.json package-lock.json webpack.config.js"
     ]
   },
   "extra": {
