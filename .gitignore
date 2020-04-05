@@ -6,7 +6,9 @@ config/
 vendor/
 var/
 node_modules/
+Documentation-GENERATED*/
 Resources/Private/Composer/
 composer.phar
 composer.lock
+docker-compose.yml
 Vagrantfile
