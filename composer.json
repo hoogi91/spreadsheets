@@ -2,15 +2,19 @@
   "type": "typo3-cms-extension",
   "name": "hoogi91/spreadsheets",
   "description": "Extension to add field definition and plugin to show and select information from spreadsheets",
+  "readme": "README.md",
   "license": "GPL-3.0-or-later",
   "authors": [
     {
       "name": "Thorsten Hogenkamp",
-      "email": "hoogi20@googlemail.com"
+      "email": "thorsten@hogenkamp-bocholt.de",
+      "homepage": "https://www.hogenkamp-bocholt.de",
+      "role": "Developer"
     },
     {
-      "name": "UDG Rhein-Main TYPO3 Development Team",
-      "email": "typo3-mainz@udg.de"
+      "name": "UDG Rhein-Main GmbH",
+      "homepage": "https://www.udg.de",
+      "role": "Contributor"
     }
   ],
   "require": {
