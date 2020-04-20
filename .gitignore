@@ -1,5 +1,7 @@
 .idea
 .vagrant
+.docker
+.docker.env
 .Build
 ansible/
 config/
@@ -9,4 +11,5 @@ node_modules/
 Resources/Private/Composer/
 composer.phar
 composer.lock
+Makefile
 Vagrantfile
