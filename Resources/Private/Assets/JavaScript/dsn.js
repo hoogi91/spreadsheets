@@ -2,12 +2,16 @@ import {colHeaderToIndex} from "./helper";
 
 export default class DSN {
     constructor(value) {
+        this.properties = {};
+        if (value.length === 0) {
+            return;
+        }
+
         const matches = value.match(/^spreadsheet:\/\/(\d+)(?:\?(.+))?/);
         if (matches === null) {
             throw new Error('DSN class expects value to be of type string and format "spreadsheet://index=0..."');
         }
 
-        this.properties = {};
         if (typeof matches[2] === 'undefined') {
             this.properties.fileUid = matches[1];
         } else {
@@ -75,11 +79,12 @@ export default class DSN {
     set range(range) {
         this.properties.range = range;
 
-        const matches = Array.from(range.match(/^([A-Z]+|\d+)(\d+)?:([A-Z]+|\d+)(\d+)?$/)).slice(1);
+        let matches = range.match(/^([A-Z]+|\d+)(\d+)?:([A-Z]+|\d+)(\d+)?$/);
         if (matches === null) {
             return;
         }
 
+        matches = Array.from(matches).slice(1);
         if (!Number.isNaN(parseInt(matches[0]))) {
             matches[1] = parseInt(matches[0]);
             matches[0] = null;

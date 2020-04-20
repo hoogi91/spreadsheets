@@ -103,7 +103,10 @@ class SpreadsheetDataInput {
 
         // update formatted and database input value
         let formatted = this.spreadsheet.getSheetName();
-        let database = 'spreadsheet://' + this.dsn.fileUid + '?index=' + this.dsn.index;
+        let database = '';
+        if (typeof this.dsn.fileUid !== 'undefined' && typeof this.dsn.index !== 'undefined') {
+            database += 'spreadsheet://' + this.dsn.fileUid + '?index=' + this.dsn.index;
+        }
 
         // set range information only if table was rendered
         if (this.tableWrapper !== null && this.dsn.range.length > 0) {

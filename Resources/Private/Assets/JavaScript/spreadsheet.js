@@ -23,6 +23,9 @@ export default class Spreadsheet {
     }
 
     getSheet(index = this.defaultSheetIndex, fileUid = this.defaultFileUid) {
+        if (typeof this.data[fileUid] === 'undefined') {
+            return [];
+        }
         return this.data[fileUid][index] || [];
     }
 
