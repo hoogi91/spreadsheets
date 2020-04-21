@@ -1,6 +1,6 @@
 # TYPO3 Extension ``spreadsheets``
 
-![CI](https://github.com/hoogi91/spreadsheets/workflows/CI/badge.svg?event=push)
+[![CI](https://github.com/hoogi91/spreadsheets/workflows/CI/badge.svg?event=push)](https://github.com/hoogi91/spreadsheets/actions?query=workflow%3ACI)
 [![codecov](https://codecov.io/gh/hoogi91/spreadsheets/branch/develop/graph/badge.svg)](https://codecov.io/gh/hoogi91/spreadsheets)
 [![License](https://poser.pugx.org/hoogi91/spreadsheets/license)](https://packagist.org/packages/hoogi91/spreadsheets)
 
