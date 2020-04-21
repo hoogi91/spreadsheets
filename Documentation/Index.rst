@@ -29,8 +29,6 @@ Spreadsheet Extension
    This extension documentation is published under the
    `GNU General Public License v3.0 <https://www.gnu.org/licenses/gpl-3.0.de.html>`__
 
-Extension to add field definition and plugin to show and select information from spreadsheets.
-
 **TYPO3**
 
    The content of this document is related to TYPO3 CMS,
@@ -46,21 +44,11 @@ Extension to add field definition and plugin to show and select information from
    If you find an error or something is missing, please:
    `Report a Problem <https://github.com/hoogi91/spreadsheets/issues>`__
 
-**Extension Manual**
-
-   This documentation is for the TYPO3 extension "spreadsheets".
-
-
 
 **For Contributors**
 
    You are welcome to help improve this guide. Just click on "Edit me on GitHub"
    on the top right to submit your change request.
-
-
-**Sitemap:**
-
-   :ref:`sitemap`
 
 
 .. toctree::
