@@ -119,7 +119,7 @@ class DsnValueObject
             throw new InvalidDataSourceNameException('File reference from DSN can not be parsed/evaluated!');
         }
 
-        if (isset($fullSelection) && ((string)$fullSelection) !== '') {
+        if (empty($fullSelection) === false) {
             [$sheetIndex, $selection, $directionOfSelection] = GeneralUtility::trimExplode(
                 '!',
                 $fullSelection,
@@ -127,7 +127,7 @@ class DsnValueObject
                 3
             );
 
-            $this->sheetIndex = (int)($sheetIndex ?? 0);
+            $this->sheetIndex = (int)($sheetIndex ?: 0);
             $this->selection = $selection ?: null;
             $this->directionOfSelection = $directionOfSelection ?: null;
         }
