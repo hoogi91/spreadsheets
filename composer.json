@@ -1,6 +1,6 @@
 {
-  "type": "typo3-cms-extension",
   "name": "hoogi91/spreadsheets",
+  "type": "typo3-cms-extension",
   "description": "Extension to add field definition and plugin to show and select information from spreadsheets",
   "readme": "README.md",
   "license": "GPL-3.0-or-later",

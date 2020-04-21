@@ -84,7 +84,7 @@ class CellDataValueObject implements JsonSerializable
     /**
      * @var array
      */
-    private $metaData = [];
+    private $metaData;
 
     /**
      * CellDataValueObject constructor.
