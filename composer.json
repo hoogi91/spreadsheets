@@ -22,12 +22,12 @@
     "ext-json": "*",
     "ext-mbstring": "*",
     "phpoffice/phpspreadsheet": "^1.9",
-    "typo3/cms-backend": "^10.2",
-    "typo3/cms-core": "^10.2",
-    "typo3/cms-extbase": "^10.0",
-    "typo3/cms-fluid": "^10.2",
-    "typo3/cms-fluid-styled-content": "^10.2",
-    "typo3/cms-frontend": "^10.2"
+    "typo3/cms-backend": "^10.4",
+    "typo3/cms-core": "^10.4",
+    "typo3/cms-extbase": "^10.4",
+    "typo3/cms-fluid": "^10.4",
+    "typo3/cms-fluid-styled-content": "^10.4",
+    "typo3/cms-frontend": "^10.4"
   },
   "require-dev": {
     "nimut/testing-framework": "^5.0",
@@ -35,7 +35,7 @@
     "phpunit/phpunit": "^7.0",
     "roave/security-advisories": "dev-master",
     "squizlabs/php_codesniffer": "^3.5",
-    "typo3/minimal": "^10.2"
+    "typo3/minimal": "^10.4"
   },
   "autoload": {
     "psr-4": {
