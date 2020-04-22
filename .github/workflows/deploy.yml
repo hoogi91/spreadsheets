@@ -32,4 +32,4 @@ jobs:
         run: git reset --hard HEAD && git clean -fx && composer extension-cleanup-for-release
 
       - name: Uploading release ${{ steps.get_version.outputs.VERSION }} to TER
-        run: $HOME/.composer/vendor/bin/ter-client upload spreadsheets . -u "${{ secrets.TYPO3_ORG_USERNAME }}" -p "${{ secrets.TYPO3_ORG_PASSWORD }}" -m "${{ github.event.release.url }}"
+        run: $HOME/.composer/vendor/bin/ter-client upload spreadsheets . -u "${{ secrets.TYPO3_ORG_USERNAME }}" -p "${{ secrets.TYPO3_ORG_PASSWORD }}" -m "${{ github.event.release.html_url }}"
