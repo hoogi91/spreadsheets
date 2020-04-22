@@ -61,7 +61,7 @@ Bugfixes: Please describe what kind of bug your fix solve and give us feedback h
 
 Features: Not every feature is relevant for the bulk of users. It helps to have a discussion about a new feature before you open a pull request.
 
-[1]: https://docs.typo3.org/typo3cms/extensions/spreadsheets/
+[1]: https://docs.typo3.org/p/hoogi91/spreadsheets/master/en-us/
 [2]: https://getcomposer.org/
 [3]: https://extensions.typo3.org/extension/spreadsheets
 [4]: https://semver.org/
