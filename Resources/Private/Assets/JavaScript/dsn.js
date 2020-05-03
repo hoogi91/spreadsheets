@@ -113,7 +113,7 @@ export default class DSN {
      * @returns {string}
      */
     get direction() {
-        return this.properties.direction;
+        return this.properties.direction || '';
     }
 
     /**
