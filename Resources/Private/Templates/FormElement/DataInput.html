@@ -99,12 +99,14 @@
     <f:if condition="{config.allowColumnExtraction}">
         <button type="button" class="btn btn-default spreadsheet-input-direction"
                 value="{valueObject.directionOfSelection}">
-            <span class="direction-column" style="display:none">
+            <span class="direction-column"
+                  style="{f:if(condition: '{valueObject.directionOfSelection} != \'vertical\'', then: 'display:none')}">
                 <c:icon identifier="actions-arrow-down"/>
                 <f:translate key="formengine.spreadsheet.label.direction.column-based"
                              extensionName="spreadsheets"/>
             </span>
-            <span class="direction-row">
+            <span class="direction-row"
+                  style="{f:if(condition: '{valueObject.directionOfSelection} == \'vertical\'', then: 'display:none')}">
                 <c:icon identifier="actions-arrow-right"/>
                 <f:translate key="formengine.spreadsheet.label.direction.row-based"
                              extensionName="spreadsheets"/>
