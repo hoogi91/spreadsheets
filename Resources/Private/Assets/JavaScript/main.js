@@ -115,7 +115,7 @@ class SpreadsheetDataInput {
         }
 
         // only set direction if range select and direction input is active/available
-        if (this.tableWrapper !== null && this.directionInput !== null) {
+        if (this.tableWrapper !== null && this.directionInput !== null && this.dsn.direction.length > 0) {
             database += '&direction=' + this.dsn.direction;
         }
 

@@ -66,6 +66,10 @@ export default class Renderer {
 
         // convert sheet data from object to array values
         const sheetData = Object.values(spreadsheetData.getSheetData()).map(x => Object.values(x));
+        if (sheetData.length <= 0) {
+            return;
+        }
+
         const table = document.createElement('table');
         this.buildTableHeader(table, Math.max(...sheetData.map(x => x.length)));
         this.buildTableBody(table, sheetData, selectedBoundaries);
@@ -73,6 +77,7 @@ export default class Renderer {
         // empty table wrapper and append new table element
         this.tableWrapper.textContent = '';
         this.tableWrapper.appendChild(table);
+        this.tableWrapper.style.display = 'block';
     }
 
     buildTableHeader(table, columnCount) {

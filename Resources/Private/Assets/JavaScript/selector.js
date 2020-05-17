@@ -245,7 +245,7 @@ export default class Selector {
         }
 
         // deselect current highlighted cells
-        Array.from(document.querySelectorAll('td.highlight'))
+        Array.from(this.tableWrapper.querySelectorAll('td.highlight'))
             .filter(x => x !== null)
             .forEach(x => x.classList.remove('highlight'));
 

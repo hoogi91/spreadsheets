@@ -70,7 +70,7 @@ export default class DSN {
      * @returns {string}
      */
     get range() {
-        return this.properties.range;
+        return this.properties.range || '';
     }
 
     /**
@@ -113,7 +113,7 @@ export default class DSN {
      * @returns {string}
      */
     get direction() {
-        return this.properties.direction;
+        return this.properties.direction || '';
     }
 
     /**
