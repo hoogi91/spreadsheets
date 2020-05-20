@@ -25,7 +25,7 @@ With this extension you are able:
 
 .. hint::
 
-   For extended usage of this extension take a look into `Charts extension <http://typo3.org/extensions/repository/view/charts/current/>`_
+   For extended usage of this extension take a look into `Charts extension <http://typo3.org/extensions/repository/view/charts/>`_
 
 .. _screenshots:
 

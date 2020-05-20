@@ -25,8 +25,8 @@ The extension needs to be installed as any other extension of TYPO3 CMS:
       extension from the repository.
 
    #. **Get it from typo3.org:** You can always get current version from
-      `http://typo3.org/extensions/repository/view/spreadsheets/current/
-      <http://typo3.org/extensions/repository/view/spreadsheets/current/>`_ by
+      `http://typo3.org/extensions/repository/view/spreadsheets/
+      <http://typo3.org/extensions/repository/view/spreadsheets/>`_ by
       downloading either the t3x or zip version. Upload
       the file afterwards in the Extension Manager.
 
@@ -56,7 +56,7 @@ The extension ships some TypoScript code which needs to be included.
 
 #. Press the link **Edit the whole template record** and switch to the tab *Includes*.
 
-#. Select **News (news)** at the field *Include static (from extensions):*
+#. Select **Spreadsheets (spreadsheets)** at the field *Include static (from extensions):*
 
 .. figure:: ../Images/typoscript-configuration.png
    :class: with-shadow
