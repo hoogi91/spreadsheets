@@ -74,6 +74,7 @@ class SpreadsheetProcessorTest extends UnitTestCase
             (new Xlsx())->load(dirname(__DIR__, 2) . '/Fixtures/DataProcessor/01_fixture.xlsx')
         );
 
+        $GLOBALS['TSFE'] = $GLOBALS['TSFE'] ?? new \stdClass();
         $GLOBALS['TSFE']->config['config']['locale_all'] = 'de';
 
         // create dependencies for spreadsheet processor
