@@ -2,6 +2,7 @@ import DSN from './dsn';
 import Renderer from './renderer';
 import Spreadsheet from './spreadsheet';
 import Selector from "./selector";
+import DocumentService from 'DocumentService';
 
 class SpreadsheetDataInput {
     constructor(element) {
@@ -125,7 +126,10 @@ class SpreadsheetDataInput {
 }
 
 // initialize all spreadsheet data inputs
-document.querySelectorAll('.spreadsheet-input-wrap').forEach((element) => {
-    new SpreadsheetDataInput(element);
+DocumentService.ready().then(() => {
+    document.querySelectorAll('.spreadsheet-input-wrap').forEach((element) => {
+        new SpreadsheetDataInput(element);
+    });
+}).catch(() => {
+    console.error('Failed to load DOM for processing spreadsheet inputs!');
 });
-

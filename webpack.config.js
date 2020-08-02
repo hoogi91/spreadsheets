@@ -37,11 +37,9 @@ module.exports = (env, argv) => ({
         filename: "[name].js",
         libraryTarget: "amd",
         path: path.join(__dirname, "/Resources/Public/JavaScript"),
-        publicPath: argv.mode !== "production" ? "/" : "../dist/",
-        umdNamedDefine: true
+        publicPath: argv.mode !== "production" ? "/" : "../dist/"
     },
     externals: {
-        // require("jquery") is external and available on the global var jQuery
-        "jquery": "jquery",
+        "DocumentService": "TYPO3/CMS/Core/DocumentService",
     }
 });
