@@ -39,7 +39,7 @@ class CellService
         $this->styleService = $styleService;
         $this->currentLocales = $GLOBALS['TSFE']->config['config']['locale_all'] ?? '';
 
-        if ($this->currentLocales === '') {
+        if ($this->currentLocales === '' && is_int($GLOBALS['TSFE']->id)) {
             // happens, when Sites are used in TYPO3 9+
             $language = GeneralUtility::makeInstance(SiteFinder::class)
                 ->getSiteByPageId($GLOBALS['TSFE']->id)

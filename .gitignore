@@ -11,6 +11,5 @@ node_modules/
 Documentation-GENERATED*/
 Resources/Private/Composer/
 composer.phar
-composer.lock
 Makefile
 Vagrantfile
