@@ -78,7 +78,7 @@ defined('TYPO3_MODE') or die();
                 'config' => [
                     'renderType'  => 'spreadsheetInput',
                     'uploadField' => 'tx_spreadsheets_assets',
-                    'sheetsOnly'  => true,
+                    'sheetsOnly'  => false,
                     'size'        => 100,
                 ],
             ],
