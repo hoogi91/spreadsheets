@@ -3,8 +3,6 @@
 namespace Hoogi91\Spreadsheets\Tests\Unit;
 
 use ArrayAccess;
-use PHPUnit\Framework\ExpectationFailedException;
-use SebastianBergmann\RecursionContext\InvalidArgumentException;
 
 /**
  * Trait ArrayAssertTrait
@@ -20,9 +18,6 @@ trait ArrayAssertTrait
      * @param array|ArrayAccess $array
      * @param array $notAllowedClassInstances
      * @param string $message
-     *
-     * @throws ExpectationFailedException
-     * @throws InvalidArgumentException
      */
     public static function assertArraySubsetWithoutClassInstances(
         $subset,

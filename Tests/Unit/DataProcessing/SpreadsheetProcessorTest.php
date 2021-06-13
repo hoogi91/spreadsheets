@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoogi91\Spreadsheets\Tests\Domain\Model;
+namespace Hoogi91\Spreadsheets\Tests\Unit\DataProcessing;
 
 use Hoogi91\Spreadsheets\DataProcessing\SpreadsheetProcessor;
 use Hoogi91\Spreadsheets\Domain\ValueObject\CellDataValueObject;
@@ -9,7 +9,6 @@ use Hoogi91\Spreadsheets\Tests\Unit\ArrayAssertTrait;
 use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
 use Nimut\TestingFramework\TestCase\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
-use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Container\ContainerInterface;
@@ -19,7 +18,7 @@ use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer as CObjRenderer;
 
 /**
  * Class SpreadsheetProcessorTest
- * @package Hoogi91\Spreadsheets\Tests\Domain\Model
+ * @package Hoogi91\Spreadsheets\Tests\Unit\DataProcessing
  */
 class SpreadsheetProcessorTest extends UnitTestCase
 {
@@ -46,10 +45,7 @@ class SpreadsheetProcessorTest extends UnitTestCase
      */
     private $dataProcessor;
 
-    /**
-     * @throws ReaderException
-     */
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -65,7 +61,7 @@ class SpreadsheetProcessorTest extends UnitTestCase
         // add generic file repository mock to container
         /** @var ContainerInterface|MockObject $container */
         $container = $this->getContainerMock();
-        $container->expects($this->any())->method('get')->willReturn($this->getFileRepositoryMock());
+        $container->method('get')->willReturn($this->getFileRepositoryMock());
         GeneralUtility::setContainer($container);
 
         /** @var Service\ReaderService|MockObject $readerService */
@@ -107,9 +103,9 @@ class SpreadsheetProcessorTest extends UnitTestCase
     ): void {
         // add page renderer expectation based on ignoreStyle option
         if (isset($processConfig['options.']['ignoreStyles']) && $processConfig['options.']['ignoreStyles'] === 1) {
-            $this->pageRendererMock->expects($this->never())->method('addCssFile');
+            $this->pageRendererMock->expects(self::never())->method('addCssFile');
         } elseif (self::INPUT_DATA !== $expectedResult) {
-            $this->pageRendererMock->expects($this->once())->method('addCssFile')->with($this->isType('string'));
+            $this->pageRendererMock->expects(self::once())->method('addCssFile')->with($this->isType('string'));
         }
 
         // execute processor

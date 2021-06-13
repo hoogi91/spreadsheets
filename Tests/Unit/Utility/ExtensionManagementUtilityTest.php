@@ -1,13 +1,13 @@
 <?php
 
-namespace Hoogi91\Spreadsheets\Tests\Utility;
+namespace Hoogi91\Spreadsheets\Tests\Unit\Utility;
 
 use Hoogi91\Spreadsheets\Utility\ExtensionManagementUtility;
 use Nimut\TestingFramework\TestCase\UnitTestCase;
 
 /**
  * Class ExtensionManagementUtilityTest
- * @package Hoogi91\Spreadsheets\Tests\Utility
+ * @package Hoogi91\Spreadsheets\Tests\Unit\Utility
  */
 class ExtensionManagementUtilityTest extends UnitTestCase
 {
@@ -23,7 +23,7 @@ class ExtensionManagementUtilityTest extends UnitTestCase
     /**
      * initialize with typical TCA structure of tt_content's CType column
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $GLOBALS['TCA']['tt_content']['columns']['CType']['config'] = [
@@ -39,16 +39,17 @@ class ExtensionManagementUtilityTest extends UnitTestCase
 
     public function testInsertOnCType(): void
     {
-        // execute insert
+        // execute insert twice to see item is added once
+        ExtensionManagementUtility::addItemToCTypeList(self::$elementToInsert);
         ExtensionManagementUtility::addItemToCTypeList(self::$elementToInsert);
 
         // test expectations
-        $this->assertCount(2, $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items']);
-        $this->assertEquals(
+        self::assertCount(2, $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items']);
+        self::assertEquals(
             'element_key',
-            $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'][1][1]
+            $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'][2][1]
         );
-        $this->assertEquals(
+        self::assertEquals(
             'existing_element_key',
             $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'][0][1]
         );
@@ -60,12 +61,12 @@ class ExtensionManagementUtilityTest extends UnitTestCase
         ExtensionManagementUtility::addItemToCTypeList(self::$elementToInsert, 'before:existing_element_key');
 
         // test expectations
-        $this->assertCount(2, $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items']);
-        $this->assertEquals(
+        self::assertCount(2, $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items']);
+        self::assertEquals(
             'element_key',
             $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'][0][1]
         );
-        $this->assertEquals(
+        self::assertEquals(
             'existing_element_key',
             $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'][1][1]
         );
@@ -77,12 +78,12 @@ class ExtensionManagementUtilityTest extends UnitTestCase
         ExtensionManagementUtility::addItemToCTypeList(self::$elementToInsert, 'after:existing_element_key');
 
         // test expectations
-        $this->assertCount(2, $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items']);
-        $this->assertEquals(
+        self::assertCount(2, $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items']);
+        self::assertEquals(
             'element_key',
             $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'][1][1]
         );
-        $this->assertEquals(
+        self::assertEquals(
             'existing_element_key',
             $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'][0][1]
         );
@@ -94,12 +95,12 @@ class ExtensionManagementUtilityTest extends UnitTestCase
         ExtensionManagementUtility::addItemToCTypeList(self::$elementToInsert, 'existing_element_key');
 
         // test expectations
-        $this->assertCount(2, $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items']);
-        $this->assertEquals(
+        self::assertCount(2, $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items']);
+        self::assertEquals(
             'element_key',
             $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'][0][1]
         );
-        $this->assertEquals(
+        self::assertEquals(
             'existing_element_key',
             $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'][1][1]
         );
@@ -111,12 +112,12 @@ class ExtensionManagementUtilityTest extends UnitTestCase
         ExtensionManagementUtility::addItemToCTypeList(self::$elementToInsert, 'somewhere:existing_element_key');
 
         // test expectations
-        $this->assertCount(2, $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items']);
-        $this->assertEquals(
+        self::assertCount(2, $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items']);
+        self::assertEquals(
             'element_key',
             $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'][1][1]
         );
-        $this->assertEquals(
+        self::assertEquals(
             'existing_element_key',
             $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'][0][1]
         );

@@ -72,18 +72,14 @@ class ExtractorService
     /**
      * @param ValueObject\DsnValueObject $dsnValue
      * @param bool $returnCellRef
-     * @return ValueObject\ExtractionValueObject|null
+     * @return ValueObject\ExtractionValueObject
+     * @throws SpreadsheetReaderException
      */
     public function getDataByDsnValueObject(
         ValueObject\DsnValueObject $dsnValue,
         bool $returnCellRef = false
-    ): ?ValueObject\ExtractionValueObject {
-        try {
-            $spreadsheet = $this->readerService->getSpreadsheet($dsnValue->getFileReference());
-        } catch (SpreadsheetReaderException $e) {
-            return null;
-        }
-
+    ): ValueObject\ExtractionValueObject {
+        $spreadsheet = $this->readerService->getSpreadsheet($dsnValue->getFileReference());
         try {
             // calculate correct range from worksheet or selection
             $worksheet = $spreadsheet->setActiveSheetIndex($dsnValue->getSheetIndex());

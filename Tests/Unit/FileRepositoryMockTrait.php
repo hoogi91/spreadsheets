@@ -26,7 +26,7 @@ trait FileRepositoryMockTrait
 
         /** @var UnitTestCase $this */
         $filRepositoryMock = $this->getMockBuilder(FileRepository::class)->disableOriginalConstructor()->getMock();
-        $filRepositoryMock->expects($this->any())->method('findFileReferenceByUid')->willReturnCallback(
+        $filRepositoryMock->method('findFileReferenceByUid')->willReturnCallback(
             static function (int $fileUid) use ($_this) {
                 if ($fileUid < 1) {
                     // force mock to throw an resource does not exists exception
@@ -49,7 +49,7 @@ trait FileRepositoryMockTrait
     {
         /** @var UnitTestCase $this */
         $container = $this->getMockBuilder(ContainerInterface::class)->getMock();
-        $container->expects($this->any())->method('has')->willReturn(true);
+        $container->method('has')->willReturn(true);
 
         return $container;
     }

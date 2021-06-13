@@ -103,10 +103,6 @@ class DsnValueObject
     private function legacyDSNParsing(string $dsn): void
     {
         [$file, $fullSelection] = GeneralUtility::trimExplode('|', $dsn, false, 2);
-        if (empty($file)) {
-            throw new InvalidDataSourceNameException('File reference is required in spreadsheet DSN!');
-        }
-
         if (strpos($file, 'file:') === 0 && (int)substr($file, 5) !== 0) {
             /** @var FileRepository $fileRepository */
             $fileRepository = GeneralUtility::makeInstance(FileRepository::class);

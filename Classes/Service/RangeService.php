@@ -57,7 +57,7 @@ class RangeService
     {
         if ($sheet->getHighestColumn() === 'A'
             && $sheet->getHighestRow() === 1
-            && $sheet->getCell('A1', false) === null) {
+            && $sheet->cellExists('A1') === false) {
             return '';
         }
 

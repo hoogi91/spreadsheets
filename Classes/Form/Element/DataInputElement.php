@@ -60,7 +60,6 @@ class DataInputElement extends AbstractFormElement
         $this->extractorService = GeneralUtility::makeInstance(ExtractorService::class);
         $this->config = $this->data['parameterArray']['fieldConf']['config'];
 
-        /** @var StandaloneView $view */
         $this->view = GeneralUtility::makeInstance(StandaloneView::class);
         $this->view->setTemplatePathAndFilename($this->getTemplatePath());
         $this->view->assign('inputSize', (int)$this->config['size'] ?: 0);
