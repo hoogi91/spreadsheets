@@ -6,6 +6,7 @@ use Hoogi91\Spreadsheets\Domain\ValueObject\CellDataValueObject;
 use Hoogi91\Spreadsheets\Service\CellService;
 use Hoogi91\Spreadsheets\Service\StyleService;
 use Hoogi91\Spreadsheets\Service\ValueMappingService;
+use Hoogi91\Spreadsheets\Tests\Unit\TsfeSetupTrait;
 use Nimut\TestingFramework\TestCase\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
@@ -17,6 +18,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
  */
 class CellDataValueObjectTest extends UnitTestCase
 {
+    use TsfeSetupTrait;
 
     /**
      * @var Worksheet
@@ -31,6 +33,7 @@ class CellDataValueObjectTest extends UnitTestCase
     protected function setUp(): void
     {
         parent::setUp();
+        self::setupDefaultTSFE();
 
         $sheet = (new Xlsx())->load(dirname(__DIR__, 3) . '/Fixtures/01_fixture.xlsx');
         $this->sheet = $sheet->getSheet(0);

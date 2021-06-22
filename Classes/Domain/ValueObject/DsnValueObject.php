@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Hoogi91\Spreadsheets\Domain\ValueObject;
 
 use Hoogi91\Spreadsheets\Exception\InvalidDataSourceNameException;
+use JsonSerializable;
 use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\FileRepository;
@@ -15,7 +16,7 @@ use TYPO3\CMS\Core\Utility\MathUtility;
  * Class DsnValueObject
  * @package Hoogi91\Spreadsheets\Domain\ValueObject
  */
-class DsnValueObject
+class DsnValueObject implements JsonSerializable
 {
     /**
      * Legacy DSN pattern matches all strings like:
@@ -201,6 +202,14 @@ class DsnValueObject
      * @return string
      */
     public function __toString()
+    {
+        return $this->getDsn();
+    }
+
+    /**
+     * @return string
+     */
+    public function jsonSerialize(): string
     {
         return $this->getDsn();
     }

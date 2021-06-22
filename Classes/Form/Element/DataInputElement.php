@@ -77,7 +77,7 @@ class DataInputElement extends AbstractFormElement
         $resultArray = $this->initializeResultArray();
 
         // upload fields hasn't been specified
-        if (array_key_exists($this->config['uploadField'], $this->data['processedTca']['columns']) === false) {
+        if (array_key_exists($this->config['uploadField'], $this->data['processedTca']['columns'] ?? []) === false) {
             $resultArray['html'] = $this->view->assign('missingUploadField', true)->render();
             return $resultArray;
         }
@@ -94,7 +94,7 @@ class DataInputElement extends AbstractFormElement
         $resultArray['stylesheetFiles'] = ['EXT:spreadsheets/Resources/Public/Css/SpreadsheetDataInput.css'];
 
         try {
-            $valueObject = DsnValueObject::createFromDSN($this->data['parameterArray']['itemFormElValue']);
+            $valueObject = DsnValueObject::createFromDSN($this->data['parameterArray']['itemFormElValue'] ?? '');
         } catch (InvalidDataSourceNameException $exception) {
             $valueObject = '';
         }
@@ -177,7 +177,7 @@ class DataInputElement extends AbstractFormElement
             $sheetData,
             static function (&$item) {
                 if (is_string($item) && mb_detect_encoding($item, 'utf-8', true) === false) {
-                    $item = utf8_encode($item);
+                    $item = utf8_encode($item); // @codeCoverageIgnore
                 }
             }
         );
@@ -216,8 +216,9 @@ class DataInputElement extends AbstractFormElement
                     'name' => $worksheet->getTitle(),
                     'cells' => $this->extractorService->rangeToCellArray($worksheet, $worksheetRange),
                 ];
-            } catch (SpreadsheetException $e) {
+            } catch (SpreadsheetException $e) { // @codeCoverageIgnoreStart
                 // ignore sheet when an exception occurs
+                // @codeCoverageIgnoreEnd
             }
         }
         return $sheetData;

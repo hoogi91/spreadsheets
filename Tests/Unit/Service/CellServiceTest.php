@@ -5,10 +5,14 @@ namespace Hoogi91\Spreadsheets\Tests\Unit\Service;
 use Hoogi91\Spreadsheets\Service\CellService;
 use Hoogi91\Spreadsheets\Service\StyleService;
 use Hoogi91\Spreadsheets\Service\ValueMappingService;
+use Hoogi91\Spreadsheets\Tests\Unit\TsfeSetupTrait;
 use Nimut\TestingFramework\TestCase\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\RichText\RichText;
+use PhpOffice\PhpSpreadsheet\RichText\Run;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -19,22 +23,24 @@ use PHPUnit\Framework\MockObject\MockObject;
  */
 class CellServiceTest extends UnitTestCase
 {
+    use TsfeSetupTrait;
 
     private const TEST_FORMATTING_SHEET_INDEX = 1;
-
-    /**
-     * @var CellService
-     */
-    private $cellService;
 
     /**
      * @var Spreadsheet
      */
     private $spreadsheet;
 
+    /**
+     * @var CellService
+     */
+    protected $cellService;
+
     protected function setUp(): void
     {
         parent::setUp();
+        self::setupDefaultTSFE();
         $this->spreadsheet = (new Xlsx())->load(dirname(__DIR__, 2) . '/Fixtures/01_fixture.xlsx');
         $this->cellService = new CellService(new StyleService(new ValueMappingService()));
     }
@@ -113,5 +119,24 @@ class CellServiceTest extends UnitTestCase
         $mockedCell->method('getWorksheet')->willReturn($worksheetMock);
 
         self::assertEquals('MockValue', $this->cellService->getFormattedValue($mockedCell));
+    }
+
+    public function testFormatRichTextCell(): void
+    {
+        $richText = new RichText();
+        $richText->createText('my-text');
+        $richText->createTextRun('another-text');
+
+        $customRun = new Run('third-text');
+        $customRun->setFont(null);
+        $richText->addText($customRun);
+
+        $cell = new Cell($richText, null, $this->spreadsheet->getActiveSheet());
+
+        self::assertEquals(DataType::TYPE_INLINE, $cell->getDataType());
+        self::assertEquals(
+            'my-text<span style="color:#000000">another-text</span>third-text',
+            $this->cellService->getFormattedValue($cell)
+        );
     }
 }

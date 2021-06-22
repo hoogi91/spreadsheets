@@ -7,6 +7,7 @@ use Hoogi91\Spreadsheets\Domain\ValueObject\CellDataValueObject;
 use Hoogi91\Spreadsheets\Service;
 use Hoogi91\Spreadsheets\Tests\Unit\ArrayAssertTrait;
 use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
+use Hoogi91\Spreadsheets\Tests\Unit\TsfeSetupTrait;
 use Nimut\TestingFramework\TestCase\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
@@ -25,6 +26,7 @@ class SpreadsheetProcessorTest extends UnitTestCase
 
     use ArrayAssertTrait;
     use FileRepositoryMockTrait;
+    use TsfeSetupTrait;
 
     private const INPUT_DATA = [
         'someVar' => 'data',
@@ -48,6 +50,7 @@ class SpreadsheetProcessorTest extends UnitTestCase
     protected function setUp(): void
     {
         parent::setUp();
+        self::setupDefaultTSFE();
 
         // add general TYPO3 mock objects
         $this->pageRendererMock = $this->getMockBuilder(PageRenderer::class)->disableOriginalConstructor()->getMock();
@@ -69,9 +72,6 @@ class SpreadsheetProcessorTest extends UnitTestCase
         $readerService->method('getSpreadsheet')->willReturn(
             (new Xlsx())->load(dirname(__DIR__, 2) . '/Fixtures/DataProcessor/01_fixture.xlsx')
         );
-
-        $GLOBALS['TSFE'] = $GLOBALS['TSFE'] ?? new \stdClass();
-        $GLOBALS['TSFE']->config['config']['locale_all'] = 'de';
 
         // create dependencies for spreadsheet processor
         $styleService = new Service\StyleService(new Service\ValueMappingService());
