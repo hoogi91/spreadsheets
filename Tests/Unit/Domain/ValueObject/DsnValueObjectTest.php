@@ -43,6 +43,19 @@ class DsnValueObjectTest extends UnitTestCase
         $value = DsnValueObject::createFromDSN($dsn);
         self::assertEquals($exceptionClassOrFinalDsn, (string)$value);
         self::assertEquals(5, $value->getFileReference()->getUid());
+
+        self::assertEquals(
+            strpos($dsn, 'vertical') !== false ? 'vertical' : null,
+            $value->getDirectionOfSelection()
+        );
+
+        if (strpos($dsn, '|0') === false) {
+            self::assertEquals(1, $value->getSheetIndex());
+            self::assertEquals('D2:G5', $value->getSelection());
+        } else {
+            self::assertEquals(0, $value->getSheetIndex());
+            self::assertNull($value->getSelection());
+        }
     }
 
     public function legacyProvider(): array
@@ -66,8 +79,12 @@ class DsnValueObjectTest extends UnitTestCase
                 'spreadsheet://5?index=1&range=D2%3AG5&direction=vertical'
             ],
             'without direction' => [
-                'file:5|2!A2:B5',
-                'spreadsheet://5?index=2&range=A2%3AB5'
+                'file:5|1!D2:G5',
+                'spreadsheet://5?index=1&range=D2%3AG5'
+            ],
+            'only file reference' => [
+                'file:5|0',
+                'spreadsheet://5?index=0'
             ],
             'valid dsn' => [
                 'file:5|1!D2:G5!vertical',
@@ -88,6 +105,18 @@ class DsnValueObjectTest extends UnitTestCase
         $value = DsnValueObject::createFromDSN($dsn);
         self::assertEquals($exceptionClassOrFinalDsn, (string)$value);
         self::assertEquals(5, $value->getFileReference()->getUid());
+        self::assertEquals(
+            strpos($dsn, 'vertical') !== false ? 'vertical' : null,
+            $value->getDirectionOfSelection()
+        );
+
+        if (strpos($dsn, '?index') !== false) {
+            self::assertEquals(1, $value->getSheetIndex());
+            self::assertEquals('D2:G5', $value->getSelection());
+        } else {
+            self::assertEquals(0, $value->getSheetIndex());
+            self::assertNull($value->getSelection());
+        }
     }
 
     public function dsnProvider(): array
@@ -111,8 +140,12 @@ class DsnValueObjectTest extends UnitTestCase
                 InvalidDataSourceNameException::class
             ],
             'without direction' => [
-                'spreadsheet://5?index=2&range=A2%3AB5',
-                'spreadsheet://5?index=2&range=A2%3AB5'
+                'spreadsheet://5?index=1&range=D2%3AG5',
+                'spreadsheet://5?index=1&range=D2%3AG5'
+            ],
+            'only file reference' => [
+                'spreadsheet://5',
+                'spreadsheet://5?index=0'
             ],
             'valid dsn' => [
                 'spreadsheet://5?index=1&range=D2%3AG5&direction=vertical',

@@ -70,7 +70,7 @@ class DsnValueObject implements JsonSerializable
                 $this->legacyDSNParsing($dsn);
             } elseif (preg_match(self::DSN_PATTERN, $dsn) === 1) {
                 $dsnData = parse_url($dsn);
-                parse_str($dsnData['query'], $queryData);
+                parse_str($dsnData['query'] ?? '', $queryData);
                 if (MathUtility::canBeInterpretedAsInteger($dsnData['host'])) {
                     /** @var FileRepository $fileRepository */
                     $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
@@ -116,7 +116,7 @@ class DsnValueObject implements JsonSerializable
             throw new InvalidDataSourceNameException('File reference from DSN can not be parsed/evaluated!');
         }
 
-        if (empty($fullSelection) === false) {
+        if (trim($fullSelection) !== '') {
             [$sheetIndex, $selection, $directionOfSelection] = GeneralUtility::trimExplode(
                 '!',
                 $fullSelection,
