@@ -52,6 +52,10 @@ After selecting the file the user gets a list of worksheets to select. After sel
 
 If field value is `true` the user can only select a worksheet and the exact cell selecting is disabled.
 
+.. hint::
+
+   Please note that the default :ref:`content element <editor-content-element>` of this extension
+   uses **sheetsOnly => true** and you may override it's TCA value if you want to enable field selection!
 
 **Field "allowColumnExtraction"**
 This field can be set to `true` or `false`. Default value is `false`!
