@@ -130,6 +130,10 @@ class DsnValueObject
             $this->sheetIndex = (int)($sheetIndex ?: 0);
             $this->selection = $selection ?: null;
             $this->directionOfSelection = $directionOfSelection ?: null;
+        } else {
+            $this->sheetIndex = 0;
+            $this->selection = null;
+            $this->directionOfSelection = null;
         }
     }
 
