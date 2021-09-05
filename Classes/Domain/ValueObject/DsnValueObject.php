@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Hoogi91\Spreadsheets\Domain\ValueObject;
 
 use Hoogi91\Spreadsheets\Exception\InvalidDataSourceNameException;
+use JsonSerializable;
 use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\FileRepository;
@@ -15,7 +16,7 @@ use TYPO3\CMS\Core\Utility\MathUtility;
  * Class DsnValueObject
  * @package Hoogi91\Spreadsheets\Domain\ValueObject
  */
-class DsnValueObject
+class DsnValueObject implements JsonSerializable
 {
     /**
      * Legacy DSN pattern matches all strings like:
@@ -69,7 +70,7 @@ class DsnValueObject
                 $this->legacyDSNParsing($dsn);
             } elseif (preg_match(self::DSN_PATTERN, $dsn) === 1) {
                 $dsnData = parse_url($dsn);
-                parse_str($dsnData['query'], $queryData);
+                parse_str($dsnData['query'] ?? '', $queryData);
                 if (MathUtility::canBeInterpretedAsInteger($dsnData['host'])) {
                     /** @var FileRepository $fileRepository */
                     $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
@@ -103,10 +104,6 @@ class DsnValueObject
     private function legacyDSNParsing(string $dsn): void
     {
         [$file, $fullSelection] = GeneralUtility::trimExplode('|', $dsn, false, 2);
-        if (empty($file)) {
-            throw new InvalidDataSourceNameException('File reference is required in spreadsheet DSN!');
-        }
-
         if (strpos($file, 'file:') === 0 && (int)substr($file, 5) !== 0) {
             /** @var FileRepository $fileRepository */
             $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
@@ -119,7 +116,7 @@ class DsnValueObject
             throw new InvalidDataSourceNameException('File reference from DSN can not be parsed/evaluated!');
         }
 
-        if (empty($fullSelection) === false) {
+        if (trim($fullSelection) !== '') {
             [$sheetIndex, $selection, $directionOfSelection] = GeneralUtility::trimExplode(
                 '!',
                 $fullSelection,
@@ -205,6 +202,14 @@ class DsnValueObject
      * @return string
      */
     public function __toString()
+    {
+        return $this->getDsn();
+    }
+
+    /**
+     * @return string
+     */
+    public function jsonSerialize(): string
     {
         return $this->getDsn();
     }

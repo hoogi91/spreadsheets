@@ -48,7 +48,7 @@ class ExtensionManagementUtility extends \TYPO3\CMS\Core\Utility\ExtensionManage
 
             foreach ($items as $k => $v) {
                 // add array before or after specific field
-                if ((string)$atField === (string)$v[1]) {
+                if ($atField === (string)$v[1]) {
                     if ($insertPosition === 'after') {
                         array_splice($items, ($k + 1), 0, [$itemArray]);
                     } elseif ($insertPosition === 'before') {

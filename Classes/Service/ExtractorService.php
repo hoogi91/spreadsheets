@@ -72,18 +72,14 @@ class ExtractorService
     /**
      * @param ValueObject\DsnValueObject $dsnValue
      * @param bool $returnCellRef
-     * @return ValueObject\ExtractionValueObject|null
+     * @return ValueObject\ExtractionValueObject
+     * @throws SpreadsheetReaderException
      */
     public function getDataByDsnValueObject(
         ValueObject\DsnValueObject $dsnValue,
         bool $returnCellRef = false
-    ): ?ValueObject\ExtractionValueObject {
-        try {
-            $spreadsheet = $this->readerService->getSpreadsheet($dsnValue->getFileReference());
-        } catch (SpreadsheetReaderException $e) {
-            return null;
-        }
-
+    ): ValueObject\ExtractionValueObject {
+        $spreadsheet = $this->readerService->getSpreadsheet($dsnValue->getFileReference());
         try {
             // calculate correct range from worksheet or selection
             $worksheet = $spreadsheet->setActiveSheetIndex($dsnValue->getSheetIndex());
@@ -105,8 +101,8 @@ class ExtractorService
             );
 
             return ValueObject\ExtractionValueObject::create($spreadsheet, $cellData);
-        } catch (SpreadsheetException $exception) {
-            return ValueObject\ExtractionValueObject::create($spreadsheet, []);
+        } catch (SpreadsheetException $exception) { // @codeCoverageIgnoreStart
+            return ValueObject\ExtractionValueObject::create($spreadsheet, []); // @codeCoverageIgnoreEnd
         }
     }
 
@@ -125,9 +121,9 @@ class ExtractorService
             $rowsToRepeatAtTop = $sheet->getPageSetup()->getRowsToRepeatAtTop();
             $range = 'A1:' . $sheet->getHighestColumn() . $rowsToRepeatAtTop[1];
             return $this->rangeToCellArray($sheet, $range, self::EXTRACT_DIRECTION_HORIZONTAL, $returnCellRef);
-        } catch (SpreadsheetException $e) {
+        } catch (SpreadsheetException $e) { // @codeCoverageIgnoreStart
             // sheet or range of cells couldn't be loaded
-            return [];
+            return []; // @codeCoverageIgnoreEnd
         }
     }
 
@@ -147,9 +143,9 @@ class ExtractorService
             $rowsToRepeatAtTop = $sheet->getPageSetup()->getRowsToRepeatAtTop();
             $range = 'A' . ($rowsToRepeatAtTop[1] + 1) . ':' . $sheet->getHighestColumn() . $sheet->getHighestRow();
             return $this->rangeToCellArray($sheet, $range, self::EXTRACT_DIRECTION_HORIZONTAL, $returnCellRef);
-        } catch (SpreadsheetException $e) {
+        } catch (SpreadsheetException $e) { // @codeCoverageIgnoreStart
             // sheet or range of cells couldn't be loaded
-            return [];
+            return []; // @codeCoverageIgnoreEnd
         }
     }
 

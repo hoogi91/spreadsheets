@@ -6,6 +6,7 @@ use Nimut\TestingFramework\TestCase\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Container\ContainerInterface;
 use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
+use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\FileRepository;
 
@@ -26,7 +27,7 @@ trait FileRepositoryMockTrait
 
         /** @var UnitTestCase $this */
         $filRepositoryMock = $this->getMockBuilder(FileRepository::class)->disableOriginalConstructor()->getMock();
-        $filRepositoryMock->expects($this->any())->method('findFileReferenceByUid')->willReturnCallback(
+        $filRepositoryMock->method('findFileReferenceByUid')->willReturnCallback(
             static function (int $fileUid) use ($_this) {
                 if ($fileUid < 1) {
                     // force mock to throw an resource does not exists exception
@@ -43,13 +44,35 @@ trait FileRepositoryMockTrait
     }
 
     /**
+     * @param string $file
+     * @param string $extension
+     * @param bool $missingOriginalFile
+     * @return FileReference|MockObject
+     */
+    private function getFileReferenceMock(
+        string $file,
+        string $extension = 'xlsx',
+        bool $missingOriginalFile = false
+    ): MockObject {
+        $fileMock = $this->getMockBuilder(File::class)->disableOriginalConstructor()->getMock();
+        $fileMock->method('exists')->willReturn(!$missingOriginalFile);
+
+        $mock = $this->getMockBuilder(FileReference::class)->disableOriginalConstructor()->getMock();
+        $mock->method('getUid')->willReturn(123);
+        $mock->method('getExtension')->willReturn($extension);
+        $mock->method('getOriginalFile')->willReturn($fileMock);
+        $mock->method('getForLocalProcessing')->willReturn(dirname(__DIR__) . '/Fixtures/' . $file);
+        return $mock;
+    }
+
+    /**
      * @return MockObject
      */
     private function getContainerMock(): MockObject
     {
         /** @var UnitTestCase $this */
         $container = $this->getMockBuilder(ContainerInterface::class)->getMock();
-        $container->expects($this->any())->method('has')->willReturn(true);
+        $container->method('has')->willReturn(true);
 
         return $container;
     }

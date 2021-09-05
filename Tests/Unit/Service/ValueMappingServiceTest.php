@@ -18,7 +18,7 @@ class ValueMappingServiceTest extends UnitTestCase
      */
     private $valueMappingService;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->valueMappingService = new ValueMappingService();
@@ -53,6 +53,6 @@ class ValueMappingServiceTest extends UnitTestCase
      */
     public function testValueMapping(string $map, string $value, ?string $expected, ?string $default = null): void
     {
-        $this->assertEquals($expected, $this->valueMappingService->convertValue($map, $value, $default));
+        self::assertEquals($expected, $this->valueMappingService->convertValue($map, $value, $default));
     }
 }

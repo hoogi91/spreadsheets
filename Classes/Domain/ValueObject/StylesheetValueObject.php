@@ -41,12 +41,8 @@ class StylesheetValueObject
      *
      * @return string
      */
-    private function assembleStyles($styles = []): string
+    private function assembleStyles(array $styles = []): string
     {
-        if (empty($styles)) {
-            return '';
-        }
-
         $pairs = [];
         foreach ($styles as $property => $value) {
             $pairs[] = $property . ':' . $value;
@@ -65,32 +61,20 @@ class StylesheetValueObject
      */
     public function toCSS(?string $htmlIdentifier = null): string
     {
-        if (empty($this->styles)) {
-            return '';
-        }
-
         // write all styles with table selector prefix
         $content = '';
         foreach ($this->styles as $styleName => $styleDefinition) {
             if ($styleName !== 'html') {
                 if (empty($htmlIdentifier) === false) {
-                    $content .= vsprintf(
-                        '#%s %s {%s}' . PHP_EOL,
-                        [
-                            $htmlIdentifier,
-                            $styleName,
-                            $this->assembleStyles($styleDefinition),
-                        ]
-                    );
-                } else {
-                    $content .= vsprintf(
-                        '%s {%s}' . PHP_EOL,
-                        [
-                            $styleName,
-                            $this->assembleStyles($styleDefinition),
-                        ]
-                    );
+                    $content .= sprintf('#%s ', $htmlIdentifier);
                 }
+                $content .= vsprintf(
+                    '%s {%s}' . PHP_EOL,
+                    [
+                        $styleName,
+                        $this->assembleStyles($styleDefinition),
+                    ]
+                );
             }
         }
         return $content;

@@ -4,9 +4,10 @@ namespace Hoogi91\Spreadsheets\Tests\Unit\Service;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\CellDataValueObject;
 use Hoogi91\Spreadsheets\Domain\ValueObject\DsnValueObject;
+use Hoogi91\Spreadsheets\Exception\InvalidDataSourceNameException;
 use Hoogi91\Spreadsheets\Service;
+use Hoogi91\Spreadsheets\Tests\Unit\TsfeSetupTrait;
 use Nimut\TestingFramework\TestCase\UnitTestCase;
-use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -18,6 +19,8 @@ use TYPO3\CMS\Core\Resource\FileReference;
  */
 class ExtractorServiceTest extends UnitTestCase
 {
+    use TsfeSetupTrait;
+
     /**
      * @var Service\ExtractorService
      */
@@ -33,12 +36,10 @@ class ExtractorServiceTest extends UnitTestCase
      */
     private $spreadsheet;
 
-    /**
-     * @throws SpreadsheetException
-     */
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
+        self::setupDefaultTSFE();
 
         // setup reader mock instance
         $this->spreadsheet = (new Xlsx())->load(dirname(__DIR__, 2) . '/Fixtures/01_fixture.xlsx');
@@ -54,19 +55,15 @@ class ExtractorServiceTest extends UnitTestCase
         );
     }
 
-    /**
-     * @expectedException \Hoogi91\Spreadsheets\Exception\InvalidDataSourceNameException
-     */
     public function testExtractionWithEmptyDSN(): void
     {
+        $this->expectException(InvalidDataSourceNameException::class);
         $this->extractorService->getDataByDsnValueObject(DsnValueObject::createFromDSN(''));
     }
 
-    /**
-     * @expectedException \Hoogi91\Spreadsheets\Exception\InvalidDataSourceNameException
-     */
     public function testExtractionWithInvalidDSN(): void
     {
+        $this->expectException(InvalidDataSourceNameException::class);
         $this->extractorService->getDataByDsnValueObject(DsnValueObject::createFromDSN('file:0|0'));
     }
 
@@ -74,8 +71,8 @@ class ExtractorServiceTest extends UnitTestCase
     {
         /** @var MockObject|DsnValueObject $mockDsnValueObject */
         $mockDsnValueObject = $this->getMockBuilder(DsnValueObject::class)->disableOriginalConstructor()->getMock();
-        $mockDsnValueObject->expects($this->once())->method('getSheetIndex')->willReturn(0);
-        $mockDsnValueObject->expects($this->once())->method('getFileReference')->willReturn(
+        $mockDsnValueObject->expects(self::once())->method('getSheetIndex')->willReturn(0);
+        $mockDsnValueObject->expects(self::once())->method('getFileReference')->willReturn(
             $this->getMockBuilder(FileReference::class)->disableOriginalConstructor()->getMock()
         );
 
@@ -86,7 +83,7 @@ class ExtractorServiceTest extends UnitTestCase
     public function testHeadDataExtraction(): void
     {
         $worksheet = $this->spreadsheet->getSheet(0);
-        $this->assertEmpty($this->extractorService->getHeadData($worksheet, true));
+        self::assertEmpty($this->extractorService->getHeadData($worksheet, true));
     }
 
     public function testBodyDataExtraction(): void
@@ -94,19 +91,19 @@ class ExtractorServiceTest extends UnitTestCase
         $worksheet = $this->spreadsheet->getSheet(0);
         $bodyData = $this->extractorService->getBodyData($worksheet, true);
 
-        $this->assertIsArray($bodyData);
-        $this->assertCount(7, $bodyData);
+        self::assertIsArray($bodyData);
+        self::assertCount(9, $bodyData);
 
         /** @var CellDataValueObject $cellValueA1 */
         $cellValueA1 = $bodyData[1][1];
-        $this->assertInstanceOf(CellDataValueObject::class, $cellValueA1);
-        $this->assertEquals('2014', $cellValueA1->getRenderedValue());
+        self::assertInstanceOf(CellDataValueObject::class, $cellValueA1);
+        self::assertEquals('2014', $cellValueA1->getRenderedValue());
 
 
         /** @var CellDataValueObject $cellValueD5 */
         $cellValueD5 = $bodyData[5][4];
-        $this->assertInstanceOf(CellDataValueObject::class, $cellValueD5);
-        $this->assertEquals(
+        self::assertInstanceOf(CellDataValueObject::class, $cellValueD5);
+        self::assertEquals(
             '<span style="color:#000000"><sup>Hoch</sup></span><span style="color:#000000"> Test </span><span style="color:#000000"><sub>Tief</sub></span>',
             $cellValueD5->getRenderedValue()
         );
@@ -118,8 +115,6 @@ class ExtractorServiceTest extends UnitTestCase
      * @param bool $cellRef
      *
      * @dataProvider rangeExtractorDataProvider
-     *
-     * @throws SpreadsheetException
      */
     public function testRangeExtractor(string $range, string $direction, bool $cellRef = false): void
     {
@@ -132,8 +127,8 @@ class ExtractorServiceTest extends UnitTestCase
         } else {
             $cellValueA1 = $cellRef === false ? $data['B'][1] : $data[2][1];
         }
-        $this->assertInstanceOf(CellDataValueObject::class, $cellValueA1);
-        $this->assertEquals('2015', $cellValueA1->getRenderedValue());
+        self::assertInstanceOf(CellDataValueObject::class, $cellValueA1);
+        self::assertEquals('2015', $cellValueA1->getRenderedValue());
 
         /** @var CellDataValueObject $cellValueE5 */
         if ($direction === Service\ExtractorService::EXTRACT_DIRECTION_HORIZONTAL) {
@@ -141,8 +136,8 @@ class ExtractorServiceTest extends UnitTestCase
         } else {
             $cellValueE5 = $cellRef === false ? $data['D'][5] : $data[4][5];
         }
-        $this->assertInstanceOf(CellDataValueObject::class, $cellValueE5);
-        $this->assertEquals(
+        self::assertInstanceOf(CellDataValueObject::class, $cellValueE5);
+        self::assertEquals(
             '<span style="color:#000000"><sup>Hoch</sup></span><span style="color:#000000"> Test </span><span style="color:#000000"><sub>Tief</sub></span>',
             $cellValueE5->getRenderedValue()
         );
@@ -156,5 +151,39 @@ class ExtractorServiceTest extends UnitTestCase
             ['A1:E7', Service\ExtractorService::EXTRACT_DIRECTION_VERTICAL],
             ['A1:E7', Service\ExtractorService::EXTRACT_DIRECTION_VERTICAL, true],
         ];
+    }
+
+    public function testExtractingWithFixedRowsOnTop(): void
+    {
+        $worksheet = $this->spreadsheet->getActiveSheet();
+        $worksheet->getPageSetup()->setRowsToRepeatAtTop([1, 2]); // first two rows
+
+        $headData = $this->extractorService->getHeadData($worksheet);
+        $bodyData = $this->extractorService->getBodyData($worksheet);
+
+        self::assertIsArray($headData, 'Head data is not an array');
+        self::assertIsArray($bodyData, 'Body data is not an array');
+        self::assertCount(2, $headData);
+        self::assertCount(7, $bodyData);
+
+        /** @var CellDataValueObject $cellValueA1 */
+        $cellValueA1 = $headData[1]['A'];
+        self::assertInstanceOf(CellDataValueObject::class, $cellValueA1);
+        self::assertEquals('2014', $cellValueA1->getRenderedValue());
+
+        /** @var CellDataValueObject $cellValueA1 */
+        $cellValueC3 = $headData[2]['C'];
+        self::assertInstanceOf(CellDataValueObject::class, $cellValueC3);
+        self::assertEquals('70', $cellValueC3->getRenderedValue());
+
+        /** @var CellDataValueObject $cellValueA1 */
+        $cellValueG3 = $bodyData[3]['G'];
+        self::assertInstanceOf(CellDataValueObject::class, $cellValueG3);
+        self::assertEquals('x', $cellValueG3->getRenderedValue());
+
+        /** @var CellDataValueObject $cellValueA1 */
+        $cellValueA4 = $bodyData[4]['A'];
+        self::assertInstanceOf(CellDataValueObject::class, $cellValueA4);
+        self::assertEquals('©™§∆', $cellValueA4->getRenderedValue());
     }
 }

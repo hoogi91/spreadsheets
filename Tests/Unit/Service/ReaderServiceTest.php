@@ -3,13 +3,10 @@
 namespace Hoogi91\Spreadsheets\Tests\Unit\Service;
 
 use Hoogi91\Spreadsheets\Service\ReaderService;
+use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
 use Nimut\TestingFramework\TestCase\UnitTestCase;
-use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use TYPO3\CMS\Core\Resource\File;
-use TYPO3\CMS\Core\Resource\FileReference;
 
 /**
  * Class ReaderServiceTest
@@ -17,6 +14,8 @@ use TYPO3\CMS\Core\Resource\FileReference;
  */
 class ReaderServiceTest extends UnitTestCase
 {
+    use FileRepositoryMockTrait;
+
     public function readerTypeDataProvider(): array
     {
         return [
@@ -33,14 +32,14 @@ class ReaderServiceTest extends UnitTestCase
     {
         $this->expectException(ReaderException::class);
         $this->expectExceptionCode(1539959214);
-        (new ReaderService())->getSpreadsheet($this->createFileReferenceMock('01_fixture.xlsx', 'xlsx', true));
+        (new ReaderService())->getSpreadsheet($this->getFileReferenceMock('01_fixture.xlsx', 'xlsx', true));
     }
 
     public function testReaderExceptionOnInvalidFileReferenceExtension(): void
     {
         $this->expectException(ReaderException::class);
         $this->expectExceptionCode(1514909945);
-        (new ReaderService())->getSpreadsheet($this->createFileReferenceMock('some-unknwon.ext', 'ext'));
+        (new ReaderService())->getSpreadsheet($this->getFileReferenceMock('some-unknwon.ext', 'ext'));
     }
 
     /**
@@ -48,19 +47,15 @@ class ReaderServiceTest extends UnitTestCase
      * @param string $extension
      *
      * @dataProvider readerTypeDataProvider
-     *
-     * @throws ReaderException
-     * @throws SpreadsheetException
      */
     public function testReaderInstance(string $filename, string $extension): void
     {
         // assert if reader service is successfully initialized and returns spreadsheet
-        $spreadsheet = (new ReaderService())->getSpreadsheet($this->createFileReferenceMock($filename, $extension));
-        $this->assertInstanceOf(Spreadsheet::class, $spreadsheet);
-        $this->assertInstanceOf(Worksheet::class, $spreadsheet->getSheet(0));
+        $spreadsheet = (new ReaderService())->getSpreadsheet($this->getFileReferenceMock($filename, $extension));
+        self::assertInstanceOf(Worksheet::class, $spreadsheet->getSheet(0));
 
         foreach ($spreadsheet->getAllSheets() as $index => $sheet) {
-            $this->assertInstanceOf(
+            self::assertInstanceOf(
                 Worksheet::class,
                 $sheet,
                 sprintf(
@@ -70,39 +65,5 @@ class ReaderServiceTest extends UnitTestCase
                 )
             );
         }
-    }
-
-    /**
-     * get file referece mock of fixture file
-     *
-     * @param string $file
-     * @param string $extension
-     * @param bool $missingOriginalFile
-     *
-     * @return FileReference|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private function createFileReferenceMock($file, $extension, $missingOriginalFile = false)
-    {
-        $fileReferenceMock = $this->getMockBuilder(FileReference::class)->disableOriginalConstructor()->getMock();
-
-        $fileReferenceMock->method('getExtension')->willReturn($extension);
-        $fileReferenceMock->method('getOriginalFile')->willReturn($this->createOriginalFileMock(!$missingOriginalFile));
-        $fileReferenceMock->method('getForLocalProcessing')->willReturn(
-            dirname(__DIR__, 2) . '/Fixtures/' . $file
-        );
-
-        return $fileReferenceMock;
-    }
-
-    /**
-     * @param bool $exists
-     *
-     * @return File|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private function createOriginalFileMock($exists = true)
-    {
-        $fileMock = $this->getMockBuilder(File::class)->disableOriginalConstructor()->getMock();
-        $fileMock->method('exists')->willReturn($exists);
-        return $fileMock;
     }
 }
