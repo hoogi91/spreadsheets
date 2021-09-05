@@ -13,15 +13,15 @@
 .cell.cell-style-6 {vertical-align:bottom;color:#9C0006;background-color:#FFC7CE}
 .cell.cell-style-7 {vertical-align:bottom;border-top:2px solid #000000 !important;border-left:2px solid #000000 !important;color:#006100;background-color:#C6EFCE}
 .cell.cell-style-8 {vertical-align:bottom;border-top:2px solid #000000 !important;color:#006100;background-color:#C6EFCE}
-.cell.cell-style-9 {vertical-align:bottom;text-align:left;padding-left:0px;border-top:2px solid #000000 !important;border-right:2px solid #000000 !important;color:#006100;background-color:#C6EFCE}
-.cell.cell-style-10 {vertical-align:bottom;border-bottom:2px solid #000000 !important;border-left:2px solid #000000 !important;color:#000000;font-weight:bold}
+.cell.cell-style-9 {vertical-align:bottom;border-bottom:2px solid #000000 !important;border-left:2px solid #000000 !important;color:#000000;font-weight:bold}
+.cell.cell-style-10 {vertical-align:bottom;border-bottom:2px solid #000000 !important;color:#000000;font-weight:bold}
 .cell.cell-style-11 {vertical-align:bottom;border-bottom:2px solid #000000 !important;color:#000000;font-weight:bold}
-.cell.cell-style-12 {vertical-align:bottom;border-bottom:2px solid #000000 !important;color:#000000;font-weight:bold}
-.cell.cell-style-13 {vertical-align:bottom;border-bottom:2px solid #000000 !important;border-right:2px solid #000000 !important;color:#000000;font-weight:bold}
-.cell.cell-style-14 {vertical-align:bottom;color:#335593;font-weight:bold;font-style:italic;text-decoration:underline}
+.cell.cell-style-12 {vertical-align:bottom;border-bottom:2px solid #000000 !important;border-right:2px solid #000000 !important;color:#000000;font-weight:bold}
+.cell.cell-style-13 {vertical-align:bottom;color:#335593;font-weight:bold;font-style:italic;text-decoration:underline}
+.cell.cell-style-14 {vertical-align:bottom;color:#000000}
 .cell.cell-style-15 {vertical-align:bottom;color:#000000}
-.cell.cell-style-16 {vertical-align:bottom;color:#000000}
-.cell.cell-style-17 {vertical-align:bottom;color:#0563C1;text-decoration:underline}
+.cell.cell-style-16 {vertical-align:bottom;color:#0563C1;text-decoration:underline}
+.cell.cell-style-17 {vertical-align:bottom;color:#000000}
 .cell.cell-style-18 {vertical-align:bottom;color:#000000}
 .cell.cell-style-19 {vertical-align:bottom;color:#000000}
 .cell.cell-style-20 {vertical-align:bottom;color:#000000}
@@ -30,10 +30,10 @@
 .cell.cell-style-23 {vertical-align:bottom;color:#000000}
 .cell.cell-style-24 {vertical-align:bottom;color:#000000}
 .cell.cell-style-25 {vertical-align:bottom;color:#000000}
-.cell.cell-style-26 {vertical-align:bottom;color:#000000}
+.cell.cell-style-26 {vertical-align:bottom;color:#000000;text-decoration:line-through}
 .cell.cell-style-27 {vertical-align:bottom;text-align:center;color:#000000;font-weight:bold}
 .cell.cell-style-28 {vertical-align:bottom;text-align:center;border-top:2px solid #000000 !important;color:#006100;background-color:#C6EFCE}
 .cell.cell-style-29 {vertical-align:bottom;text-align:center;border-bottom:2px solid #000000 !important;color:#006100;background-color:#C6EFCE}
-.cell.cell-style-30 {vertical-align:bottom;text-align:center;color:#000000}
-.cell.cell-style-31 {vertical-align:bottom;color:#000000;text-decoration:line-through}
-.cell.cell-style-32 {vertical-align:middle;text-align:center;color:#000000}
+.cell.cell-style-30 {vertical-align:middle;text-align:center;color:#000000}
+.cell.cell-style-31 {vertical-align:bottom;text-align:center;color:#000000}
+.cell.cell-style-32 {vertical-align:bottom;text-align:left;padding-left:0px;border-top:2px solid #000000 !important;border-right:2px solid #000000 !important;color:#006100;background-color:#C6EFCE}

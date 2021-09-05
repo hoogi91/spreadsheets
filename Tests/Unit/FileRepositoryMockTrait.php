@@ -6,6 +6,7 @@ use Nimut\TestingFramework\TestCase\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Container\ContainerInterface;
 use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
+use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\FileRepository;
 
@@ -40,6 +41,28 @@ trait FileRepositoryMockTrait
         );
 
         return $filRepositoryMock;
+    }
+
+    /**
+     * @param string $file
+     * @param string $extension
+     * @param bool $missingOriginalFile
+     * @return FileReference|MockObject
+     */
+    private function getFileReferenceMock(
+        string $file,
+        string $extension = 'xlsx',
+        bool $missingOriginalFile = false
+    ): MockObject {
+        $fileMock = $this->getMockBuilder(File::class)->disableOriginalConstructor()->getMock();
+        $fileMock->method('exists')->willReturn(!$missingOriginalFile);
+
+        $mock = $this->getMockBuilder(FileReference::class)->disableOriginalConstructor()->getMock();
+        $mock->method('getUid')->willReturn(123);
+        $mock->method('getExtension')->willReturn($extension);
+        $mock->method('getOriginalFile')->willReturn($fileMock);
+        $mock->method('getForLocalProcessing')->willReturn(dirname(__DIR__) . '/Fixtures/' . $file);
+        return $mock;
     }
 
     /**

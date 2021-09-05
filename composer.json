@@ -21,7 +21,7 @@
     "php": ">=7.2",
     "ext-json": "*",
     "ext-mbstring": "*",
-    "phpoffice/phpspreadsheet": "^1.9",
+    "phpoffice/phpspreadsheet": "^1.18",
     "typo3/cms-backend": "^10.4",
     "typo3/cms-core": "^10.4",
     "typo3/cms-extbase": "^10.4",
@@ -60,7 +60,7 @@
     "extension-spreadsheet-fallback": [
       "mkdir -p Resources/Private/Composer",
       "if [ -f Resources/Private/Composer/composer.json ]; then cd Resources/Private/Composer/ && composer update; fi",
-      "if [ ! -f Resources/Private/Composer/composer.json ]; then cd Resources/Private/Composer/ && composer require phpoffice/phpspreadsheet=^1.9 && composer config classmap-authoritative true && composer config prepend-autoloader true && composer dump-autoload -o; fi"
+      "if [ ! -f Resources/Private/Composer/composer.json ]; then cd Resources/Private/Composer/ && composer require phpoffice/phpspreadsheet=^1.18 && composer config classmap-authoritative true && composer config prepend-autoloader true && composer dump-autoload -o; fi"
     ],
     "extension-cleanup-for-release": [
       "@extension-spreadsheet-fallback",
