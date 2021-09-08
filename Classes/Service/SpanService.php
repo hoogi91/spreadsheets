@@ -48,12 +48,6 @@ class SpanService
             return static::$ignoredColumns[$sheetHash];
         }
 
-        // get max. column count to identify ignored rows
-        $maxRowCount = $worksheet->getHighestRow();
-        if ($maxRowCount <= 0) {
-            return [];
-        }
-
         // map ignored cells by column
         $ignoredColumnsByRow = [];
         foreach ($this->getIgnoredCells($worksheet) as $value) {
@@ -62,6 +56,7 @@ class SpanService
         }
 
         // check if unique column values will exceed max. column count and should be ignored
+        $maxRowCount = $worksheet->getHighestRow();
         $ignoredColumnsByRow = array_map(
             static function ($values) use ($maxRowCount) {
                 return count(array_unique($values)) >= $maxRowCount;
@@ -85,12 +80,6 @@ class SpanService
             return static::$ignoredRows[$sheetHash];
         }
 
-        // get max. column count to identify ignored rows
-        $maxColumnCount = $this->getActiveSheetColumnCount($worksheet);
-        if ($maxColumnCount <= 0) {
-            return [];
-        }
-
         // map ignored cells by row
         $ignoredRowsByColumn = [];
         foreach ($this->getIgnoredCells($worksheet) as $value) {
@@ -99,6 +88,7 @@ class SpanService
         }
 
         // check if unique column values will exceed max. column count and should be ignored
+        $maxColumnCount = Coordinate::columnIndexFromString($worksheet->getHighestColumn());
         $ignoredRowsByColumn = array_map(
             static function ($values) use ($maxColumnCount) {
                 return count(array_unique($values)) >= $maxColumnCount;
@@ -122,7 +112,6 @@ class SpanService
         }
 
         $ignoredCells = [];
-        /** @var string $cells */
         foreach ($worksheet->getMergeCells() as $cells) {
             // get all cell references by range
             $cellsByRange = Coordinate::extractAllCellReferencesInRange($cells);
@@ -149,24 +138,22 @@ class SpanService
             return static::$mergedCells[$sheetHash];
         }
 
+        $rowCount = $worksheet->getHighestRow();
+        $columnCount = Coordinate::columnIndexFromString($worksheet->getHighestColumn());
+
         $mergedCells = [];
-        /** @var string $cells */
         foreach ($worksheet->getMergeCells() as $cells) {
             // get all cell references by range
             $cellsByRange = Coordinate::extractAllCellReferencesInRange($cells);
-            $rangeDimension = $this->getRangeDimension(
-                $cells,
-                $this->getIgnoredColumns($worksheet),
-                $this->getIgnoredRows($worksheet)
-            );
+            [$colspan, $rowspan] = Coordinate::rangeDimension($cells);
 
             // shift off first cell / base cell
             $baseCell = array_shift($cellsByRange);
 
             // push base cell to merge cells with info about row- and colspan
             $mergedCells[$baseCell] = [
-                'colspan' => (int)$rangeDimension[0],
-                'rowspan' => (int)$rangeDimension[1],
+                'colspan' => $rowspan === $rowCount ? 1 : $colspan,
+                'rowspan' => $colspan === $columnCount ? 1 : $rowspan,
                 'additionalStyleIndexes' => $this->getCellStyleIndexesFromReferences($worksheet, $cellsByRange),
             ];
         }
@@ -182,80 +169,13 @@ class SpanService
      */
     private function getCellStyleIndexesFromReferences(Worksheet $worksheet, array $references): array
     {
-        if (empty($references)) {
-            return [];
-        }
-
-        try {
-            $result = [];
-            foreach ($references as $cellRef) {
-                $cell = $worksheet->getCell($cellRef);
-                if ($cell === null) {
-                    continue;
-                }
-
-                $result[] = $cell->getXfIndex();
+        $result = [];
+        foreach ($references as $cellRef) {
+            if ($worksheet->cellExists($cellRef) === true) {
+                $result[] = $worksheet->getCell($cellRef)->getXfIndex();
             }
-            return array_unique($result);
-        } catch (SpreadsheetException $e) {
-            // return empty cell style information if spreadsheet couldn't be loaded
         }
-        return [];
-    }
-
-    /**
-     * @param string $range
-     * @param array $ignoredRows
-     * @param array $ignoredColumns
-     * @return array
-     */
-    private function getRangeDimension(string $range, array $ignoredRows, array $ignoredColumns): array
-    {
-        if (empty($range) || Coordinate::coordinateIsRange($range) !== true) {
-            return [];
-        }
-
-        // get default dimension and all cells inside given range
-        $rangeDimension = Coordinate::rangeDimension($range);
-        $cellsByRange = Coordinate::extractAllCellReferencesInRange($range);
-
-        // get information about rows and cols in cell references
-        $rowsInRange = array_unique(
-            array_map(
-                static function ($cell) {
-                    return (int)Coordinate::coordinateFromString($cell)[1];
-                },
-                $cellsByRange
-            )
-        );
-        $columnsInRange = array_unique(
-            array_map(
-                static function ($cell) {
-                    return Coordinate::coordinateFromString($cell)[0];
-                },
-                $cellsByRange
-            )
-        );
-
-        // update rangeDimension by count of ignoredRows inside rows in current range
-        $rangeDimension[0] -= count(array_intersect($columnsInRange, $ignoredColumns));
-        $rangeDimension[1] -= count(array_intersect($rowsInRange, $ignoredRows));
-
-        return $rangeDimension;
-    }
-
-    /**
-     * @param Worksheet $worksheet
-     * @return int
-     */
-    private function getActiveSheetColumnCount(Worksheet $worksheet): int
-    {
-        try {
-            return Coordinate::columnIndexFromString($worksheet->getHighestColumn());
-        } catch (SpreadSheetException $e) {
-            // return zero if active worksheet couldn't be loaded
-            return 0;
-        }
+        return array_unique($result);
     }
 
     /**

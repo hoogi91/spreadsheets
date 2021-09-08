@@ -52,7 +52,7 @@ class CellService
 
     /**
      * @param Cell $cell
-     * @param callable $formatCallback
+     * @param callable|null $formatCallback
      *
      * @return string
      */
@@ -67,11 +67,9 @@ class CellService
             if ($value instanceof RichText) {
                 $richTextValue = '';
                 foreach ($value->getRichTextElements() as $element) {
-                    if ($element instanceof Run) {
-                        $richTextValue .= $this->getTextElementValue($element);
-                    } else {
-                        $richTextValue .= $element->getText();
-                    }
+                    $richTextValue .= $element instanceof Run
+                        ? $this->getTextElementValue($element)
+                        : $element->getText();
                 }
                 $value = $richTextValue;
             } else {
@@ -89,7 +87,7 @@ class CellService
      *
      * @return string
      */
-    private function getTextElementValue($element): string
+    private function getTextElementValue(Run $element): string
     {
         // evaluate text content and check if it is superscript or subscript
         $textContent = $element->getText();
@@ -116,7 +114,7 @@ class CellService
     /**
      * @param string|int|float $value
      * @param Cell $cell
-     * @param callable $callback
+     * @param callable|null $callback
      *
      * @return string
      */
@@ -153,6 +151,6 @@ class CellService
             return (string)$value;
         }
 
-        return (string)NumberFormat::toFormattedString($value, NumberFormat::FORMAT_GENERAL, $callback);
+        return NumberFormat::toFormattedString($value, NumberFormat::FORMAT_GENERAL, $callback);
     }
 }

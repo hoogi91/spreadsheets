@@ -6,9 +6,7 @@ module.exports = (env, argv) => ({
     optimization: {
         minimizer: [
             new TerserPlugin({
-                cache: true,
                 parallel: true,
-                sourceMap: false,
                 terserOptions: {
                     output: {
                         comments: false,

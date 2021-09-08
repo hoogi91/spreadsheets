@@ -45,21 +45,15 @@ class StyleService
      */
     public function getStylesheet(Spreadsheet $spreadsheet): StylesheetValueObject
     {
-        // get style collection from spreadsheet
-        $styleCollection = $spreadsheet->getCellXfCollection();
-        if (empty($styleCollection)) {
-            return StylesheetValueObject::create(self::DEFAULT_STYLES);
-        }
-
         // get default styles
         $css = self::DEFAULT_STYLES;
 
         // extend styles with calculated styles from cell information
-        foreach ($styleCollection as $index => $style) {
+        foreach ($spreadsheet->getCellXfCollection() as $index => $style) {
             $styles = array_merge(
                 $this->getAlignmentStyles($style->getAlignment()),
                 $this->getBorderStyles($style->getBorders()),
-                $this->getFontStyles($style->getFont(), true),
+                $this->getFontStyles($style->getFont()),
                 $this->getBackgroundStyles($style->getFill())
             );
             $css['.cell.cell-style-' . $index] = $styles;
@@ -71,7 +65,7 @@ class StyleService
     public function getStylesheetForRichTextElement(Run $text): StylesheetValueObject
     {
         // extract font styles for current element
-        $fontStyles = $this->getFontStyles($text->getFont(), true);
+        $fontStyles = $this->getFontStyles($text->getFont());
         return StylesheetValueObject::create($fontStyles);
     }
 
@@ -91,7 +85,7 @@ class StyleService
         if (empty($textAlign) === false) {
             $css['text-align'] = $textAlign;
             if (in_array($textAlign, ['left', 'right'])) {
-                $css['padding-' . $textAlign] = ((int)$pStyle->getIndent() * 9) . 'px';
+                $css['padding-' . $textAlign] = ($pStyle->getIndent() * 9) . 'px';
             }
         }
         return $css;
@@ -144,11 +138,10 @@ class StyleService
      * Create CSS style (\PhpOffice\PhpSpreadsheet\Style\Font).
      *
      * @param Style\Font $pStyle
-     * @param bool $excludeFontFamilyAndSize
      *
      * @return array
      */
-    private function getFontStyles(Style\Font $pStyle, $excludeFontFamilyAndSize = false): array
+    private function getFontStyles(Style\Font $pStyle): array
     {
         $css = [];
         $css['color'] = '#' . $pStyle->getColor()->getRGB();
@@ -168,11 +161,6 @@ class StyleService
             $css['text-decoration'] .= ' line-through';
         }
         $css['text-decoration'] = trim($css['text-decoration']);
-
-        if ($excludeFontFamilyAndSize === false) {
-            $css['font-family'] = '\'' . $pStyle->getName() . '\'';
-            $css['font-size'] = $pStyle->getSize() . 'pt';
-        }
 
         return array_filter($css);
     }

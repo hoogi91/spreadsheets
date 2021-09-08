@@ -29,17 +29,6 @@ class ReaderService
             throw new Reader\Exception('Reference original file doesn\'t exists!', 1539959214);
         }
 
-        if (in_array($reference->getExtension(), static::ALLOWED_EXTENSIONS, true) === false) {
-            throw new Reader\Exception(
-                sprintf(
-                    'Reference has not allowed file extension "%s"! Allowed Extensions are "%s"',
-                    $reference->getExtension(),
-                    implode(',', static::ALLOWED_EXTENSIONS)
-                ),
-                1514909945
-            );
-        }
-
         switch ($reference->getExtension()) {
             case 'xls':
                 return (new Reader\Xls())->load($reference->getForLocalProcessing());
@@ -57,10 +46,11 @@ class ReaderService
 
         throw new Reader\Exception(
             sprintf(
-                'Unknown file extension "%s" could not be loaded',
-                $reference->getExtension()
+                'Reference has not allowed file extension "%s"! Allowed Extensions are "%s"',
+                $reference->getExtension(),
+                implode(',', static::ALLOWED_EXTENSIONS)
             ),
-            1514909946
+            1514909945
         );
     }
 }

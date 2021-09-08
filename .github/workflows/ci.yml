@@ -40,6 +40,7 @@ jobs:
 
       - name: Install project testing dependencies
         run: |
+          rm composer.lock
           if [[ "${{ matrix.typo3_version }}" = *"dev"* ]]; then
             composer config minimum-stability dev;
             composer config prefer-stable true;

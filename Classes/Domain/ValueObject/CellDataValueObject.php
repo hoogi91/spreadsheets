@@ -274,16 +274,6 @@ class CellDataValueObject implements JsonSerializable
     }
 
     /**
-     * @param string $name
-     * @param mixed|null $default
-     * @return mixed|null
-     */
-    private function getMetaData(string $name, $default = null)
-    {
-        return $this->metaData[$name] ?? $default;
-    }
-
-    /**
      * @inheritDoc
      */
     public function jsonSerialize()
@@ -296,7 +286,7 @@ class CellDataValueObject implements JsonSerializable
             $data['col'] = $this->getColspan();
         }
 
-        $css = $this->getMetaData('backendCellClasses');
+        $css = $this->metaData['backendCellClasses'] ?? null;
         if (empty($css) === false) {
             $data['css'] = implode('-', $css);
         }

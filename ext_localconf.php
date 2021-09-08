@@ -28,5 +28,8 @@ defined('TYPO3_MODE') or die();
             'priority' => 30,
             'class' => \Hoogi91\Spreadsheets\Form\Element\DataInputElement::class,
         ];
+
+        // register data handler hook
+        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] = \Hoogi91\Spreadsheets\Hooks\DataHandlerHook::class;
     }
 })();
