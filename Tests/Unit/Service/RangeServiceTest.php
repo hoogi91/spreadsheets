@@ -35,16 +35,16 @@ class RangeServiceTest extends UnitTestCase
     {
         // input ranges will be shrinked to fit into fixture data structure
         return [
-            ['2:24', 'A2:G10'],
+            ['2:24', 'A2:G11'],
             ['2', 'A2:G2'],
-            ['B:D', 'B1:D10'],
-            ['B', 'B1:B10'],
+            ['B:D', 'B1:D11'],
+            ['B', 'B1:B11'],
             ['2:B', 'B2:B2'],
-            ['B:24', 'B10:B10'],
-            ['B2:24', 'B2:B10'],
-            ['2:D24', 'D2:D10'],
+            ['B:24', 'B11:B11'],
+            ['B2:24', 'B2:B11'],
+            ['2:D24', 'D2:D11'],
             ['B2:D', 'B2:D2'],
-            ['B:D24', 'B10:D10'],
+            ['B:D24', 'B11:D11'],
         ];
     }
 

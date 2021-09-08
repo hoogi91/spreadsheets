@@ -92,7 +92,7 @@ class ExtractorServiceTest extends UnitTestCase
         $bodyData = $this->extractorService->getBodyData($worksheet, true);
 
         self::assertIsArray($bodyData);
-        self::assertCount(9, $bodyData);
+        self::assertCount(10, $bodyData);
 
         /** @var CellDataValueObject $cellValueA1 */
         $cellValueA1 = $bodyData[1][1];
@@ -164,7 +164,7 @@ class ExtractorServiceTest extends UnitTestCase
         self::assertIsArray($headData, 'Head data is not an array');
         self::assertIsArray($bodyData, 'Body data is not an array');
         self::assertCount(2, $headData);
-        self::assertCount(7, $bodyData);
+        self::assertCount(8, $bodyData);
 
         /** @var CellDataValueObject $cellValueA1 */
         $cellValueA1 = $headData[1]['A'];

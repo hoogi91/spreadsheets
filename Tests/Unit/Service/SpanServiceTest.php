@@ -93,7 +93,7 @@ class SpanServiceTest extends UnitTestCase
                 'A9' => [
                     'additionalStyleIndexes' => $mergedCells['A9']['additionalStyleIndexes'],
                     'colspan' => 7,
-                    'rowspan' => 2,
+                    'rowspan' => 1, // colspan uses full width so rowspan should equal to 1 and NOT 2
                 ],
             ],
             $mergedCells
