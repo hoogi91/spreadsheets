@@ -82,7 +82,7 @@ class DataHandlerHook
     private function getBackendRecordField(int $uid, string $field)
     {
         if (!isset(self::$records[$uid])) {
-            self::$records[$uid] = BackendUtility::getRecord('tt_content', $uid);
+            self::$records[$uid] = BackendUtility::getRecord('tt_content', $uid); // @codeCoverageIgnore
         }
         return self::$records[$uid][$field] ?? null;
     }

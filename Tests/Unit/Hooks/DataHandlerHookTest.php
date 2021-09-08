@@ -23,6 +23,15 @@ class DataHandlerHookTest extends UnitTestCase
         'NEW123456' => 123456,
     ];
 
+    public function setUp()
+    {
+        parent::setUp();
+        // default record has no bodytext
+        \Closure::bind(function () {
+            self::$records[123456] = ['bodytext' => ''];
+        }, null, DataHandlerHook::class)->call(new DataHandlerHook());
+    }
+
     public function tearDown()
     {
         parent::tearDown();
@@ -145,13 +154,6 @@ class DataHandlerHookTest extends UnitTestCase
                 'references' => [456],
                 'updateTriggered' => true,
                 'updateParams' => ['tt_content', 123456, ['bodytext' => 'spreadsheet://456']],
-                'closure' => function () {
-                    self::$records[123456] = [
-                        'CType' => 'spreadsheets_table',
-                        'tx_spreadsheets_assets' => 1,
-                        'bodytext' => '',
-                    ];
-                },
             ],
         ];
     }
