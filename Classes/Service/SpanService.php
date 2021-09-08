@@ -138,19 +138,22 @@ class SpanService
             return static::$mergedCells[$sheetHash];
         }
 
+        $rowCount = $worksheet->getHighestRow();
+        $columnCount = Coordinate::columnIndexFromString($worksheet->getHighestColumn());
+
         $mergedCells = [];
         foreach ($worksheet->getMergeCells() as $cells) {
             // get all cell references by range
             $cellsByRange = Coordinate::extractAllCellReferencesInRange($cells);
-            $rangeDimension = Coordinate::rangeDimension($cells);
+            [$colspan, $rowspan] = Coordinate::rangeDimension($cells);
 
             // shift off first cell / base cell
             $baseCell = array_shift($cellsByRange);
 
             // push base cell to merge cells with info about row- and colspan
             $mergedCells[$baseCell] = [
-                'colspan' => (int)$rangeDimension[0],
-                'rowspan' => (int)$rangeDimension[1],
+                'colspan' => $rowspan === $rowCount ? 1 : $colspan,
+                'rowspan' => $colspan === $columnCount ? 1 : $rowspan,
                 'additionalStyleIndexes' => $this->getCellStyleIndexesFromReferences($worksheet, $cellsByRange),
             ];
         }
