@@ -27,7 +27,7 @@ class DataHandlerHook
      *
      * @return void
      */
-    public function processDatamap_afterDatabaseOperations(
+    public function processDatamap_afterDatabaseOperations( // @codingStandardsIgnoreLine
         $status,
         $table,
         $id,
