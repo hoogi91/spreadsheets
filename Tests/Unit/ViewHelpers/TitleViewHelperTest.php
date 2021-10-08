@@ -2,10 +2,12 @@
 
 namespace Hoogi91\Spreadsheets\Tests\Unit\ViewHelpers;
 
+use Hoogi91\Spreadsheets\Service\ReaderService;
 use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
 use Hoogi91\Spreadsheets\ViewHelpers\Cell\Value\FormattedViewHelper;
 use Hoogi91\Spreadsheets\ViewHelpers\Reader\Sheet\TitleViewHelper;
 use Nimut\TestingFramework\TestCase\ViewHelperBaseTestcase;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
@@ -24,7 +26,15 @@ class TitleViewHelperTest extends ViewHelperBaseTestcase
     protected function setUp(): void
     {
         parent::setUp();
+
+        /** @var ReaderService|MockObject $readerService */
+        $readerService = $this->getMockBuilder(ReaderService::class)->getMock();
+        $readerService->method('getSpreadsheet')->willReturn(
+            (new Xlsx())->load(dirname(__DIR__, 2) . '/Fixtures/01_fixture.xlsx')
+        );
+
         $this->viewHelper = $this->getMockBuilder(TitleViewHelper::class)
+            ->setConstructorArgs([$readerService])
             ->setMethods(['renderChildren'])
             ->getMock();
         $this->injectDependenciesIntoViewHelper($this->viewHelper);

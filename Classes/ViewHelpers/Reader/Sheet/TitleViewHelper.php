@@ -8,7 +8,6 @@ use Closure;
 use Hoogi91\Spreadsheets\Service\ReaderService;
 use PhpOffice\PhpSpreadsheet\Exception;
 use TYPO3\CMS\Core\Resource\FileReference;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 use TYPO3Fluid\Fluid\Core\ViewHelper\Traits\CompileWithRenderStatic;
@@ -20,6 +19,16 @@ use TYPO3Fluid\Fluid\Core\ViewHelper\Traits\CompileWithRenderStatic;
 class TitleViewHelper extends AbstractViewHelper
 {
     use CompileWithRenderStatic;
+
+    /**
+     * @var
+     */
+    private static $readerService;
+
+    public function __construct(ReaderService $readerService)
+    {
+        self::$readerService = $readerService;
+    }
 
     /**
      * Initialize arguments.
@@ -51,9 +60,9 @@ class TitleViewHelper extends AbstractViewHelper
         }
 
         try {
-            /** @var ReaderService $reader */
-            $reader = GeneralUtility::makeInstance(ReaderService::class);
-            return $reader->getSpreadsheet($arguments['file'])->getSheet((int)$arguments['index'])->getTitle();
+            return self::$readerService->getSpreadsheet($arguments['file'])
+                ->getSheet((int)$arguments['index'])
+                ->getTitle();
         } catch (Exception $e) {
             return '';
         }

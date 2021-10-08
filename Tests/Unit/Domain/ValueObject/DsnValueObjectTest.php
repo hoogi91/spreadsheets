@@ -42,7 +42,7 @@ class DsnValueObjectTest extends UnitTestCase
 
         $value = DsnValueObject::createFromDSN($dsn);
         self::assertEquals($exceptionClassOrFinalDsn, (string)$value);
-        self::assertEquals(5, $value->getFileReference()->getUid());
+        self::assertEquals(5, $value->getFileReference());
 
         self::assertEquals(
             strpos($dsn, 'vertical') !== false ? 'vertical' : null,
@@ -104,7 +104,7 @@ class DsnValueObjectTest extends UnitTestCase
 
         $value = DsnValueObject::createFromDSN($dsn);
         self::assertEquals($exceptionClassOrFinalDsn, (string)$value);
-        self::assertEquals(5, $value->getFileReference()->getUid());
+        self::assertEquals(5, $value->getFileReference());
         self::assertEquals(
             strpos($dsn, 'vertical') !== false ? 'vertical' : null,
             $value->getDirectionOfSelection()
@@ -160,7 +160,7 @@ class DsnValueObjectTest extends UnitTestCase
         $value = DsnValueObject::createFromDSN($databaseString);
 
         // assert data from value
-        self::assertEquals(5, $value->getFileReference()->getUid());
+        self::assertEquals(5, $value->getFileReference());
         self::assertEquals(1, $value->getSheetIndex());
         self::assertEquals('D2:G5', $value->getSelection());
         self::assertEquals('vertical', $value->getDirectionOfSelection());
@@ -174,7 +174,7 @@ class DsnValueObjectTest extends UnitTestCase
         $value = DsnValueObject::createFromDSN($databaseString);
 
         // assert data from value
-        self::assertEquals(5, $value->getFileReference()->getUid());
+        self::assertEquals(5, $value->getFileReference());
         self::assertEquals(1, $value->getSheetIndex());
         self::assertEquals('D2:G5', $value->getSelection());
         self::assertEquals('vertical', $value->getDirectionOfSelection());
@@ -188,7 +188,7 @@ class DsnValueObjectTest extends UnitTestCase
         $value = DsnValueObject::createFromDSN($databaseString);
 
         // assert data from value
-        self::assertEquals(10, $value->getFileReference()->getUid());
+        self::assertEquals(10, $value->getFileReference());
         self::assertEquals(2, $value->getSheetIndex());
         self::assertEquals('A2:B5', $value->getSelection());
         self::assertEquals(null, $value->getDirectionOfSelection());
@@ -202,24 +202,9 @@ class DsnValueObjectTest extends UnitTestCase
         $value = DsnValueObject::createFromDSN($databaseString);
 
         // assert data from value
-        self::assertEquals(5, $value->getFileReference()->getUid());
+        self::assertEquals(5, $value->getFileReference());
         self::assertEquals(1, $value->getSheetIndex());
         self::assertEquals('D2:G5', $value->getSelection());
         self::assertEquals($expectedDSN, (string)$value);
-    }
-
-    public function testCreationFromDatabaseStringOnUnknown(): void
-    {
-        // an invalid DSN exception should be thrown cause the file could not be found
-        $this->expectException(InvalidDataSourceNameException::class);
-
-        try {
-            $databaseString = 'spreadsheet://0?index=99&range=A1%3AB2';
-            DsnValueObject::createFromDSN($databaseString);
-        } catch (InvalidDataSourceNameException $exception) {
-            // check if the previous exception indicates that TYPO3 was not able to found the file resource
-            self::assertInstanceOf(ResourceDoesNotExistException::class, $exception->getPrevious());
-            throw $exception;
-        }
     }
 }

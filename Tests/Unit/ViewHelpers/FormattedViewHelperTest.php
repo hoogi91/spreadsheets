@@ -3,12 +3,8 @@
 namespace Hoogi91\Spreadsheets\Tests\Unit\ViewHelpers;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\CellDataValueObject;
-use Hoogi91\Spreadsheets\Service\CellService;
-use Hoogi91\Spreadsheets\Service\StyleService;
-use Hoogi91\Spreadsheets\Service\ValueMappingService;
 use Hoogi91\Spreadsheets\ViewHelpers\Cell\Value\FormattedViewHelper;
 use Nimut\TestingFramework\TestCase\ViewHelperBaseTestcase;
-use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -35,7 +31,6 @@ class FormattedViewHelperTest extends ViewHelperBaseTestcase
             ->setMethods(['renderChildren'])
             ->getMock();
         $this->injectDependenciesIntoViewHelper($this->viewHelper);
-        $this->spreadsheet = (new Xlsx())->load(dirname(__DIR__, 2) . '/Fixtures/01_fixture.xlsx');
     }
 
     public function testRenderWithoutCell(): void
@@ -47,12 +42,9 @@ class FormattedViewHelperTest extends ViewHelperBaseTestcase
     /**
      * @dataProvider cellProvider
      */
-    public function testRender(string $expected, string $coordinate, string $target = null): void
+    public function testRender(string $expected, array $cellMock, string $target = null): void
     {
-        $cellService = new CellService(new StyleService(new ValueMappingService()));
-
-        $cell = $this->spreadsheet->getActiveSheet()->getCell($coordinate);
-        $cellValue = CellDataValueObject::create($cell, $cellService->getFormattedValue($cell));
+        $cellValue = $this->createConfiguredMock(CellDataValueObject::class, $cellMock);
         $this->setArgumentsUnderTest($this->viewHelper, ['cell' => $cellValue, 'target' => $target]);
         self::assertEquals($expected, $this->viewHelper->render());
     }
@@ -65,27 +57,61 @@ class FormattedViewHelperTest extends ViewHelperBaseTestcase
     {
         return [
             // special chars
-            ['©™§∆', 'A4'],
+            [
+                '©™§∆',
+                [
+                    'getRenderedValue' => '©™§∆',
+                    'isRichText' => false,
+                    'isSuperscript' => false,
+                    'isSubscript' => false,
+                    'getHyperlink' => '',
+                ],
+            ],
             // hyperlink, hyperlink-title, target _self
             [
                 '<a href="http://www.google.de/" target="_self" title="">Link</a>',
-                'D4',
+                [
+                    'getRenderedValue' => 'Link',
+                    'isRichText' => false,
+                    'isSuperscript' => false,
+                    'isSubscript' => false,
+                    'getHyperlink' => 'http://www.google.de/',
+                    'getHyperlinkTitle' => '',
+                ],
                 '_self'
             ],
             // richtext, superscript, subscript
             [
                 '<span style="color:#000000"><sup>Hoch</sup></span><span style="color:#000000"> Test </span><span style="color:#000000"><sub>Tief</sub></span>',
-                'D5'
+                [
+                    'getRenderedValue' => '<span style="color:#000000"><sup>Hoch</sup></span><span style="color:#000000"> Test </span><span style="color:#000000"><sub>Tief</sub></span>',
+                    'isRichText' => true,
+                    'isSuperscript' => false,
+                    'isSubscript' => false,
+                    'getHyperlink' => '',
+                ]
             ],
             // superscript
             [
                 '<sup>Hoch</sup>',
-                'E5'
+                [
+                    'getRenderedValue' => 'Hoch',
+                    'isRichText' => false,
+                    'isSuperscript' => true,
+                    'isSubscript' => false,
+                    'getHyperlink' => '',
+                ]
             ],
             // subscript
             [
                 '<sub>2018</sub>',
-                'E6'
+                [
+                    'getRenderedValue' => '2018',
+                    'isRichText' => false,
+                    'isSuperscript' => false,
+                    'isSubscript' => true,
+                    'getHyperlink' => '',
+                ]
             ]
         ];
     }

@@ -292,7 +292,15 @@ class DataInputElementTest extends UnitTestCase
                     'valueObject' => 'spreadsheet://678?index=1&range=D2%3AG5&direction=vertical',
                 ]
             ),
-            'data' => ['databaseRow' => ['uid' => 1, self::DEFAULT_UPLOAD_FIELD => 678]] + self::DEFAULT_DATA,
+            'data' => array_replace_recursive(
+                self::DEFAULT_DATA,
+                [
+                    'databaseRow' => ['uid' => 1, self::DEFAULT_UPLOAD_FIELD => 678],
+                    'parameterArray' => [
+                        'itemFormElValue' => 'spreadsheet://678?index=1&range=D2%3AG5&direction=vertical'
+                    ],
+                ]
+            ),
         ];
 
         yield 'successful input element rendering' => [];

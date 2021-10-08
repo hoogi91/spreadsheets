@@ -6,9 +6,6 @@ namespace Hoogi91\Spreadsheets\Domain\ValueObject;
 
 use Hoogi91\Spreadsheets\Exception\InvalidDataSourceNameException;
 use JsonSerializable;
-use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
-use TYPO3\CMS\Core\Resource\FileReference;
-use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 
@@ -39,7 +36,7 @@ class DsnValueObject implements JsonSerializable
     private const DSN_PATTERN = '/^spreadsheet:\/\/(\d+)(\?.*)?/';
 
     /**
-     * @var FileReference
+     * @var int
      */
     private $fileReference;
 
@@ -65,32 +62,22 @@ class DsnValueObject implements JsonSerializable
      */
     public function __construct(string $dsn)
     {
-        try {
-            if (preg_match(self::LEGACY_DSN_PATTERN, $dsn) === 1) {
-                $this->legacyDSNParsing($dsn);
-            } elseif (preg_match(self::DSN_PATTERN, $dsn) === 1) {
-                $dsnData = parse_url($dsn);
-                parse_str($dsnData['query'] ?? '', $queryData);
-                if (MathUtility::canBeInterpretedAsInteger($dsnData['host'])) {
-                    /** @var FileRepository $fileRepository */
-                    $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
-                    $this->fileReference = $fileRepository->findFileReferenceByUid((int)$dsnData['host']);
-                } else {
-                    throw new InvalidDataSourceNameException('File reference from DSN can not be parsed/evaluated!');
-                }
-
-                $this->sheetIndex = (int)($queryData['index'] ?? 0);
-                $this->selection = $queryData['range'] ?: null;
-                $this->directionOfSelection = $queryData['direction'] ?: null;
+        if (preg_match(self::LEGACY_DSN_PATTERN, $dsn) === 1) {
+            $this->legacyDSNParsing($dsn);
+        } elseif (preg_match(self::DSN_PATTERN, $dsn) === 1) {
+            $dsnData = parse_url($dsn);
+            parse_str($dsnData['query'] ?? '', $queryData);
+            if (MathUtility::canBeInterpretedAsInteger($dsnData['host']) && (int)$dsnData['host'] > 0) {
+                $this->fileReference = (int)$dsnData['host'];
             } else {
-                throw new InvalidDataSourceNameException('Spreadsheet DSN could not be parsed!');
+                throw new InvalidDataSourceNameException('File reference from DSN is not valid!');
             }
-        } /** @noinspection PhpRedundantCatchClauseInspection */ catch (ResourceDoesNotExistException $exception) {
-            throw new InvalidDataSourceNameException(
-                'Referenced file resource could not be found!',
-                1578420075,
-                $exception
-            );
+
+            $this->sheetIndex = (int)($queryData['index'] ?? 0);
+            $this->selection = $queryData['range'] ?: null;
+            $this->directionOfSelection = $queryData['direction'] ?: null;
+        } else {
+            throw new InvalidDataSourceNameException('Spreadsheet DSN could not be parsed!');
         }
 
         if ($this->sheetIndex < 0) {
@@ -105,13 +92,9 @@ class DsnValueObject implements JsonSerializable
     {
         [$file, $fullSelection] = GeneralUtility::trimExplode('|', $dsn, false, 2);
         if (strpos($file, 'file:') === 0 && (int)substr($file, 5) !== 0) {
-            /** @var FileRepository $fileRepository */
-            $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
-            $this->fileReference = $fileRepository->findFileReferenceByUid((int)substr($file, 5));
+            $this->fileReference = (int)substr($file, 5);
         } elseif ((int)$file !== 0 && MathUtility::canBeInterpretedAsInteger($file)) {
-            /** @var FileRepository $fileRepository */
-            $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
-            $this->fileReference = $fileRepository->findFileReferenceByUid((int)$file);
+            $this->fileReference = (int)$file;
         } else {
             throw new InvalidDataSourceNameException('File reference from DSN can not be parsed/evaluated!');
         }
@@ -159,17 +142,13 @@ class DsnValueObject implements JsonSerializable
             }
         );
 
-        return sprintf(
-            'spreadsheet://%d?%s',
-            $this->getFileReference()->getUid(),
-            http_build_query($parameters)
-        );
+        return sprintf('spreadsheet://%d?%s', $this->getFileReference(), http_build_query($parameters));
     }
 
     /**
-     * @return FileReference
+     * @return int
      */
-    public function getFileReference(): FileReference
+    public function getFileReference(): int
     {
         return $this->fileReference;
     }

@@ -5,11 +5,9 @@ namespace Hoogi91\Spreadsheets\Tests\Unit\Hooks;
 use Hoogi91\Spreadsheets\Hooks\DataHandlerHook;
 use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
 use Nimut\TestingFramework\TestCase\UnitTestCase;
-use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Container\ContainerInterface;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Resource\FileReference;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Resource\FileRepository;
 
 /**
  * Class DataHandlerHookTest
@@ -23,23 +21,27 @@ class DataHandlerHookTest extends UnitTestCase
         'NEW123456' => 123456,
     ];
 
-    public function setUp()
+    /**
+     * @var FileRepository
+     */
+    private $fileRepositoryMock;
+
+    /**
+     * @var DataHandlerHook
+     */
+    private $testHandlerHook;
+
+    public function setUp(): void
     {
         parent::setUp();
-        // default record has no bodytext
-        \Closure::bind(function () {
-            self::$records[123456] = ['bodytext' => ''];
-        }, null, DataHandlerHook::class)->call(new DataHandlerHook());
-    }
 
-    public function tearDown()
-    {
-        parent::tearDown();
-        // reset data handler static property bindings
-        \Closure::bind(function () {
-            self::$records = [];
-        }, null, DataHandlerHook::class)->call(new DataHandlerHook());
-        gc_collect_cycles();
+        $this->fileRepositoryMock = $this->getFileRepositoryMock();
+        $this->testHandlerHook = new DataHandlerHook($this->fileRepositoryMock);
+
+        // default record has no bodytext
+        $property = new \ReflectionProperty($this->testHandlerHook, 'records');
+        $property->setAccessible(true);
+        $property->setValue($this->testHandlerHook, [123456 => ['bodytext' => '']]);
     }
 
     /**
@@ -60,7 +62,7 @@ class DataHandlerHookTest extends UnitTestCase
 
         // append data handler to hook params
         $hookParams[] = $dataHandlerMock;
-        (new DataHandlerHook())->processDatamap_afterDatabaseOperations(...array_values($hookParams));
+        $this->testHandlerHook->processDatamap_afterDatabaseOperations(...array_values($hookParams));
     }
 
     /**
@@ -79,17 +81,11 @@ class DataHandlerHookTest extends UnitTestCase
             $mock->method('getUid')->willReturn($reference);
             return $mock;
         }, $references);
-        $fileRepositoryMock = $this->getFileRepositoryMock();
-        $fileRepositoryMock->method('findByRelation')->willReturn($references);
-
-        /** @var ContainerInterface|MockObject $container */
-        $container = $this->getContainerMock();
-        $container->method('get')->willReturn($fileRepositoryMock);
-        GeneralUtility::setContainer($container);
+        $this->fileRepositoryMock->method('findByRelation')->willReturn($references);
 
         // update statically saved entries got with backend utility
         if ($closure !== null) {
-            \Closure::bind($closure, null, DataHandlerHook::class)->call(new DataHandlerHook());
+            $closure($this->testHandlerHook);
         }
 
         // now start process datamap hook test
@@ -140,12 +136,16 @@ class DataHandlerHookTest extends UnitTestCase
                 'references' => [123],
                 'updateTriggered' => false,
                 'updateParams' => [],
-                'closure' => function () {
-                    self::$records[123456] = [
-                        'CType' => 'spreadsheets_table',
-                        'tx_spreadsheets_assets' => 1,
-                        'bodytext' => 'spreadsheet://456',
-                    ];
+                'closure' => function ($handler) {
+                    $property = new \ReflectionProperty($handler, 'records');
+                    $property->setAccessible(true);
+                    $property->setValue($handler, [
+                        123456 => [
+                            'CType' => 'spreadsheets_table',
+                            'tx_spreadsheets_assets' => 1,
+                            'bodytext' => 'spreadsheet://456',
+                        ]
+                    ]);
                 },
             ],
             '[NEW] saved and bodytext gets updated' => [

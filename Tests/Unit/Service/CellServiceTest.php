@@ -42,7 +42,10 @@ class CellServiceTest extends UnitTestCase
         parent::setUp();
         self::setupDefaultTSFE();
         $this->spreadsheet = (new Xlsx())->load(dirname(__DIR__, 2) . '/Fixtures/01_fixture.xlsx');
-        $this->cellService = new CellService(new StyleService(new ValueMappingService()));
+
+        $mappingService = $this->createTestProxy(ValueMappingService::class);
+        $styleService = $this->createTestProxy(StyleService::class, [$mappingService]);
+        $this->cellService = new CellService($styleService);
     }
 
     public function testReadingOfCellValues(): void
@@ -55,6 +58,7 @@ class CellServiceTest extends UnitTestCase
         self::assertEquals('Test123', $this->cellService->getFormattedValue($worksheet->getCell('C4')));
         self::assertEquals('Link', $this->cellService->getFormattedValue($worksheet->getCell('D4')));
         self::assertEquals('Hoch', $this->cellService->getFormattedValue($worksheet->getCell('E5')));
+        self::assertEquals('2018', $this->cellService->getFormattedValue($worksheet->getCell('E6')));
         self::assertEquals(
             '<span style="color:#000000"><sup>Hoch</sup></span><span style="color:#000000"> Test </span><span style="color:#000000"><sub>Tief</sub></span>',
             $this->cellService->getFormattedValue($worksheet->getCell('D5'))

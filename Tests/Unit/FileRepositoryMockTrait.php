@@ -18,7 +18,7 @@ trait FileRepositoryMockTrait
 {
 
     /**
-     * @return MockObject
+     * @return FileRepository|MockObject
      */
     private function getFileRepositoryMock(): MockObject
     {
