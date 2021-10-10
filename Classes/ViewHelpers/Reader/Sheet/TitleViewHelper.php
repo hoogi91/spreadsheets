@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\ViewHelpers\Reader\Sheet;
 
-use Closure;
 use Hoogi91\Spreadsheets\Service\ReaderService;
 use PhpOffice\PhpSpreadsheet\Exception;
 use TYPO3\CMS\Core\Resource\FileReference;
-use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
-use TYPO3Fluid\Fluid\Core\ViewHelper\Traits\CompileWithRenderStatic;
 
 /**
  * Class TitleViewHelper
@@ -18,16 +15,15 @@ use TYPO3Fluid\Fluid\Core\ViewHelper\Traits\CompileWithRenderStatic;
  */
 class TitleViewHelper extends AbstractViewHelper
 {
-    use CompileWithRenderStatic;
 
     /**
-     * @var
+     * @var ReaderService
      */
-    private static $readerService;
+    private $readerService;
 
     public function __construct(ReaderService $readerService)
     {
-        self::$readerService = $readerService;
+        $this->readerService = $readerService;
     }
 
     /**
@@ -41,27 +37,20 @@ class TitleViewHelper extends AbstractViewHelper
     }
 
     /**
-     * @param array $arguments
-     * @param Closure $renderChildrenClosure
-     * @param RenderingContextInterface $renderingContext
-     *
      * @return string
      */
-    public static function renderStatic(
-        array $arguments,
-        Closure $renderChildrenClosure,
-        RenderingContextInterface $renderingContext
-    ): string {
-        if (empty($arguments['file'])) {
-            $arguments['file'] = $renderChildrenClosure();
+    public function render(): string
+    {
+        if (empty($this->arguments['file'])) {
+            $this->arguments['file'] = $this->renderChildren();
         }
-        if ($arguments['file'] instanceof FileReference === false) {
+        if ($this->arguments['file'] instanceof FileReference === false) {
             return '';
         }
 
         try {
-            return self::$readerService->getSpreadsheet($arguments['file'])
-                ->getSheet((int)$arguments['index'])
+            return $this->readerService->getSpreadsheet($this->arguments['file'])
+                ->getSheet((int)$this->arguments['index'])
                 ->getTitle();
         } catch (Exception $e) {
             return '';

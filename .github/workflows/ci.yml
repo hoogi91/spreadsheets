@@ -19,8 +19,13 @@ jobs:
       fail-fast: false
       matrix:
         php_version: ['7.2', '7.3', '7.4']
-        typo3_version: ['^10.4']
+        typo3_version: ['^10.4', '^11.5']
         experimental: [false]
+        exclude:
+          - php_version: '7.2'
+            typo3_version: '^11.5'
+          - php_version: '7.3'
+            typo3_version: '^11.5'
         include:
           # add experimental dev-master for PHP 7.4
           - php_version: '7.4'

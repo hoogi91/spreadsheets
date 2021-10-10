@@ -17,35 +17,37 @@
 </strong>
 
 <f:alias map="{value: '{bodytext -> s:value.get()}'}">
-	<ul>
-		<li>
-			<i>
-				<f:translate key="backend.preview.spreadsheets_table.file" extensionName="spreadsheets"/>
-			</i>
-			{value.fileReference.name}
-		</li>
+    <f:alias map="{file: '{value.fileReference -> s:reader.fileReference()}'}">
+        <ul>
+            <li>
+                <i>
+                    <f:translate key="backend.preview.spreadsheets_table.file" extensionName="spreadsheets"/>
+                </i>
+                {file.name}
+            </li>
 
-		<f:alias map="{title: '{value.fileReference -> s:reader.sheet.title(index: value.sheetIndex)}'}">
-			<f:if condition="{title}">
-				<li>
-					<i>
-						<f:translate key="backend.preview.spreadsheets_table.sheet"
-									 extensionName="spreadsheets"/>
-					</i>
-					{title}
-				</li>
-			</f:if>
-		</f:alias>
+            <f:alias map="{title: '{file -> s:reader.sheet.title(index: value.sheetIndex)}'}">
+                <f:if condition="{title}">
+                    <li>
+                        <i>
+                            <f:translate key="backend.preview.spreadsheets_table.sheet"
+                                         extensionName="spreadsheets"/>
+                        </i>
+                        {title}
+                    </li>
+                </f:if>
+            </f:alias>
 
-		<f:if condition="{value.selection}">
-			<li>
-				<i>
-					<f:translate key="backend.preview.spreadsheets_table.selection"
-								 extensionName="spreadsheets"/>
-				</i>
-				{value.selection}
-			</li>
-		</f:if>
-	</ul>
+            <f:if condition="{value.selection}">
+                <li>
+                    <i>
+                        <f:translate key="backend.preview.spreadsheets_table.selection"
+                                     extensionName="spreadsheets"/>
+                    </i>
+                    {value.selection}
+                </li>
+            </f:if>
+        </ul>
+    </f:alias>
 </f:alias>
 </html>

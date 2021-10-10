@@ -83,16 +83,17 @@ class ExtractorService
      * @param bool $returnCellRef
      * @return ValueObject\ExtractionValueObject
      * @throws SpreadsheetReaderException
+     * @throws ResourceDoesNotExistException
      */
     public function getDataByDsnValueObject(
         ValueObject\DsnValueObject $dsnValue,
         bool $returnCellRef = false
     ): ValueObject\ExtractionValueObject {
-        try {
-            $spreadsheet = $this->readerService->getSpreadsheet(
-                $this->fileRepository->findFileReferenceByUid($dsnValue->getFileReference())
-            );
+        $spreadsheet = $this->readerService->getSpreadsheet(
+            $this->fileRepository->findFileReferenceByUid($dsnValue->getFileReference())
+        );
 
+        try {
             // calculate correct range from worksheet or selection
             $worksheet = $spreadsheet->setActiveSheetIndex($dsnValue->getSheetIndex());
             $range = $dsnValue->getSelection();
@@ -113,7 +114,7 @@ class ExtractorService
             );
 
             return ValueObject\ExtractionValueObject::create($spreadsheet, $cellData);
-        } catch (SpreadsheetException | ResourceDoesNotExistException $exception) { // @codeCoverageIgnoreStart
+        } catch (SpreadsheetException $exception) { // @codeCoverageIgnoreStart
             return ValueObject\ExtractionValueObject::create($spreadsheet, []); // @codeCoverageIgnoreEnd
         }
     }

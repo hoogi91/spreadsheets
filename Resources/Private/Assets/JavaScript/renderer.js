@@ -45,17 +45,21 @@ export default class Renderer {
                 const link = document.createElement('a');
                 link.setAttribute('href', '#');
                 link.setAttribute('data-value', index);
+                link.classList.add('nav-link');
                 link.innerText = spreadsheetData.getSheetName(index);
 
                 const listItem = document.createElement('li');
+                listItem.classList.add('nav-item');
+
                 if (index === parseInt(selectedSheetIndex)) {
+                    link.classList.add('active');
                     listItem.classList.add('active');
                 }
                 listItem.appendChild(link);
 
                 this.sheetWrapper.appendChild(listItem);
             }
-            this.sheetWrapper.style.display = 'block';
+            this.sheetWrapper.style.display = '';
         }
     }
 

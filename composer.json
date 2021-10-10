@@ -22,12 +22,12 @@
     "ext-json": "*",
     "ext-mbstring": "*",
     "phpoffice/phpspreadsheet": "^1.18",
-    "typo3/cms-backend": "^10.4",
-    "typo3/cms-core": "^10.4",
-    "typo3/cms-extbase": "^10.4",
-    "typo3/cms-fluid": "^10.4",
-    "typo3/cms-fluid-styled-content": "^10.4",
-    "typo3/cms-frontend": "^10.4"
+    "typo3/cms-backend": "^10.4 || ^11.5",
+    "typo3/cms-core": "^10.4 || ^11.5",
+    "typo3/cms-extbase": "^10.4 || ^11.5",
+    "typo3/cms-fluid": "^10.4 || ^11.5",
+    "typo3/cms-fluid-styled-content": "^10.4 || ^11.5",
+    "typo3/cms-frontend": "^10.4 || ^11.5"
   },
   "require-dev": {
     "nimut/testing-framework": "^5.0",
@@ -35,7 +35,7 @@
     "phpunit/phpunit": "^7.0",
     "roave/security-advisories": "dev-latest",
     "squizlabs/php_codesniffer": "^3.5",
-    "typo3/minimal": "^10.4"
+    "typo3/minimal": "^10.4 || ^11.5"
   },
   "autoload": {
     "psr-4": {
@@ -71,6 +71,7 @@
   },
   "extra": {
     "typo3/cms": {
+      "extension-key": "spreadsheets",
       "cms-package-dir": "{$vendor-dir}/typo3/cms",
       "web-dir": ".Build/web"
     }
