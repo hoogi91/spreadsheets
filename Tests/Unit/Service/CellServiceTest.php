@@ -6,7 +6,6 @@ use Hoogi91\Spreadsheets\Service\CellService;
 use Hoogi91\Spreadsheets\Service\StyleService;
 use Hoogi91\Spreadsheets\Service\ValueMappingService;
 use Hoogi91\Spreadsheets\Tests\Unit\TsfeSetupTrait;
-use Nimut\TestingFramework\TestCase\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
@@ -16,6 +15,7 @@ use PhpOffice\PhpSpreadsheet\RichText\Run;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PHPUnit\Framework\MockObject\MockObject;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /**
  * Class CellServiceTest
@@ -36,6 +36,8 @@ class CellServiceTest extends UnitTestCase
      * @var CellService
      */
     protected $cellService;
+
+    protected $resetSingletonInstances = true;
 
     protected function setUp(): void
     {

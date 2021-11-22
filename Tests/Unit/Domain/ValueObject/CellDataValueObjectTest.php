@@ -4,7 +4,7 @@ namespace Hoogi91\Spreadsheets\Tests\Unit\Domain\ValueObject;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\CellDataValueObject;
 use Hoogi91\Spreadsheets\Tests\Unit\TsfeSetupTrait;
-use Nimut\TestingFramework\TestCase\UnitTestCase;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;

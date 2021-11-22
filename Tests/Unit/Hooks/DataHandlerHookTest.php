@@ -4,7 +4,7 @@ namespace Hoogi91\Spreadsheets\Tests\Unit\Hooks;
 
 use Hoogi91\Spreadsheets\Hooks\DataHandlerHook;
 use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
-use Nimut\TestingFramework\TestCase\UnitTestCase;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\FileRepository;

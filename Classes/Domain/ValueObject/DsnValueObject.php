@@ -74,8 +74,8 @@ class DsnValueObject implements JsonSerializable
             }
 
             $this->sheetIndex = (int)($queryData['index'] ?? 0);
-            $this->selection = $queryData['range'] ?: null;
-            $this->directionOfSelection = $queryData['direction'] ?: null;
+            $this->selection = $queryData['range'] ?? null;
+            $this->directionOfSelection = $queryData['direction'] ?? null;
         } else {
             throw new InvalidDataSourceNameException('Spreadsheet DSN could not be parsed!');
         }
@@ -100,11 +100,10 @@ class DsnValueObject implements JsonSerializable
         }
 
         if (trim($fullSelection) !== '') {
-            [$sheetIndex, $selection, $directionOfSelection] = GeneralUtility::trimExplode(
-                '!',
-                $fullSelection,
-                false,
-                3
+            [$sheetIndex, $selection, $directionOfSelection] = array_pad(
+                GeneralUtility::trimExplode('!', $fullSelection, false, 3),
+                3,
+                ''
             );
 
             $this->sheetIndex = (int)($sheetIndex ?: 0);

@@ -5,7 +5,7 @@ namespace Hoogi91\Spreadsheets\Tests\Unit\Domain\ValueObject;
 use Hoogi91\Spreadsheets\Domain\ValueObject\DsnValueObject;
 use Hoogi91\Spreadsheets\Exception\InvalidDataSourceNameException;
 use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
-use Nimut\TestingFramework\TestCase\UnitTestCase;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Container\ContainerInterface;
 use Throwable;

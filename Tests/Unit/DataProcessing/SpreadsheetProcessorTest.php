@@ -7,7 +7,7 @@ use Hoogi91\Spreadsheets\Domain\ValueObject\CellDataValueObject;
 use Hoogi91\Spreadsheets\Domain\ValueObject\ExtractionValueObject;
 use Hoogi91\Spreadsheets\Service;
 use Hoogi91\Spreadsheets\Tests\Unit\ArrayAssertTrait;
-use Nimut\TestingFramework\TestCase\UnitTestCase;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PHPUnit\Framework\MockObject\MockObject;

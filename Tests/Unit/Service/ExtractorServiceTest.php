@@ -8,7 +8,7 @@ use Hoogi91\Spreadsheets\Exception\InvalidDataSourceNameException;
 use Hoogi91\Spreadsheets\Service;
 use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
 use Hoogi91\Spreadsheets\Tests\Unit\TsfeSetupTrait;
-use Nimut\TestingFramework\TestCase\UnitTestCase;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PHPUnit\Framework\MockObject\MockObject;

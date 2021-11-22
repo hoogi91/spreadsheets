@@ -4,7 +4,7 @@ namespace Hoogi91\Spreadsheets\Tests\Unit\Service;
 
 use Hoogi91\Spreadsheets\Service\ReaderService;
 use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
-use Nimut\TestingFramework\TestCase\UnitTestCase;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 

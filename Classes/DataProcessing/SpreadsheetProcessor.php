@@ -91,12 +91,12 @@ class SpreadsheetProcessor implements DataProcessorInterface
             'bodyData' => $extraction->getBodyData(),
         ];
 
-        $ignoreStyles = (bool)$cObj->stdWrapValue('ignoreStyles', $processorConfiguration['options.'] ?: []);
+        $ignoreStyles = (bool)$cObj->stdWrapValue('ignoreStyles', $processorConfiguration['options.'] ?? []);
         if ($ignoreStyles !== false) {
             return $processedData;
         }
 
-        $htmlIdentifier = $cObj->stdWrapValue('htmlIdentifier', $processorConfiguration['options.'] ?: [], 'sheet');
+        $htmlIdentifier = $cObj->stdWrapValue('htmlIdentifier', $processorConfiguration['options.'] ?? [], 'sheet');
         $this->pageRenderer->addCssFile(
             GeneralUtility::writeStyleSheetContentToTemporaryFile(
                 $this->styleService->getStylesheet($extraction->getSpreadsheet())->toCSS($htmlIdentifier)

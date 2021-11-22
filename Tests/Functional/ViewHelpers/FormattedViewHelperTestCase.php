@@ -1,42 +1,15 @@
 <?php
 
-namespace Hoogi91\Spreadsheets\Tests\Unit\ViewHelpers;
+namespace Hoogi91\Spreadsheets\Tests\Functional\ViewHelpers;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\CellDataValueObject;
-use Hoogi91\Spreadsheets\ViewHelpers\Cell\Value\FormattedViewHelper;
-use Nimut\TestingFramework\TestCase\ViewHelperBaseTestcase;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PHPUnit\Framework\MockObject\MockObject;
 
-/**
- * Class FormattedViewHelperTest
- * @package Hoogi91\Spreadsheets\Tests\Unit\ViewHelpers
- */
-class FormattedViewHelperTest extends ViewHelperBaseTestcase
+class FormattedViewHelperTestCase extends AbstractViewHelperTestCase
 {
-    /**
-     * @var MockObject|FormattedViewHelper
-     */
-    protected $viewHelper;
-
-    /**
-     * @var Spreadsheet
-     */
-    private $spreadsheet;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->viewHelper = $this->getMockBuilder(FormattedViewHelper::class)
-            ->setMethods(['renderChildren'])
-            ->getMock();
-        $this->injectDependenciesIntoViewHelper($this->viewHelper);
-    }
 
     public function testRenderWithoutCell(): void
     {
-        $this->viewHelper->initializeArguments();
-        self::assertEmpty($this->viewHelper->render());
+        self::assertEmpty($this->getView('<test:cell.value.formatted></test:cell.value.formatted>')->render());
     }
 
     /**
@@ -45,8 +18,13 @@ class FormattedViewHelperTest extends ViewHelperBaseTestcase
     public function testRender(string $expected, array $cellMock, string $target = null): void
     {
         $cellValue = $this->createConfiguredMock(CellDataValueObject::class, $cellMock);
-        $this->setArgumentsUnderTest($this->viewHelper, ['cell' => $cellValue, 'target' => $target]);
-        self::assertEquals($expected, $this->viewHelper->render());
+        self::assertEquals(
+            $expected,
+            $this->getView(
+                '<test:cell.value.formatted cell="{cell}" target="{target}"/>',
+                ['cell' => $cellValue, 'target' => $target]
+            )->render()
+        );
     }
 
     /**

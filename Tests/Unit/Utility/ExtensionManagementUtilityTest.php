@@ -3,7 +3,7 @@
 namespace Hoogi91\Spreadsheets\Tests\Unit\Utility;
 
 use Hoogi91\Spreadsheets\Utility\ExtensionManagementUtility;
-use Nimut\TestingFramework\TestCase\UnitTestCase;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /**
  * Class ExtensionManagementUtilityTest

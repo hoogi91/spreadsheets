@@ -8,6 +8,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Cell;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\RichText\RichText;
 use PhpOffice\PhpSpreadsheet\RichText\Run;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Style\Style;
 use TYPO3\CMS\Core\Context\Context;
@@ -120,8 +121,15 @@ class CellService
      */
     private function formatString($value, Cell $cell, callable $callback = null): string
     {
+        $style = null;
+        /** @var Spreadsheet|null $parent */
+        $parent = $cell->getWorksheet()->getParent();
+        $cellCollection = $parent !== null ? $parent->getCellXfCollection() : [];
+        if (array_key_exists($cell->getXfIndex(), $cellCollection) === true) {
+            $style = $parent->getCellXfByIndex($cell->getXfIndex());
+        }
+
         // get cell style to find number format code
-        $style = $cell->getWorksheet()->getParent()->getCellXfByIndex($cell->getXfIndex());
         if (is_numeric($value) && $style instanceof Style) {
             // check current locales and set them for converting numeric values
             if (!empty($this->currentLocales)) {
@@ -151,6 +159,6 @@ class CellService
             return (string)$value;
         }
 
-        return NumberFormat::toFormattedString($value, NumberFormat::FORMAT_GENERAL, $callback);
+        return (string)NumberFormat::toFormattedString($value, NumberFormat::FORMAT_GENERAL, $callback);
     }
 }

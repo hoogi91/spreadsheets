@@ -22,7 +22,7 @@ class ExtensionManagementUtility extends \TYPO3\CMS\Core\Utility\ExtensionManage
     public static function addItemToCTypeList(array $itemArray, string $position = ''): void
     {
         $columnConfig = &$GLOBALS['TCA']['tt_content']['columns'];
-        if (is_array($columnConfig) && is_array($columnConfig['CType']['config']['items'])) {
+        if (is_array($columnConfig) && isset($columnConfig['CType']['config']['items'])) {
             $items = &$columnConfig['CType']['config']['items'];
 
             foreach ($items as $k => $v) {
@@ -37,7 +37,7 @@ class ExtensionManagementUtility extends \TYPO3\CMS\Core\Utility\ExtensionManage
                 return;
             }
 
-            [$insertPosition, $atField] = GeneralUtility::trimExplode(':', $position);
+            [$insertPosition, $atField] = array_pad(GeneralUtility::trimExplode(':', $position), 2, '');
             if (empty($atField)) {
                 $atField = $insertPosition;
                 $insertPosition = 'before';

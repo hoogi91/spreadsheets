@@ -3,7 +3,7 @@
 namespace Hoogi91\Spreadsheets\Tests\Unit\Domain\ValueObject;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\StylesheetValueObject;
-use Nimut\TestingFramework\TestCase\UnitTestCase;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /**
  * Class StylesheetValueObjectTest
