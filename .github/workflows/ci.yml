@@ -13,7 +13,7 @@ on:
 
 env:
   TYPO3_PATH_ROOT: ${{ github.workspace }}/.Build/web
-  typo3DatabaseSocket: /var/run/mysqld/mysqld.sock
+  typo3DatabaseHost: 127.0.0.1
   typo3DatabaseName: typo3
   typo3DatabaseUsername: root
   typo3DatabasePassword: root
@@ -39,6 +39,18 @@ jobs:
             typo3_version: 'dev-master'
             experimental: true
 
+    services:
+      mysql:
+        image: bitnami/mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: false
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: typo3
+          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
+        ports:
+          - 3306:3306
+        options: --health-cmd "mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 10
+
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
@@ -48,10 +60,7 @@ jobs:
           php-version: '${{ matrix.php_version }}'
           coverage: xdebug
           tools: composer
-          extensions: json, mbstring
-
-      - name: Start MySQL
-        run: sudo /etc/init.d/mysql start
+          extensions: json, mbstring, pdo_mysql, mysql
 
       - name: Install project testing dependencies
         run: |
@@ -70,29 +79,37 @@ jobs:
         run: .Build/bin/phpstan analyse --level 5 Classes/
 
       - name: Running unit tests
-        if: (matrix.php_version == '7.4' && matrix.typo3_version == '^10.4') == false
+        if: (matrix.php_version == '8.0' && matrix.typo3_version == '^11.5') == false
         run: |
           if [ -d "Tests/Unit" ]; then
             .Build/bin/phpunit --bootstrap .Build/vendor/typo3/testing-framework/Resources/Core/Build/UnitTestsBootstrap.php Tests/Unit/
           fi
 
       - name: Running unit tests with coverage report
-        if: matrix.php_version == '7.4' && matrix.typo3_version == '^10.4'
+        if: matrix.php_version == '8.0' && matrix.typo3_version == '^11.5'
         run: |
           if [ -d "Tests/Unit" ]; then
-            .Build/bin/phpunit --bootstrap .Build/vendor/typo3/testing-framework/Resources/Core/Build/UnitTestsBootstrap.php Tests/Unit/ --coverage-clover=./coverage.xml --whitelist=./Classes/
+            .Build/bin/phpunit --bootstrap .Build/vendor/typo3/testing-framework/Resources/Core/Build/UnitTestsBootstrap.php Tests/Unit/ --coverage-clover=./coverage/unit/clover.xml --whitelist=./Classes/
           fi
 
       - name: Running functional tests
+        if: (matrix.php_version == '8.0' && matrix.typo3_version == '^11.5') == false
         run: |
           if [ -d "Tests/Functional" ]; then
             find 'Tests/Functional' -wholename '*Test.php' | parallel --gnu 'echo; echo "Running functional test suite {}"; .Build/bin/phpunit --bootstrap .Build/vendor/typo3/testing-framework/Resources/Core/Build/FunctionalTestsBootstrap.php {}'
           fi
 
+      - name: Running functional tests with coverage report
+        if: matrix.php_version == '8.0' && matrix.typo3_version == '^11.5'
+        run: |
+          if [ -d "Tests/Functional" ]; then
+            find 'Tests/Functional' -wholename '*Test.php' | parallel --gnu 'echo; echo "Running functional test suite {}"; .Build/bin/phpunit --bootstrap .Build/vendor/typo3/testing-framework/Resources/Core/Build/FunctionalTestsBootstrap.php {} --coverage-clover=./coverage/functional/{}/clover.xml --whitelist=./Classes/'
+          fi
+
       - name: Upload coverage report to codecov
-        uses: codecov/codecov-action@v1
-        if: matrix.php_version == '7.4' && matrix.typo3_version == '^10.4'
+        uses: codecov/codecov-action@v2
+        if: matrix.php_version == '8.0' && matrix.typo3_version == '^11.5'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.xml
+          directory: ./coverage/
           flags: phpunit

@@ -4,7 +4,7 @@ namespace Hoogi91\Spreadsheets\Tests\Functional\ViewHelpers;
 
 use TYPO3\CMS\Core\Resource\FileReference;
 
-class FileReferenceViewHelperTestCase extends AbstractViewHelperTestCase
+class FileReferenceViewHelperTest extends AbstractViewHelperTestCase
 {
 
     public function testRenderWithoutFile(): void

@@ -6,7 +6,7 @@ use Hoogi91\Spreadsheets\Domain\ValueObject\DsnValueObject;
 use Hoogi91\Spreadsheets\Tests\Unit\DsnProviderTrait;
 use Throwable;
 
-class GetViewHelperTestCase extends AbstractViewHelperTestCase
+class GetViewHelperTest extends AbstractViewHelperTestCase
 {
     use DsnProviderTrait;
 

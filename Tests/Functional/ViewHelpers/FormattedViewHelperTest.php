@@ -4,7 +4,7 @@ namespace Hoogi91\Spreadsheets\Tests\Functional\ViewHelpers;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\CellDataValueObject;
 
-class FormattedViewHelperTestCase extends AbstractViewHelperTestCase
+class FormattedViewHelperTest extends AbstractViewHelperTestCase
 {
 
     public function testRenderWithoutCell(): void
