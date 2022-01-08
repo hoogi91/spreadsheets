@@ -62,7 +62,7 @@
       "if [ -f Resources/Private/Composer/composer.json ]; then cd Resources/Private/Composer/ && composer update; fi",
       "if [ ! -f Resources/Private/Composer/composer.json ]; then cd Resources/Private/Composer/ && composer require phpoffice/phpspreadsheet=^1.18 && composer config classmap-authoritative true && composer config prepend-autoloader true && composer dump-autoload -o; fi"
     ],
-    "extension-cleanup-for-release": [
+    "prepare-release": [
       "@extension-spreadsheet-fallback",
       "rm -rf .github/ Tests/",
       "rm -f .gitattributes .gitignore .editorconfig composer.lock",
