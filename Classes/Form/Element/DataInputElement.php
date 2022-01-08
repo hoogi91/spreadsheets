@@ -101,7 +101,7 @@ class DataInputElement extends AbstractFormElement
 
         $this->view->assignMultiple(
             [
-                'inputName' => $this->data['parameterArray']['itemFormElName'],
+                'inputName' => $this->data['parameterArray']['itemFormElName'] ?? null,
                 'config' => $this->config,
                 'sheetFiles' => $references,
                 'sheetData' => $this->getFileReferencesSpreadsheetData($references),

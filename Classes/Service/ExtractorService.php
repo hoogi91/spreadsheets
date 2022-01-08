@@ -11,6 +11,8 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\Reader\Exception as SpreadsheetReaderException;
 use PhpOffice\PhpSpreadsheet\Worksheet;
+use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
+use TYPO3\CMS\Core\Resource\FileRepository;
 
 /**
  * Class ExtractorService
@@ -47,6 +49,11 @@ class ExtractorService
     private $mappingService;
 
     /**
+     * @var FileRepository
+     */
+    private $fileRepository;
+
+    /**
      * ExtractorService constructor.
      *
      * @param ReaderService $readerService
@@ -60,13 +67,15 @@ class ExtractorService
         CellService $cellService,
         SpanService $spanService,
         RangeService $rangeService,
-        ValueMappingService $mappingService
+        ValueMappingService $mappingService,
+        FileRepository $fileRepository
     ) {
         $this->readerService = $readerService;
         $this->cellService = $cellService;
         $this->spanService = $spanService;
         $this->rangeService = $rangeService;
         $this->mappingService = $mappingService;
+        $this->fileRepository = $fileRepository;
     }
 
     /**
@@ -74,12 +83,16 @@ class ExtractorService
      * @param bool $returnCellRef
      * @return ValueObject\ExtractionValueObject
      * @throws SpreadsheetReaderException
+     * @throws ResourceDoesNotExistException
      */
     public function getDataByDsnValueObject(
         ValueObject\DsnValueObject $dsnValue,
         bool $returnCellRef = false
     ): ValueObject\ExtractionValueObject {
-        $spreadsheet = $this->readerService->getSpreadsheet($dsnValue->getFileReference());
+        $spreadsheet = $this->readerService->getSpreadsheet(
+            $this->fileRepository->findFileReferenceByUid($dsnValue->getFileReference())
+        );
+
         try {
             // calculate correct range from worksheet or selection
             $worksheet = $spreadsheet->setActiveSheetIndex($dsnValue->getSheetIndex());

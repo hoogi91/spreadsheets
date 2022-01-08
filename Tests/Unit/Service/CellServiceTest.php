@@ -6,7 +6,6 @@ use Hoogi91\Spreadsheets\Service\CellService;
 use Hoogi91\Spreadsheets\Service\StyleService;
 use Hoogi91\Spreadsheets\Service\ValueMappingService;
 use Hoogi91\Spreadsheets\Tests\Unit\TsfeSetupTrait;
-use Nimut\TestingFramework\TestCase\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
@@ -16,6 +15,7 @@ use PhpOffice\PhpSpreadsheet\RichText\Run;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PHPUnit\Framework\MockObject\MockObject;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /**
  * Class CellServiceTest
@@ -37,12 +37,17 @@ class CellServiceTest extends UnitTestCase
      */
     protected $cellService;
 
+    protected $resetSingletonInstances = true;
+
     protected function setUp(): void
     {
         parent::setUp();
         self::setupDefaultTSFE();
         $this->spreadsheet = (new Xlsx())->load(dirname(__DIR__, 2) . '/Fixtures/01_fixture.xlsx');
-        $this->cellService = new CellService(new StyleService(new ValueMappingService()));
+
+        $mappingService = $this->createTestProxy(ValueMappingService::class);
+        $styleService = $this->createTestProxy(StyleService::class, [$mappingService]);
+        $this->cellService = new CellService($styleService);
     }
 
     public function testReadingOfCellValues(): void
@@ -55,6 +60,7 @@ class CellServiceTest extends UnitTestCase
         self::assertEquals('Test123', $this->cellService->getFormattedValue($worksheet->getCell('C4')));
         self::assertEquals('Link', $this->cellService->getFormattedValue($worksheet->getCell('D4')));
         self::assertEquals('Hoch', $this->cellService->getFormattedValue($worksheet->getCell('E5')));
+        self::assertEquals('2018', $this->cellService->getFormattedValue($worksheet->getCell('E6')));
         self::assertEquals(
             '<span style="color:#000000"><sup>Hoch</sup></span><span style="color:#000000"> Test </span><span style="color:#000000"><sub>Tief</sub></span>',
             $this->cellService->getFormattedValue($worksheet->getCell('D5'))

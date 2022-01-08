@@ -2,7 +2,7 @@
 
 namespace Hoogi91\Spreadsheets\Tests\Unit;
 
-use Nimut\TestingFramework\TestCase\UnitTestCase;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Container\ContainerInterface;
 use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
@@ -18,7 +18,7 @@ trait FileRepositoryMockTrait
 {
 
     /**
-     * @return MockObject
+     * @return FileRepository|MockObject
      */
     private function getFileRepositoryMock(): MockObject
     {

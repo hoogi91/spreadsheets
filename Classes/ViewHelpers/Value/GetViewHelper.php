@@ -18,6 +18,8 @@ class GetViewHelper extends AbstractViewHelper
 {
     use CompileWithRenderStatic;
 
+    protected $escapeOutput = false;
+
     /**
      * Initialize arguments.
      */

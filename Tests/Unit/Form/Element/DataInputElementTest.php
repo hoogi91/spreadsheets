@@ -5,7 +5,6 @@ namespace Hoogi91\Spreadsheets\Tests\Unit\Form\Element;
 use Hoogi91\Spreadsheets\Form\Element\DataInputElement;
 use Hoogi91\Spreadsheets\Service\ExtractorService;
 use Hoogi91\Spreadsheets\Service\ReaderService;
-use Nimut\TestingFramework\TestCase\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Reader\Exception;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -17,6 +16,7 @@ use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /**
  * Class DataInputElementTest
@@ -113,7 +113,9 @@ class DataInputElementTest extends UnitTestCase
 
     private static $assignedVariables = [];
 
-    public function setUp(): void
+    protected $resetSingletonInstances = true;
+
+    protected function setUp(): void
     {
         parent::setUp();
         $spreadsheet = (new Xlsx())->load(dirname(__DIR__, 3) . '/Fixtures/01_fixture.xlsx');
@@ -168,11 +170,11 @@ class DataInputElementTest extends UnitTestCase
         include dirname(__DIR__, 4) . '/Configuration/TCA/Overrides/tt_content.php';
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
-        parent::tearDown();
-        static::$assignedVariables = []; // reset every time
         GeneralUtility::purgeInstances();
+        parent::tearDown();
+        static::$assignedVariables = [];
     }
 
     /**
@@ -245,7 +247,7 @@ class DataInputElementTest extends UnitTestCase
                 if ($item instanceof \JsonSerializable) {
                     $item = $item->jsonSerialize();
                 }
-                if (method_exists($item, 'toArray')) {
+                if ((is_string($item) || is_object($item)) && method_exists($item, 'toArray')) {
                     $item = $item->toArray();
                 }
             }
@@ -292,7 +294,15 @@ class DataInputElementTest extends UnitTestCase
                     'valueObject' => 'spreadsheet://678?index=1&range=D2%3AG5&direction=vertical',
                 ]
             ),
-            'data' => ['databaseRow' => ['uid' => 1, self::DEFAULT_UPLOAD_FIELD => 678]] + self::DEFAULT_DATA,
+            'data' => array_replace_recursive(
+                self::DEFAULT_DATA,
+                [
+                    'databaseRow' => ['uid' => 1, self::DEFAULT_UPLOAD_FIELD => 678],
+                    'parameterArray' => [
+                        'itemFormElValue' => 'spreadsheet://678?index=1&range=D2%3AG5&direction=vertical'
+                    ],
+                ]
+            ),
         ];
 
         yield 'successful input element rendering' => [];

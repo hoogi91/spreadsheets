@@ -6,7 +6,6 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\FileRepository;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class DataHandlerHook
@@ -14,7 +13,17 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class DataHandlerHook
 {
-    private static $records = [];
+    private $records = [];
+
+    /**
+     * @var FileRepository
+     */
+    private $fileRepository;
+
+    public function __construct(FileRepository $fileRepository)
+    {
+        $this->fileRepository = $fileRepository;
+    }
 
     /**
      * Post hook to set default spreadsheet selection for newly created items
@@ -57,10 +66,8 @@ class DataHandlerHook
             return;
         }
 
-        /** @var FileRepository $fileRepository */
-        $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
         /** @var FileReference[] $relations */
-        $relations = $fileRepository->findByRelation('tt_content', 'tx_spreadsheets_assets', $uid);
+        $relations = $this->fileRepository->findByRelation('tt_content', 'tx_spreadsheets_assets', $uid);
         if (empty($relations)) {
             return;
         }
@@ -81,9 +88,9 @@ class DataHandlerHook
      */
     private function getBackendRecordField(int $uid, string $field)
     {
-        if (!isset(self::$records[$uid])) {
-            self::$records[$uid] = BackendUtility::getRecord('tt_content', $uid); // @codeCoverageIgnore
+        if (!isset($this->records[$uid])) {
+            $this->records[$uid] = BackendUtility::getRecord('tt_content', $uid); // @codeCoverageIgnore
         }
-        return self::$records[$uid][$field] ?? null;
+        return $this->records[$uid][$field] ?? null;
     }
 }

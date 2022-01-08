@@ -8,8 +8,9 @@ use Hoogi91\Spreadsheets\Domain\ValueObject\DsnValueObject;
 use Hoogi91\Spreadsheets\Exception\InvalidDataSourceNameException;
 use Hoogi91\Spreadsheets\Service\ExtractorService;
 use Hoogi91\Spreadsheets\Service\StyleService;
-use PhpOffice\PhpSpreadsheet\Reader\Exception as SpreadsheetReaderException;
+use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
 use TYPO3\CMS\Core\Page\PageRenderer;
+use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 use TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface;
@@ -77,7 +78,7 @@ class SpreadsheetProcessor implements DataProcessorInterface
             // get spreadsheet DSN value from content object to parse and render
             $dsnValue = DsnValueObject::createFromDSN($value);
             $extraction = $this->extractorService->getDataByDsnValueObject($dsnValue, true);
-        } catch (InvalidDataSourceNameException | SpreadsheetReaderException $exception) {
+        } catch (InvalidDataSourceNameException | ResourceDoesNotExistException | ReaderException $exception) {
             // if DSN could not be parsed or is invalid the output is empty
             // or the extraction failed
             return $processedData;
@@ -90,12 +91,12 @@ class SpreadsheetProcessor implements DataProcessorInterface
             'bodyData' => $extraction->getBodyData(),
         ];
 
-        $ignoreStyles = (bool)$cObj->stdWrapValue('ignoreStyles', $processorConfiguration['options.'] ?: []);
+        $ignoreStyles = (bool)$cObj->stdWrapValue('ignoreStyles', $processorConfiguration['options.'] ?? []);
         if ($ignoreStyles !== false) {
             return $processedData;
         }
 
-        $htmlIdentifier = $cObj->stdWrapValue('htmlIdentifier', $processorConfiguration['options.'] ?: [], 'sheet');
+        $htmlIdentifier = $cObj->stdWrapValue('htmlIdentifier', $processorConfiguration['options.'] ?? [], 'sheet');
         $this->pageRenderer->addCssFile(
             GeneralUtility::writeStyleSheetContentToTemporaryFile(
                 $this->styleService->getStylesheet($extraction->getSpreadsheet())->toCSS($htmlIdentifier)

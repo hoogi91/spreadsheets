@@ -3,11 +3,8 @@
 namespace Hoogi91\Spreadsheets\Tests\Unit\Domain\ValueObject;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\CellDataValueObject;
-use Hoogi91\Spreadsheets\Service\CellService;
-use Hoogi91\Spreadsheets\Service\StyleService;
-use Hoogi91\Spreadsheets\Service\ValueMappingService;
 use Hoogi91\Spreadsheets\Tests\Unit\TsfeSetupTrait;
-use Nimut\TestingFramework\TestCase\UnitTestCase;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -25,30 +22,19 @@ class CellDataValueObjectTest extends UnitTestCase
      */
     private $sheet;
 
-    /**
-     * @var CellService
-     */
-    private $cellService;
-
     protected function setUp(): void
     {
         parent::setUp();
         self::setupDefaultTSFE();
-
-        $sheet = (new Xlsx())->load(dirname(__DIR__, 3) . '/Fixtures/01_fixture.xlsx');
-        $this->sheet = $sheet->getSheet(0);
-
-        $this->cellService = new CellService(new StyleService(new ValueMappingService()));
+        $this->sheet = (new Xlsx())->load(dirname(__DIR__, 3) . '/Fixtures/01_fixture.xlsx')->getSheet(0);
     }
 
     public function testDefaultCell(): void
     {
-        $cellValue = new CellDataValueObject(
-            $this->sheet->getCell('A1'),
-            $this->cellService->getFormattedValue($this->sheet->getCell('A1'))
-        );
+        $cellValue = new CellDataValueObject($this->sheet->getCell('A1'), 'my-rendered-value');
 
         // assert data from value
+        self::assertEquals('my-rendered-value', $cellValue->getRenderedValue());
         self::assertEquals('2014', $cellValue->getCalculatedValue());
         self::assertEquals(DataType::TYPE_NUMERIC, $cellValue->getDataType());
         self::assertFalse($cellValue->isRichText());
@@ -60,10 +46,7 @@ class CellDataValueObjectTest extends UnitTestCase
 
     public function testSpecialCharsCell(): void
     {
-        $cellValue = new CellDataValueObject(
-            $this->sheet->getCell('A4'),
-            $this->cellService->getFormattedValue($this->sheet->getCell('A4'))
-        );
+        $cellValue = new CellDataValueObject($this->sheet->getCell('A4'), 'my-rendered-value');
 
         // assert data from value
         self::assertEquals('©™§∆', $cellValue->getCalculatedValue());
@@ -77,10 +60,7 @@ class CellDataValueObjectTest extends UnitTestCase
 
     public function testStringFormattedCell(): void
     {
-        $cellValue = new CellDataValueObject(
-            $this->sheet->getCell('C4'),
-            $this->cellService->getFormattedValue($this->sheet->getCell('C4'))
-        );
+        $cellValue = new CellDataValueObject($this->sheet->getCell('C4'), 'my-rendered-value');
 
         // assert data from value
         self::assertEquals('Test123', $cellValue->getCalculatedValue());
@@ -94,10 +74,7 @@ class CellDataValueObjectTest extends UnitTestCase
 
     public function testHyperlinkCell(): void
     {
-        $cellValue = new CellDataValueObject(
-            $this->sheet->getCell('D4'),
-            $this->cellService->getFormattedValue($this->sheet->getCell('D4'))
-        );
+        $cellValue = new CellDataValueObject($this->sheet->getCell('D4'), 'my-rendered-value');
 
         // assert data from value
         self::assertEquals('Link', $cellValue->getCalculatedValue());
@@ -111,10 +88,7 @@ class CellDataValueObjectTest extends UnitTestCase
 
     public function testSuperscriptCell(): void
     {
-        $cellValue = new CellDataValueObject(
-            $this->sheet->getCell('E5'),
-            $this->cellService->getFormattedValue($this->sheet->getCell('E5'))
-        );
+        $cellValue = new CellDataValueObject($this->sheet->getCell('E5'), 'my-rendered-value');
 
         // assert data from value
         self::assertEquals('Hoch', $cellValue->getCalculatedValue());
@@ -128,10 +102,7 @@ class CellDataValueObjectTest extends UnitTestCase
 
     public function testSubcriptCell(): void
     {
-        $cellValue = new CellDataValueObject(
-            $this->sheet->getCell('D5'),
-            $this->cellService->getFormattedValue($this->sheet->getCell('D5'))
-        );
+        $cellValue = new CellDataValueObject($this->sheet->getCell('D5'), 'my-rendered-value');
 
         // assert data from value
         self::assertEquals('Hoch Test Tief', $cellValue->getCalculatedValue());
@@ -145,13 +116,7 @@ class CellDataValueObjectTest extends UnitTestCase
 
     public function testAllValueObjectFields(): void
     {
-        $cellValue = CellDataValueObject::create(
-            $this->sheet->getCell('B6'),
-            $this->cellService->getFormattedValue($this->sheet->getCell('B6')),
-            2,
-            1,
-            [15, 20, 25]
-        );
+        $cellValue = CellDataValueObject::create($this->sheet->getCell('B6'), 'my-rendered-value', 2, 1, [15, 20, 25]);
 
         self::assertEquals(2, $cellValue->getRowspan());
         self::assertEquals(1, $cellValue->getColspan());
@@ -171,7 +136,7 @@ class CellDataValueObjectTest extends UnitTestCase
     {
         $cellValue = CellDataValueObject::create(
             $this->sheet->getCell('B6'),
-            $this->cellService->getFormattedValue($this->sheet->getCell('B6')),
+            'my-rendered-value',
             2,
             2,
             [15, 20, 25],

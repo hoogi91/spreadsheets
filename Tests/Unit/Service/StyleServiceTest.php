@@ -3,7 +3,7 @@
 namespace Hoogi91\Spreadsheets\Tests\Unit\Service;
 
 use Hoogi91\Spreadsheets\Service;
-use Nimut\TestingFramework\TestCase\UnitTestCase;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\RichText\RichText;
 use PhpOffice\PhpSpreadsheet\RichText\Run;

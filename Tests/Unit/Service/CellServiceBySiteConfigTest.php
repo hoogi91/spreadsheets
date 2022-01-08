@@ -41,6 +41,8 @@ class CellServiceBySiteConfigTest extends CellServiceTest
         $context->method('getPropertyFromAspect')->with('language', 'id')->willReturn(123);
         GeneralUtility::setSingletonInstance(Context::class, $context);
 
-        $this->cellService = new CellService(new StyleService(new ValueMappingService()));
+        $mappingService = $this->createTestProxy(ValueMappingService::class);
+        $styleService = $this->createTestProxy(StyleService::class, [$mappingService]);
+        $this->cellService = new CellService($styleService);
     }
 }

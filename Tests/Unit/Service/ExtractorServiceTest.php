@@ -6,12 +6,12 @@ use Hoogi91\Spreadsheets\Domain\ValueObject\CellDataValueObject;
 use Hoogi91\Spreadsheets\Domain\ValueObject\DsnValueObject;
 use Hoogi91\Spreadsheets\Exception\InvalidDataSourceNameException;
 use Hoogi91\Spreadsheets\Service;
+use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
 use Hoogi91\Spreadsheets\Tests\Unit\TsfeSetupTrait;
-use Nimut\TestingFramework\TestCase\UnitTestCase;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PHPUnit\Framework\MockObject\MockObject;
-use TYPO3\CMS\Core\Resource\FileReference;
 
 /**
  * Class ExtractorServiceTest
@@ -19,6 +19,7 @@ use TYPO3\CMS\Core\Resource\FileReference;
  */
 class ExtractorServiceTest extends UnitTestCase
 {
+    use FileRepositoryMockTrait;
     use TsfeSetupTrait;
 
     /**
@@ -43,15 +44,18 @@ class ExtractorServiceTest extends UnitTestCase
 
         // setup reader mock instance
         $this->spreadsheet = (new Xlsx())->load(dirname(__DIR__, 2) . '/Fixtures/01_fixture.xlsx');
-        $this->readerService = $this->getMockBuilder(Service\ReaderService::class)->getMock();
-        $this->readerService->method('getSpreadsheet')->willReturn($this->spreadsheet);
+        $readerService = $this->getMockBuilder(Service\ReaderService::class)->getMock();
+        $readerService->method('getSpreadsheet')->willReturn($this->spreadsheet);
 
+        $mappingService = $this->createTestProxy(Service\ValueMappingService::class);
+        $styleService = $this->createTestProxy(Service\StyleService::class, [$mappingService]);
         $this->extractorService = new Service\ExtractorService(
-            $this->readerService,
-            new Service\CellService(new Service\StyleService(new Service\ValueMappingService())),
-            new Service\SpanService(),
-            new Service\RangeService(),
-            new Service\ValueMappingService()
+            $readerService,
+            $this->createTestProxy(Service\CellService::class, [$styleService]),
+            $this->createTestProxy(Service\SpanService::class),
+            $this->createTestProxy(Service\RangeService::class),
+            $mappingService,
+            $this->getFileRepositoryMock()
         );
     }
 
@@ -72,12 +76,27 @@ class ExtractorServiceTest extends UnitTestCase
         /** @var MockObject|DsnValueObject $mockDsnValueObject */
         $mockDsnValueObject = $this->getMockBuilder(DsnValueObject::class)->disableOriginalConstructor()->getMock();
         $mockDsnValueObject->expects(self::once())->method('getSheetIndex')->willReturn(0);
-        $mockDsnValueObject->expects(self::once())->method('getFileReference')->willReturn(
-            $this->getMockBuilder(FileReference::class)->disableOriginalConstructor()->getMock()
-        );
+        $mockDsnValueObject->expects(self::once())->method('getFileReference')->willReturn(456);
+
+        $result = $this->extractorService->getDataByDsnValueObject($mockDsnValueObject);
+        self::assertSame($this->spreadsheet, $result->getSpreadsheet());
+        self::assertEmpty($result->getHeadData());
+        self::assertCount(10, $result->getBodyData());
+    }
+
+    public function testExtractionOfDataByDsnValueObjectWithRange(): void
+    {
+        /** @var MockObject|DsnValueObject $mockDsnValueObject */
+        $mockDsnValueObject = $this->getMockBuilder(DsnValueObject::class)->disableOriginalConstructor()->getMock();
+        $mockDsnValueObject->expects(self::once())->method('getSheetIndex')->willReturn(0);
+        $mockDsnValueObject->expects(self::once())->method('getFileReference')->willReturn(456);
+        $mockDsnValueObject->expects(self::once())->method('getSelection')->willReturn('A1:B5');
 
         // execute the extractor and expect data from sheet 0
-        $this->extractorService->getDataByDsnValueObject($mockDsnValueObject);
+        $result = $this->extractorService->getDataByDsnValueObject($mockDsnValueObject);
+        self::assertSame($this->spreadsheet, $result->getSpreadsheet());
+        self::assertEmpty($result->getHeadData());
+        self::assertCount(5, $result->getBodyData());
     }
 
     public function testHeadDataExtraction(): void
