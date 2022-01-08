@@ -39,11 +39,12 @@ Download and install the [extension][3] with the extension manager module.
 
 ### Versions and support
 
-| Spreadsheets | TYPO3       | PHP       | Support / Development                   |
-| ------------ | ----------- | ----------|---------------------------------------- |
-| dev-master   | 10.4        | 7.4       | unstable development branch             |
-| 2.x          | 10.4        | 7.2 - 7.4 | features, bugfixes, security updates    |
-| 1.x          | 8.7 - 9.5   | 7.0 - 7.2 | bugfixes, security updates              |
+| Spreadsheets | TYPO3       | PHP       | Support / Development                |
+| ------------ | ----------- | ----------|------------------------------------- |
+| dev-master   | 11.5        | 8.0       | unstable development branch          |
+| 3.x          | 10.4 - 11.5 | 7.3 - 8.0 | features, bugfixes, security updates |
+| 2.x          | 10.4        | 7.2 - 7.4 | bugfixes, security update            |
+| 1.x          | 8.7 - 9.5   | 7.0 - 7.2 | unsupported                          |
 
 ### Release Management
 
