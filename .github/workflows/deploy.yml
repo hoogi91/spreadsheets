@@ -1,13 +1,8 @@
 name: 🚢 to TER
 on:
-  workflow_dispatch:
-    inputs:
-      commit:
-        description: 'specific commit'
-        required: true
-        default: ''
-  release:
-    types: [published]
+  push:
+    tags:
+      - "**"
 
 jobs:
   deploy:
