@@ -2,7 +2,7 @@
 
 defined('TYPO3') or die();
 
-(static function (string $extKey, array $extConf) {
+(static function (string $extKey) {
     if (class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet') === false) {
         /** @noinspection PhpIncludeInspection */
         include(\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath(
@@ -11,8 +11,13 @@ defined('TYPO3') or die();
         ));
     }
 
-    $GLOBALS['TYPO3_CONF_VARS']['SYS']['features']['spreadsheets.tabsContentElement'] =
-        $GLOBALS['TYPO3_CONF_VARS']['SYS']['features']['spreadsheets.tabsContentElement'] ?? ($extConf['ce_tabs'] === '1');
+    $featureConf = &$GLOBALS['TYPO3_CONF_VARS']['SYS']['features'];
+    if (!isset($featureConf['spreadsheets.tabsContentElement'])) {
+        $extConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+            \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+        );
+        $featureConf['spreadsheets.tabsContentElement'] = $extConf->get('spreadsheets', 'ce_tabs') === '1';
+    }
 
     // add content element to insert tables in content element wizard
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPageTSConfig(
@@ -34,9 +39,5 @@ defined('TYPO3') or die();
     // register data handler hook
     $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] = \Hoogi91\Spreadsheets\Hooks\DataHandlerHook::class;
 })(
-    'spreadsheets',
-    $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['spreadsheets'] ?? unserialize(
-        $GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['spreadsheets'],
-        ['allowed_classes' => false]
-    )
+    'spreadsheets'
 );
