@@ -1,0 +1,23 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+      xmlns:s="http://typo3.org/ns/Hoogi91/Spreadsheets/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<f:if condition="{header}">
+    <f:else>
+        <p>
+            <strong>
+                <f:translate key="wizards.spreadsheets_tabs.title" extensionName="spreadsheets"/>
+            </strong>
+        </p>
+    </f:else>
+</f:if>
+
+<f:alias map="{value: '{bodytext -> s:value.get()}'}">
+    <f:alias map="{file: '{value.fileReference -> s:reader.fileReference()}'}">
+        <strong>
+            <f:translate key="backend.preview.spreadsheets_table.file" extensionName="spreadsheets"/>
+        </strong>
+        {file.name}
+    </f:alias>
+</f:alias>
+</html>

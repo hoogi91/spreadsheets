@@ -39,11 +39,20 @@
 			<trans-unit id="backend.preview.spreadsheets_table.selection" xml:space="preserve">
 				<source>Selection:</source>
 			</trans-unit>
+			<trans-unit id="backend.preview.spreadsheets_tabs.file" xml:space="preserve">
+				<source>File:</source>
+			</trans-unit>
 			<trans-unit id="wizards.spreadsheets_table.title" xml:space="preserve">
 				<source>Table (Excel Spreadsheets)</source>
 			</trans-unit>
 			<trans-unit id="wizards.spreadsheets_table.description" xml:space="preserve">
 				<source>Adds table by spreadsheet file</source>
+			</trans-unit>
+			<trans-unit id="wizards.spreadsheets_tabs.title" xml:space="preserve">
+				<source>Tabs (Excel Spreadsheets)</source>
+			</trans-unit>
+			<trans-unit id="wizards.spreadsheets_tabs.description" xml:space="preserve">
+				<source>Adds tabs by spreadsheet file</source>
 			</trans-unit>
 			<trans-unit id="tca.assets" xml:space="preserve">
 				<source>Spreadsheet elements</source>

@@ -11,6 +11,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\Reader\Exception as SpreadsheetReaderException;
 use PhpOffice\PhpSpreadsheet\Worksheet;
+use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
 use TYPO3\CMS\Core\Resource\FileRepository;
 
@@ -270,7 +271,7 @@ class ExtractorService
     private function getCellValue(Cell $cell, array $mergeInformation = []): ValueObject\CellDataValueObject
     {
         $metaData = [];
-        if (defined('TYPO3_MODE') && TYPO3_MODE === 'BE') {
+        if (ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isBackend() === true) {
             $alignment = $cell->getStyle()->getAlignment();
 
             // evaluate style classes for backend usage

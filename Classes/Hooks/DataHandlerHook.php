@@ -54,7 +54,7 @@ class DataHandlerHook
 
         // skip if not spreadsheet table or bodytext is already filled
         $CType = $fieldArray['CType'] ?? $this->getBackendRecordField($uid, 'CType');
-        if ($CType !== 'spreadsheets_table') {
+        if (!in_array($CType, ['spreadsheets_table', 'spreadsheets_tabs'], true)) {
             return;
         }
 

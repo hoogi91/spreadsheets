@@ -28,3 +28,56 @@ tt_content.spreadsheets_table {
 		}
 	}
 }
+
+[feature("spreadsheets.tabsContentElement")]
+tt_content.spreadsheets_tabs =< tt_content.spreadsheets_table
+tt_content.spreadsheets_tabs {
+	templateName = Tabs
+	dataProcessing.10 = Hoogi91\Spreadsheets\DataProcessing\TabsProcessor
+	dataProcessing.10.options.additionalStyles (
+	    .spreadsheet-tabs {
+        	display: flex;
+        	flex-wrap: wrap;
+        	border: 1px solid #dedede;
+        }
+        .spreadsheet-tabs > label {
+            order: 1;
+            display: block;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            background: #ffffff;
+            font-weight: bold;
+        }
+        .spreadsheet-tabs > .spreadsheet-tab-content {
+            order: 99;
+            flex-grow: 1;
+            width: 100%;
+            display: none;
+            border-top: 1px solid #dedede;
+        }
+        .spreadsheet-tabs > input {
+        	display: none;
+        }
+        .spreadsheet-tabs > input:checked + label {
+        	color: #ffffff;
+        	background: #0078e6;
+        }
+        .spreadsheet-tabs > input:checked + label + .spreadsheet-tab-content {
+        	display: block;
+        }
+
+        @media (max-width: 45em) {
+          .spreadsheet-tabs>  .spreadsheet-tab-content,
+          .spreadsheet-tabs > label {
+            order: initial;
+          }
+          .spreadsheet-tabs > label {
+            width: 100%;
+          }
+          .spreadsheet-tabs > .spreadsheet-tab-content {
+            margin-bottom: 0.2rem;
+          }
+        }
+	)
+}
+[END]

@@ -8,10 +8,12 @@ use Hoogi91\Spreadsheets\Exception\InvalidDataSourceNameException;
 use Hoogi91\Spreadsheets\Service;
 use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
 use Hoogi91\Spreadsheets\Tests\Unit\TsfeSetupTrait;
-use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Core\SystemEnvironmentBuilder;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /**
  * Class ExtractorServiceTest
@@ -41,6 +43,12 @@ class ExtractorServiceTest extends UnitTestCase
     {
         parent::setUp();
         self::setupDefaultTSFE();
+
+        // mock backend request mode
+        $GLOBALS['TYPO3_REQUEST'] = $this->createConfiguredMock(
+            ServerRequestInterface::class,
+            ['getAttribute' => SystemEnvironmentBuilder::REQUESTTYPE_BE]
+        );
 
         // setup reader mock instance
         $this->spreadsheet = (new Xlsx())->load(dirname(__DIR__, 2) . '/Fixtures/01_fixture.xlsx');

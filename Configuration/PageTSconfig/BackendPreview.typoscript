@@ -1,1 +1,2 @@
 mod.web_layout.tt_content.preview.spreadsheets_table = EXT:spreadsheets/Resources/Private/Templates/Preview/SpreadsheetsTable.html
+mod.web_layout.tt_content.preview.spreadsheets_tabs = EXT:spreadsheets/Resources/Private/Templates/Preview/SpreadsheetsTabs.html
