@@ -22,15 +22,10 @@ class TabsProcessor extends AbstractProcessor
     {
         $sheetData = [];
         foreach ($spreadsheet->getAllSheets() as $worksheet) {
-            $bodyData = $this->getExtractorService()->getBodyData($worksheet, true);
-            if (empty($bodyData)) {
-                continue;
-            }
-
             $sheetIdentifier = $dsn->getFileReference() . $worksheet->getHashCode();
             $sheetData[$sheetIdentifier] = [
                 'sheetTitle' => $worksheet->getTitle(),
-                'bodyData' => $bodyData,
+                'bodyData' => $this->getExtractorService()->getBodyData($worksheet, true),
                 'headData' => $this->getExtractorService()->getHeadData($worksheet, true),
             ];
         }
