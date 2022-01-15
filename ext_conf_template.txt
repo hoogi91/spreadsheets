@@ -1,0 +1,2 @@
+# cat=basic/enable; type=boolean; label=Spreadsheet Tabs Content Element
+ce_tabs = 0
