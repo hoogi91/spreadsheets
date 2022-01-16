@@ -61,6 +61,38 @@ In this representation it is possible to select single cells, rows (incl. multip
    :alt: Spreadsheet Cell Selection
    :width: 300px
 
+.. _editor-content-element-tabs:
+
+Tabs Content Element
+====================
+
+Create a new element in TYPO3 backend and select under "Typcial page content" the element "Tabs (Excel Spreadsheets)"
+
+.. figure:: ../Images/spreadsheet-tabs-create.png
+   :class: with-shadow
+   :alt: Tabs (Excel Spreadsheets)
+   :width: 300px
+
+**Upload field**
+
+Simply upload and select a spreadsheet file and it's worksheets will be displayed as multiple tabs
+
+.. figure:: ../Images/spreadsheet-tabs-selection.png
+   :class: with-shadow
+   :alt: Spreadsheet Tabs upload field
+   :width: 300px
+
+.. attention::
+   :class: cc
+
+   Please note that this content element is not shown by default. You or an administrator
+   can enable it in the extension settings of TYPO3. Or it is enabled/disabled by development :ref:`configuration <configuration-features>`
+
+   .. figure:: ../Images/spreadsheet-tabs-enable.png
+      :class: with-shadow
+      :alt: Enabling tabs content element
+      :width: 200px
+
 .. _editor-faq:
 
 FAQ
