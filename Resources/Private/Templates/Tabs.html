@@ -1,0 +1,27 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+<f:layout name="Default"/>
+
+<f:section name="Main">
+    <f:spaceless>
+        <f:if condition="{spreadsheets}">
+            <div class="spreadsheet-tabs">
+                <f:for each="{spreadsheets}" key="hash" as="worksheet" iteration="it">
+                    <f:if condition="{it.isFirst}">
+                        <f:then>
+                            <input type="radio" name="spreadsheet-tabs-{data.uid}" checked="checked"
+                                   id="spreadsheet-tab-{hash}"/>
+                        </f:then>
+                        <f:else>
+                            <input type="radio" name="spreadsheet-tabs-{data.uid}" id="spreadsheet-tab-{hash}"/>
+                        </f:else>
+                    </f:if>
+                    <label for="spreadsheet-tab-{hash}">{worksheet.sheetTitle}</label>
+                    <div class="spreadsheet-tab-content">
+                        <f:render partial="Table" section="Main"
+                                  arguments="{spreadsheet: worksheet, data: data}"/>
+                    </div>
+                </f:for>
+            </div>
+        </f:if>
+    </f:spaceless>
+</f:section>

@@ -51,6 +51,10 @@
 				<source>Selection:</source>
 				<target>Selektion:</target>
 			</trans-unit>
+			<trans-unit id="backend.preview.spreadsheets_tabs.file" xml:space="preserve">
+				<source>File:</source>
+				<target>Datei:</target>
+			</trans-unit>
 			<trans-unit id="wizards.spreadsheets_table.title" xml:space="preserve">
 				<source>Table (Excel Spreadsheets)</source>
 				<target>Tabelle (Excel Kalkulationstabellen)</target>
@@ -58,6 +62,14 @@
 			<trans-unit id="wizards.spreadsheets_table.description" xml:space="preserve">
 				<source>Adds table by spreadsheet file</source>
 				<target>Fügt eine Kalkulationstabelle anhand einer hochgeladenen Datei hinzu</target>
+			</trans-unit>
+			<trans-unit id="wizards.spreadsheets_tabs.title" xml:space="preserve">
+				<source>Tabs (Excel Spreadsheets)</source>
+				<target>Tabs (Excel Kalkulationstabellen)</target>
+			</trans-unit>
+			<trans-unit id="wizards.spreadsheets_tabs.description" xml:space="preserve">
+				<source>Adds tabs by spreadsheet file</source>
+				<target>Fügt Tabs anhand einer hochgeladenen Datei hinzu</target>
 			</trans-unit>
 			<trans-unit id="tca.assets" xml:space="preserve">
 				<source>Spreadsheet elements</source>

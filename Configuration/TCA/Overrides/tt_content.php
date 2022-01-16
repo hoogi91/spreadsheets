@@ -1,21 +1,34 @@
 <?php
-defined('TYPO3_MODE') or die();
+defined('TYPO3') or die();
 
-(static function ($extKey, $table) {
+(static function (string $extKey, string $table, bool $isTabsFeatureEnabled = false) {
     // Adds the content element to the "Type" dropdown
-    \Hoogi91\Spreadsheets\Utility\ExtensionManagementUtility::addItemToCTypeList([
-        'LLL:EXT:' . $extKey . '/Resources/Private/Language/locallang.xlf:wizards.spreadsheets_table.title',
-        'spreadsheets_table',
-        'mimetypes-open-document-spreadsheet',
-    ], 'after:table');
+    \Hoogi91\Spreadsheets\Utility\ExtensionManagementUtility::addItemToCTypeList(
+        [
+            'LLL:EXT:' . $extKey . '/Resources/Private/Language/locallang.xlf:wizards.spreadsheets_table.title',
+            'spreadsheets_table',
+            'mimetypes-open-document-spreadsheet',
+        ],
+        'after:table'
+    );
+    if ($isTabsFeatureEnabled === true) {
+        \Hoogi91\Spreadsheets\Utility\ExtensionManagementUtility::addItemToCTypeList(
+            [
+                'LLL:EXT:' . $extKey . '/Resources/Private/Language/locallang.xlf:wizards.spreadsheets_tabs.title',
+                'spreadsheets_tabs',
+                'mimetypes-open-document-spreadsheet',
+            ],
+            'after:spreadsheets_table'
+        );
+    }
 
     // add own assets upload field
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns($table, [
-        'tx_spreadsheets_assets'        => [
+        'tx_spreadsheets_assets' => [
             'config' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getFileFieldTCAConfig(
                 'tx_spreadsheets_assets',
                 [
-                    'appearance'       => [
+                    'appearance' => [
                         'createNewRelationLinkTitle' => 'LLL:EXT:frontend/Resources/Private/Language/Database.xlf:tt_content.asset_references.addFileReference',
                     ],
                     'overrideChildTca' => [
@@ -31,8 +44,8 @@ defined('TYPO3_MODE') or die();
         ],
         'tx_spreadsheets_ignore_styles' => [
             'config' => [
-                'type'    => 'check',
-                'items'   => [
+                'type' => 'check',
+                'items' => [
                     [
                         'LLL:EXT:' . $extKey . '/Resources/Private/Language/locallang.xlf:tca.tx_spreadsheets_ignore_styles.label',
                         '',
@@ -45,7 +58,7 @@ defined('TYPO3_MODE') or die();
 
 
     // add own palettes
-    $GLOBALS['TCA'][$table]['palettes']['tableSpreadsheatLayout'] = [
+    $GLOBALS['TCA'][$table]['palettes']['tableSpreadsheetLayout'] = [
         'showitem' => 'tx_spreadsheets_ignore_styles;LLL:EXT:' . $extKey . '/Resources/Private/Language/locallang.xlf:tca.tx_spreadsheets_ignore_styles, table_class',
     ];
 
@@ -59,7 +72,7 @@ defined('TYPO3_MODE') or die();
                 bodytext;LLL:EXT:' . $extKey . '/Resources/Private/Language/locallang.xlf:tca.bodytext,
             --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.appearance,
                 --palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:palette.frames;frames,
-                --palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:palette.table_layout;tableSpreadsheatLayout,
+                --palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:palette.table_layout;tableSpreadsheetLayout,
                 --palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:palette.appearanceLinks;appearanceLinks,
             --div--;LLL:EXT:core/Resources/Private/Language/Form/locallang_tabs.xlf:language,
                 --palette--;;language,
@@ -74,12 +87,12 @@ defined('TYPO3_MODE') or die();
         ',
 
         'columnsOverrides' => [
-            'bodytext'    => [
+            'bodytext' => [
                 'config' => [
-                    'renderType'  => 'spreadsheetInput',
+                    'renderType' => 'spreadsheetInput',
                     'uploadField' => 'tx_spreadsheets_assets',
-                    'sheetsOnly'  => true,
-                    'size'        => 100,
+                    'sheetsOnly' => true,
+                    'size' => 100,
                 ],
             ],
             'table_class' => [
@@ -87,4 +100,20 @@ defined('TYPO3_MODE') or die();
             ],
         ],
     ];
-})('spreadsheets', 'tt_content');
+
+    if ($isTabsFeatureEnabled === true) {
+        // use same settings for tabs
+        $GLOBALS['TCA'][$table]['types']['spreadsheets_tabs'] = $GLOBALS['TCA'][$table]['types']['spreadsheets_table'];
+        $GLOBALS['TCA'][$table]['types']['spreadsheets_tabs']['columnsOverrides']['tx_spreadsheets_assets']['config']['maxitems'] = 1;
+        $GLOBALS['TCA'][$table]['types']['spreadsheets_tabs']['showitem'] = preg_replace(
+            '/bodytext;LLL.*bodytext,/',
+            '',
+            $GLOBALS['TCA'][$table]['types']['spreadsheets_tabs']['showitem']
+        );
+    }
+})(
+    'spreadsheets',
+    'tt_content',
+    TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(TYPO3\CMS\Core\Configuration\Features::class)
+        ->isFeatureEnabled('spreadsheets.tabsContentElement')
+);

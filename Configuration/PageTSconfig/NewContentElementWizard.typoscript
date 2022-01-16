@@ -9,6 +9,21 @@ mod.wizards.newContentElement.wizardItems.common {
             }
         }
     }
-
     show := addToList(spreadsheets_table)
 }
+
+[feature("spreadsheets.tabsContentElement")]
+mod.wizards.newContentElement.wizardItems.common {
+    elements {
+        spreadsheets_tabs {
+            iconIdentifier = mimetypes-open-document-database
+            title = LLL:EXT:spreadsheets/Resources/Private/Language/locallang.xlf:wizards.spreadsheets_tabs.title
+            description = LLL:EXT:spreadsheets/Resources/Private/Language/locallang.xlf:wizards.spreadsheets_tabs.description
+            tt_content_defValues {
+                CType = spreadsheets_tabs
+            }
+        }
+    }
+    show := addToList(spreadsheets_tabs)
+}
+[END]

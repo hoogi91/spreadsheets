@@ -61,3 +61,30 @@ If field value is `true` the user can only select a worksheet and the exact cell
 This field can be set to `true` or `false`. Default value is `false`!
 
 If field value is `true` the user can choose whether his selection should be extract by columns or by rows.
+
+.. _configuration-features:
+
+Feature toggle
+==============
+
+The following feature toggle can be set in **AdditionalConfiguration.php** to define if :ref:`tabs content element <editor-content-element-tabs>`
+is always enabled or disabled.
+
+.. code-block:: php
+
+   $GLOBALS['TYPO3_CONF_VARS']['SYS']['features']['spreadsheets.tabsContentElement'] = true;
+
+.. _configuration-tabs-styling:
+
+Tabs Content Element Styling
+============================
+
+If you want to change or remove the existing styling of the tabs content element you can write into following Typoscript path.
+
+.. code-block:: typoscript
+
+   // note that this option only takes affect if data processor is TabsProcessor class
+   tt_content.spreadsheets_tabs.dataProcessing.10 = Hoogi91\Spreadsheets\DataProcessing\TabsProcessor
+   tt_content.spreadsheets_tabs.dataProcessing.10.options.additionalStyles (
+      // your different styling comes here
+   )

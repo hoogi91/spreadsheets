@@ -3,20 +3,7 @@
 
 <f:section name="Main">
     <f:spaceless>
-        <f:if condition="{spreadsheet}">
-            <table id="sheet{data.uid}" border="0" cellpadding="0" cellspacing="0"
-                   class="table{f:if(condition: '{data.tx_spreadsheets_ignore_styles} && {data.table_class}', then: ' table-{data.table_class}')}">
-                <f:if condition="{spreadsheet.headData}">
-                    <thead>
-                    <f:render partial="Rows" section="Main" arguments="{rowsData: spreadsheet.headData}"/>
-                    </thead>
-                </f:if>
-                <f:if condition="{spreadsheet.bodyData}">
-                    <tbody>
-                    <f:render partial="Rows" section="Main" arguments="{rowsData: spreadsheet.bodyData}"/>
-                    </tbody>
-                </f:if>
-            </table>
-        </f:if>
+        <f:render partial="Table" section="Main"
+                  arguments="{spreadsheet: spreadsheets, data: data}"/>
     </f:spaceless>
 </f:section>
