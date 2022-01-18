@@ -16,7 +16,7 @@ defined('TYPO3') or die();
             [
                 'LLL:EXT:' . $extKey . '/Resources/Private/Language/locallang.xlf:wizards.spreadsheets_tabs.title',
                 'spreadsheets_tabs',
-                'mimetypes-open-document-spreadsheet',
+                'mimetypes-open-document-database',
             ],
             'after:spreadsheets_table'
         );
@@ -59,7 +59,7 @@ defined('TYPO3') or die();
 
     // add own palettes
     $GLOBALS['TCA'][$table]['palettes']['tableSpreadsheetLayout'] = [
-        'showitem' => 'tx_spreadsheets_ignore_styles;LLL:EXT:' . $extKey . '/Resources/Private/Language/locallang.xlf:tca.tx_spreadsheets_ignore_styles, table_class',
+        'showitem' => 'tx_spreadsheets_ignore_styles;LLL:EXT:' . $extKey . '/Resources/Private/Language/locallang.xlf:tca.tx_spreadsheets_ignore_styles, table_class, table_header_position, table_tfoot',
     ];
 
     // Configure the default backend fields for the content element
@@ -88,6 +88,7 @@ defined('TYPO3') or die();
 
         'columnsOverrides' => [
             'bodytext' => [
+                'displayCond' => 'FIELD:CType:=:spreadsheets_table',
                 'config' => [
                     'renderType' => 'spreadsheetInput',
                     'uploadField' => 'tx_spreadsheets_assets',
@@ -98,6 +99,12 @@ defined('TYPO3') or die();
             'table_class' => [
                 'displayCond' => 'FIELD:tx_spreadsheets_ignore_styles:>:0',
             ],
+            'table_header_position' => [
+                'displayCond' => 'FIELD:CType:=:spreadsheets_table',
+            ],
+            'table_tfoot' => [
+                'displayCond' => 'FIELD:CType:=:spreadsheets_table',
+            ],
         ],
     ];
 
@@ -105,11 +112,6 @@ defined('TYPO3') or die();
         // use same settings for tabs
         $GLOBALS['TCA'][$table]['types']['spreadsheets_tabs'] = $GLOBALS['TCA'][$table]['types']['spreadsheets_table'];
         $GLOBALS['TCA'][$table]['types']['spreadsheets_tabs']['columnsOverrides']['tx_spreadsheets_assets']['config']['maxitems'] = 1;
-        $GLOBALS['TCA'][$table]['types']['spreadsheets_tabs']['showitem'] = preg_replace(
-            '/bodytext;LLL.*bodytext,/',
-            '',
-            $GLOBALS['TCA'][$table]['types']['spreadsheets_tabs']['showitem']
-        );
     }
 })(
     'spreadsheets',

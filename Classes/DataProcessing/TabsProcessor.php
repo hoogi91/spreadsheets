@@ -16,9 +16,10 @@ class TabsProcessor extends AbstractProcessor
      * Get template relevant data
      * @param DsnValueObject $dsn DSN which is processed
      * @param Spreadsheet $spreadsheet Spreadsheet that is processed
+     * @param array $processedData Processed data
      * @return array
      */
-    protected function getTemplateData(DsnValueObject $dsn, Spreadsheet $spreadsheet): array
+    protected function getTemplateData(DsnValueObject $dsn, Spreadsheet $spreadsheet, array $processedData): array
     {
         $sheetData = [];
         foreach ($spreadsheet->getAllSheets() as $worksheet) {

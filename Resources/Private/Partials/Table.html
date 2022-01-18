@@ -11,8 +11,14 @@
             </f:if>
             <f:if condition="{spreadsheet.bodyData}">
                 <tbody>
-                <f:render partial="Rows" section="Main" arguments="{rowsData: spreadsheet.bodyData}"/>
+                <f:render partial="Rows" section="Main"
+                          arguments="{rowsData: spreadsheet.bodyData, firstColumnIsHeader: spreadsheet.firstColumnIsHeader}"/>
                 </tbody>
+            </f:if>
+            <f:if condition="{spreadsheet.footData}">
+                <tfoot>
+                <f:render partial="Rows" section="Main" arguments="{rowsData: spreadsheet.footData}"/>
+                </tfoot>
             </f:if>
         </table>
     </f:if>
