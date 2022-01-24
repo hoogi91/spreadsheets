@@ -62,20 +62,14 @@ class TabsProcessorTest extends AbstractProcessorTest
     public function processingDataProvider(): array
     {
         return [
-            [
-                // empty value should result in unprocessed input data
-                ['value' => ''],
-                self::INPUT_DATA,
+            'empty value should result in unprocessed input data' => [
+                'processConfig' => ['value' => ''],
             ],
-            [
-                // invalid value should also result in unprocessed input data
-                ['value' => 'file:'],
-                self::INPUT_DATA,
+            'invalid value should also result in unprocessed input data' => [
+                'processConfig' => ['value' => 'file:'],
             ],
-            [
-                // result should contain a custom named variable with extraction result
-                // page renderer will be checked if it is NOT being called
-                [
+            'custom named variable and page renderer is not called' => [
+                'processConfig' => [
                     'value' => 'file:123|1!A1:B2',
                     'options.' => [
                         'ignoreStyles' => 1,
@@ -83,7 +77,8 @@ class TabsProcessorTest extends AbstractProcessorTest
                     ],
                     'as' => 'someOtherVar',
                 ],
-                self::INPUT_DATA + [
+                'processedData' => [],
+                'expectedResult' => [
                     'someOtherVar' => [
                         // key is file uid and hash code
                         '123263df821f3760dc1ec4e' => [
@@ -94,14 +89,13 @@ class TabsProcessorTest extends AbstractProcessorTest
                     ]
                 ],
             ],
-            [
-                // result should contain default named result variable with extraction result
-                // page renderer will be checked if it HAS being called
-                [
+            'default named variable and page renderer has been called' => [
+                'processConfig' => [
                     'value' => 'file:123|2!A1:B2',
                     'options.' => ['additionalStyles' => '.test{color: "#fff"}',]
                 ],
-                self::INPUT_DATA + [
+                'processedData' => [],
+                'expectedResult' => [
                     'spreadsheets' => [
                         // key is file uid and hash code
                         '123263df821f3760dc1ec4e' => [
