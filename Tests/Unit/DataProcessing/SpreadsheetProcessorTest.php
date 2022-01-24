@@ -59,6 +59,17 @@ class SpreadsheetProcessorTest extends AbstractProcessorTest
             );
     }
 
+    /**
+     * @param MockObject|Spreadsheet $spreadsheetMock
+     * @return void
+     */
+    protected function validInputExpectationsWithEmptyBody(MockObject $spreadsheetMock): void
+    {
+        $this->extractorService->expects(self::once())
+            ->method('getDataByDsnValueObject')
+            ->willReturn(ExtractionValueObject::create($spreadsheetMock, []));
+    }
+
     protected function invalidInputExpectations(): void
     {
         $this->extractorService->expects(self::never())->method('getDataByDsnValueObject');
@@ -166,6 +177,20 @@ class SpreadsheetProcessorTest extends AbstractProcessorTest
                     ]
                 ],
                 'alternativeExpectation' => [$this, 'validInputExpectationsOnlyWithBody']
+            ],
+            'head and foot data are not filled incorrectly when no data is given' => [
+                'processConfig' => ['value' => 'file:123|2!A1:B2'],
+                'processedData' => ['data' => ['table_header_position' => 1, 'table_tfoot' => 1]],
+                'expectedResult' => [
+                    'spreadsheets' => [
+                        'sheetIndex' => 2,
+                        'bodyData' => [],
+                        'headData' => [],
+                        'footData' => [],
+                        'firstColumnIsHeader' => false,
+                    ]
+                ],
+                'alternativeExpectation' => [$this, 'validInputExpectationsWithEmptyBody']
             ],
         ];
     }

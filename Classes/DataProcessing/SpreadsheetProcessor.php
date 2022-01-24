@@ -30,13 +30,13 @@ class SpreadsheetProcessor extends AbstractProcessor
         // check if first row of body data should be header
         // 0 = "no header" | 1 = "top" | 2 = "left"
         $tableHeaderPosition = (int)($processedData['data']['table_header_position'] ?? 0);
-        if (empty($headData) && $tableHeaderPosition === 1) {
+        if (empty($headData) && !empty($bodyData) && $tableHeaderPosition === 1) {
             $headData[] = array_shift($bodyData);
         }
 
         // check if last row of body data should be footer
         $enableTableFooter = (bool)($processedData['data']['table_tfoot'] ?? 0);
-        if ($enableTableFooter === true) {
+        if ($enableTableFooter === true && !empty($bodyData)) {
             $footData[] = array_pop($bodyData);
         }
 
