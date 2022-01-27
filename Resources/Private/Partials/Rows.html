@@ -1,11 +1,14 @@
-<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+      xmlns:s="http://typo3.org/ns/Hoogi91/Spreadsheets/ViewHelpers"
+      data-namespace-typo3-fluid="true">
 
 <f:section name="Main">
-    <f:for each="{rowsData}" key="row" as="rowData" iteration="rowIterator">
+    <f:for each="{rowsData}" as="rowData">
         <tr>
-            <f:for each="{rowData}" key="column" as="value" iteration="columnIterator">
-                <f:render partial="Cell" section="Main"
-                          arguments="{cell: value, row: row, column: column, rowIterator: rowIterator, columnIterator: columnIterator}"/>
+            <f:for each="{rowData}" as="value" iteration="columnIterator">
+                <s:cell.render cell="{value}" isHeader="{columnIterator.isFirst} && {firstColumnIsHeader}">
+                    <s:cell.value.formatted cell="{value}"/>
+                </s:cell.render>
             </f:for>
         </tr>
     </f:for>

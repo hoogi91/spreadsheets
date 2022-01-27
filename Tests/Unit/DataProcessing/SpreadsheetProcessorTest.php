@@ -39,6 +39,37 @@ class SpreadsheetProcessorTest extends AbstractProcessorTest
             );
     }
 
+    /**
+     * @param MockObject|Spreadsheet $spreadsheetMock
+     * @return void
+     */
+    protected function validInputExpectationsOnlyWithBody(MockObject $spreadsheetMock): void
+    {
+        $this->extractorService->expects(self::once())
+            ->method('getDataByDsnValueObject')
+            ->willReturn(
+                ExtractionValueObject::create(
+                    $spreadsheetMock,
+                    [
+                        ['body-data-mocked-row-1'],
+                        ['body-data-mocked-row-2'],
+                        ['body-data-mocked-row-3'],
+                    ]
+                )
+            );
+    }
+
+    /**
+     * @param MockObject|Spreadsheet $spreadsheetMock
+     * @return void
+     */
+    protected function validInputExpectationsWithEmptyBody(MockObject $spreadsheetMock): void
+    {
+        $this->extractorService->expects(self::once())
+            ->method('getDataByDsnValueObject')
+            ->willReturn(ExtractionValueObject::create($spreadsheetMock, []));
+    }
+
     protected function invalidInputExpectations(): void
     {
         $this->extractorService->expects(self::never())->method('getDataByDsnValueObject');
@@ -47,20 +78,14 @@ class SpreadsheetProcessorTest extends AbstractProcessorTest
     public function processingDataProvider(): array
     {
         return [
-            [
-                // empty value should result in unprocessed input data
-                ['value' => ''],
-                self::INPUT_DATA,
+            'empty value should result in unprocessed input data' => [
+                'processConfig' => ['value' => ''],
             ],
-            [
-                // invalid value should also result in unprocessed input data
-                ['value' => 'file:'],
-                self::INPUT_DATA,
+            'invalid value should also result in unprocessed input data' => [
+                'processConfig' => ['value' => 'file:'],
             ],
-            [
-                // result should contain a custom named variable with extraction result
-                // page renderer will be checked if it is NOT being called
-                [
+            'custom named variable and page renderer is not called' => [
+                'processConfig' => [
                     'value' => 'file:123|1!A1:B2',
                     'options.' => [
                         'ignoreStyles' => 1,
@@ -68,28 +93,104 @@ class SpreadsheetProcessorTest extends AbstractProcessorTest
                     ],
                     'as' => 'someOtherVar',
                 ],
-                self::INPUT_DATA + [
+                'processedData' => [],
+                'expectedResult' => [
                     'someOtherVar' => [
                         'sheetIndex' => 1,
                         'bodyData' => ['body-data-mocked'],
                         'headData' => ['head-data-mocked'],
+                        'footData' => [],
+                        'firstColumnIsHeader' => false,
                     ]
                 ],
             ],
-            [
-                // result should contain default named result variable with extraction result
-                // page renderer will be checked if it HAS being called
-                [
+            'default named variable and page renderer has been called' => [
+                'processConfig' => [
                     'value' => 'file:123|2!A1:B2',
                     'options.' => ['additionalStyles' => '.test{color: "#fff"}',]
                 ],
-                self::INPUT_DATA + [
+                'processedData' => [],
+                'expectedResult' => [
                     'spreadsheets' => [
                         'sheetIndex' => 2,
                         'bodyData' => ['body-data-mocked'],
                         'headData' => ['head-data-mocked'],
+                        'footData' => [],
+                        'firstColumnIsHeader' => false,
                     ]
                 ],
+            ],
+            'top head data is only extracted from body if we do not have extracted head data' => [
+                'processConfig' => ['value' => 'file:123|2!A1:B2'],
+                'processedData' => ['data' => ['table_header_position' => 1]],
+                'expectedResult' => [
+                    'spreadsheets' => [
+                        'sheetIndex' => 2,
+                        'bodyData' => ['body-data-mocked'],
+                        'headData' => ['head-data-mocked'],
+                        'footData' => [],
+                        'firstColumnIsHeader' => false,
+                    ]
+                ],
+            ],
+            'left head data is not set if we do have extracted head data' => [
+                'processConfig' => ['value' => 'file:123|2!A1:B2'],
+                'processedData' => ['data' => ['table_header_position' => 2]],
+                'expectedResult' => [
+                    'spreadsheets' => [
+                        'sheetIndex' => 2,
+                        'bodyData' => ['body-data-mocked'],
+                        'headData' => ['head-data-mocked'],
+                        'footData' => [],
+                        'firstColumnIsHeader' => false,
+                    ]
+                ],
+            ],
+            'top head and foot data can be extracted from body data' => [
+                'processConfig' => ['value' => 'file:123|2!A1:B2',],
+                'processedData' => ['data' => ['table_header_position' => 1, 'table_tfoot' => 1]],
+                'expectedResult' => [
+                    'spreadsheets' => [
+                        'sheetIndex' => 2,
+                        'bodyData' => [['body-data-mocked-row-2']],
+                        'headData' => [['body-data-mocked-row-1']],
+                        'footData' => [['body-data-mocked-row-3']],
+                        'firstColumnIsHeader' => false,
+                    ]
+                ],
+                'alternativeExpectation' => [$this, 'validInputExpectationsOnlyWithBody']
+            ],
+            'left head data is set because we do not have extracted head data' => [
+                'processConfig' => ['value' => 'file:123|2!A1:B2'],
+                'processedData' => ['data' => ['table_header_position' => 2]],
+                'expectedResult' => [
+                    'spreadsheets' => [
+                        'sheetIndex' => 2,
+                        'bodyData' => [
+                            ['body-data-mocked-row-1'],
+                            ['body-data-mocked-row-2'],
+                            ['body-data-mocked-row-3'],
+                        ],
+                        'headData' => [],
+                        'footData' => [],
+                        'firstColumnIsHeader' => true,
+                    ]
+                ],
+                'alternativeExpectation' => [$this, 'validInputExpectationsOnlyWithBody']
+            ],
+            'head and foot data are not filled incorrectly when no data is given' => [
+                'processConfig' => ['value' => 'file:123|2!A1:B2'],
+                'processedData' => ['data' => ['table_header_position' => 1, 'table_tfoot' => 1]],
+                'expectedResult' => [
+                    'spreadsheets' => [
+                        'sheetIndex' => 2,
+                        'bodyData' => [],
+                        'headData' => [],
+                        'footData' => [],
+                        'firstColumnIsHeader' => false,
+                    ]
+                ],
+                'alternativeExpectation' => [$this, 'validInputExpectationsWithEmptyBody']
             ],
         ];
     }

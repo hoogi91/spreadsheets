@@ -101,7 +101,7 @@ abstract class AbstractProcessor implements DataProcessorInterface
                 $this->fileRepository->findFileReferenceByUid($dsnValue->getFileReference())
             );
 
-            $processedData[$targetVariableName] = $this->getTemplateData($dsnValue, $spreadsheet);
+            $processedData[$targetVariableName] = $this->getTemplateData($dsnValue, $spreadsheet, $processedData);
         } catch (InvalidDataSourceNameException|ResourceDoesNotExistException|ReaderException $exception) {
             // if DSN could not be parsed or is invalid the output is empty
             // or the extraction failed
@@ -128,5 +128,9 @@ abstract class AbstractProcessor implements DataProcessorInterface
         return $processedData;
     }
 
-    abstract protected function getTemplateData(DsnValueObject $dsn, Spreadsheet $spreadsheet): array;
+    abstract protected function getTemplateData(
+        DsnValueObject $dsn,
+        Spreadsheet $spreadsheet,
+        array $processedData
+    ): array;
 }
