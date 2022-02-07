@@ -6,13 +6,14 @@
                class="table{f:if(condition: '{data.tx_spreadsheets_ignore_styles} && {data.table_class}', then: ' table-{data.table_class}')}">
             <f:if condition="{spreadsheet.headData}">
                 <thead>
-                <f:render partial="Rows" section="Main" arguments="{rowsData: spreadsheet.headData}"/>
+                <f:render partial="Rows" section="Main"
+                          arguments="{rowsData: spreadsheet.headData, forceHeader: 1, headerScope: 'col'}"/>
                 </thead>
             </f:if>
             <f:if condition="{spreadsheet.bodyData}">
                 <tbody>
                 <f:render partial="Rows" section="Main"
-                          arguments="{rowsData: spreadsheet.bodyData, firstColumnIsHeader: spreadsheet.firstColumnIsHeader}"/>
+                          arguments="{rowsData: spreadsheet.bodyData, firstColumnIsHeader: spreadsheet.firstColumnIsHeader, headerScope: 'row'}"/>
                 </tbody>
             </f:if>
             <f:if condition="{spreadsheet.footData}">

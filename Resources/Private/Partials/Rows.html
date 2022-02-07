@@ -6,7 +6,9 @@
     <f:for each="{rowsData}" as="rowData">
         <tr>
             <f:for each="{rowData}" as="value" iteration="columnIterator">
-                <s:cell.render cell="{value}" isHeader="{columnIterator.isFirst} && {firstColumnIsHeader}">
+                <s:cell.render cell="{value}"
+                               scope="{headerScope}"
+                               isHeader="({columnIterator.isFirst} && {firstColumnIsHeader}) || {forceHeader}">
                     <s:cell.value.formatted cell="{value}"/>
                 </s:cell.render>
             </f:for>
