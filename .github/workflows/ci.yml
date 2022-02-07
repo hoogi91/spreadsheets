@@ -31,8 +31,10 @@ jobs:
         include:
           - php_version: '7.3'
             typo3_version: '^10.4'
+            experimental: false
           - php_version: '7.4'
             typo3_version: '^10.4'
+            experimental: false
           - php_version: '8.1'
             typo3_version: 'dev-master'
             experimental: true
