@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php_version: [ '7.4', '8.0' , '8.1' ]
+        php_version: [ '7.4', '8.0', '8.1' ]
         typo3_version: [ '^11.5' ]
         experimental: [ false ]
         include:
