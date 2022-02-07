@@ -39,7 +39,7 @@ class RenderViewHelper extends AbstractViewHelper
             true
         );
         $this->registerArgument('isHeader', 'bool', 'True to render <th> otherwise it will be <td>', false, false);
-        $this->registerArgument('scope', 'string', 'scope attribute value', 'col', false);
+        $this->registerArgument('scope', 'string', 'scope attribute value', false);
     }
 
     /**
