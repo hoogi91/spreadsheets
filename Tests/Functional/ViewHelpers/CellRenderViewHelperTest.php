@@ -12,8 +12,12 @@ class CellRenderViewHelperTest extends AbstractViewHelperTestCase
     /**
      * @dataProvider cellProvider
      */
-    public function testRender(string $expectedAttributes, ?array $cellMock, bool $isHeader = false): void
-    {
+    public function testRender(
+        string $expectedAttributes,
+        ?array $cellMock,
+        ?string $scope = null,
+        bool $isHeader = false
+    ): void {
         if ($cellMock !== null) {
             $cellValue = $this->createConfiguredMock(CellDataValueObject::class, $cellMock);
         }
@@ -24,8 +28,8 @@ class CellRenderViewHelperTest extends AbstractViewHelperTestCase
                 $expectedAttributes !== '' ? ' ' . $expectedAttributes : ''
             ),
             $this->getView(
-                '<test:cell.render cell="{cell}" isHeader="{isHeader}">content</test:cell.render>',
-                ['cell' => $cellValue ?? null, 'isHeader' => $isHeader]
+                '<test:cell.render cell="{cell}" scope="{scope}" isHeader="{isHeader}">content</test:cell.render>',
+                ['cell' => $cellValue ?? null, 'scope' => $scope ?? null, 'isHeader' => $isHeader]
             )->render()
         );
     }
@@ -35,7 +39,33 @@ class CellRenderViewHelperTest extends AbstractViewHelperTestCase
      */
     public function testRenderAsHeader(string $expectedAttributes, ?array $cellMock): void
     {
-        $this->testRender($expectedAttributes, $cellMock, true);
+        $this->testRender($expectedAttributes, $cellMock, null, true);
+    }
+
+    /**
+     * @dataProvider cellProvider
+     */
+    public function testRenderWithRowScope(string $expectedAttributes, ?array $cellMock): void
+    {
+        $this->testRender($expectedAttributes, $cellMock, 'row');
+    }
+
+    /**
+     * @dataProvider cellProvider
+     */
+    public function testRenderAsHeaderWithRowScope(string $expectedAttributes, ?array $cellMock): void
+    {
+        $expectedAttributes = trim('scope="row" ' . $expectedAttributes);
+        $this->testRender($expectedAttributes, $cellMock, 'row', true);
+    }
+
+    /**
+     * @dataProvider cellProvider
+     */
+    public function testRenderAsHeaderWithColScope(string $expectedAttributes, ?array $cellMock): void
+    {
+        $expectedAttributes = trim('scope="col" ' . $expectedAttributes);
+        $this->testRender($expectedAttributes, $cellMock, 'col', true);
     }
 
     /**

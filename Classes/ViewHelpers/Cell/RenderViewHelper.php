@@ -39,6 +39,7 @@ class RenderViewHelper extends AbstractViewHelper
             true
         );
         $this->registerArgument('isHeader', 'bool', 'True to render <th> otherwise it will be <td>', false, false);
+        $this->registerArgument('scope', 'string', 'scope attribute value', false);
     }
 
     /**
@@ -60,8 +61,13 @@ class RenderViewHelper extends AbstractViewHelper
             $attributes .= $cell->getColspan() > 0 ? ' colspan="' . $cell->getColspan() . '"' : '';
         }
 
+        $isHeader = (bool)($arguments['isHeader'] ?? 0);
+        if ($isHeader === true && isset($arguments['scope'])) {
+            $attributes = ' scope="' . $arguments['scope'] . '"' . ($attributes ?? '');
+        }
+
         return sprintf(
-            (bool)($arguments['isHeader'] ?? 0) === true ? '<th%s>%s</th>' : '<td%s>%s</td>',
+            $isHeader === true ? '<th%s>%s</th>' : '<td%s>%s</td>',
             $attributes ?? '',
             $renderChildrenClosure()
         );
