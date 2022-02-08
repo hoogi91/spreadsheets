@@ -276,6 +276,7 @@ class CellDataValueObject implements JsonSerializable
     /**
      * @inheritDoc
      */
+    #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         $data = ['val' => $this->getFormattedValue()];
