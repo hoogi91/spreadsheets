@@ -81,6 +81,10 @@
                         title="{f:translate(key: 'formengine.spreadsheet.button.reset.title', extensionName: 'spreadsheets')}">
 					<c:icon identifier="actions-edit-undo"/>
 				</button>
+				<button class="btn btn-default spreadsheet-unset-button" type="button"
+                        title="{f:translate(key: 'formengine.spreadsheet.button.unset.title', extensionName: 'spreadsheets')}">
+					<c:icon identifier="actions-close"/>
+				</button>
 			</span>
         </div>
 
@@ -97,8 +101,7 @@
 
 <f:section name="DirectionButton">
     <f:if condition="{config.allowColumnExtraction}">
-        <button type="button" class="btn btn-default spreadsheet-input-direction"
-                value="{valueObject.directionOfSelection}">
+        <button type="button" class="btn btn-default spreadsheet-input-direction">
             <span class="direction-column"
                   style="{f:if(condition: '{valueObject.directionOfSelection} != \'vertical\'', then: 'display:none')}">
                 <c:icon identifier="actions-arrow-down"/>

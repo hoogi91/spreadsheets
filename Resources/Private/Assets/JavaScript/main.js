@@ -14,6 +14,7 @@ class SpreadsheetDataInput {
         this.fileInput = this.element.querySelector('.spreadsheet-file-select');
         this.directionInput = this.element.querySelector('.spreadsheet-input-direction');
         this.resetInput = this.element.querySelector('.spreadsheet-reset-button');
+        this.unsetInput = this.element.querySelector('.spreadsheet-unset-button');
 
         // data inputs
         this.originalDataInput = this.element.querySelector('input.spreadsheet-input-original');
@@ -53,6 +54,19 @@ class SpreadsheetDataInput {
             this.updateSpreadsheet(true);
         });
 
+        // bind click on reset button
+        this.unsetInput.addEventListener('click', () => {
+            this.dsn = new DSN('');
+            this.sheetWrapper.style.display = 'none';
+            if (this.tableWrapper !== null) {
+                this.tableWrapper.style.display = 'none';
+            }
+            if (this.directionInput !== null) {
+                this.directionInput.disabled = true;
+            }
+            this.updateSpreadsheet();
+        });
+
         // only bind if table wrapper exists
         if (this.tableWrapper !== null) {
             this.tableWrapper.addEventListener('changeSelection', (event) => {
@@ -71,21 +85,8 @@ class SpreadsheetDataInput {
 
         // bind click on column based extraction toggle when range and direction select are active/available
         if (this.tableWrapper !== null && this.directionInput !== null) {
-            this.directionInput.addEventListener('click', (event) => {
-                const target = event.currentTarget;
-                const targetParentNode = target.parentNode;
-                this.dsn.direction = ((target.value || 'horizontal') === 'horizontal' ? 'vertical' : 'horizontal');
-
-                // update target value and text
-                target.setAttribute('value', this.dsn.direction);
-                if (this.dsn.direction !== 'horizontal') {
-                    targetParentNode.querySelector('.direction-row').style.display = 'none';
-                    targetParentNode.querySelector('.direction-column').style.display = 'block';
-                } else {
-                    targetParentNode.querySelector('.direction-column').style.display = 'none';
-                    targetParentNode.querySelector('.direction-row').style.display = 'block';
-                }
-
+            this.directionInput.addEventListener('click', () => {
+                this.dsn.direction = ((this.dsn.direction || 'horizontal') === 'horizontal' ? 'vertical' : 'horizontal');
                 this.updateSpreadsheet();
             });
         }
@@ -101,6 +102,15 @@ class SpreadsheetDataInput {
 
         // set select value to trigger browser showing correct item
         this.fileInput.value = this.dsn.fileUid;
+        if (this.directionInput !== null) {
+            if (this.dsn.direction === 'vertical') {
+                this.directionInput.querySelector('.direction-row').style.display = 'none';
+                this.directionInput.querySelector('.direction-column').style.display = 'block';
+            } else {
+                this.directionInput.querySelector('.direction-column').style.display = 'none';
+                this.directionInput.querySelector('.direction-row').style.display = 'block';
+            }
+        }
 
         // update formatted and database input value
         let formatted = this.spreadsheet.getSheetName();
@@ -115,13 +125,23 @@ class SpreadsheetDataInput {
             database += '&range=' + this.dsn.range;
         }
 
-        // only set direction if range select and direction input is active/available
+        // only set direction if range select and direction input is available
         if (this.tableWrapper !== null && this.directionInput !== null && this.dsn.direction.length > 0) {
             database += '&direction=' + this.dsn.direction;
         }
 
         this.formattedDataInput.setAttribute('value', formatted);
         this.databaseDataInput.setAttribute('value', database);
+
+        if (database !== '') {
+            this.sheetWrapper.style.display = '';
+            if (this.tableWrapper !== null) {
+                this.tableWrapper.style.display = '';
+            }
+            if (this.directionInput !== null) {
+                this.directionInput.disabled = false;
+            }
+        }
     }
 }
 
