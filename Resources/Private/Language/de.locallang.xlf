@@ -25,6 +25,10 @@
 			</trans-unit>
 			<trans-unit id="formengine.spreadsheet.button.reset.title" xml:space="preserve">
 				<source>Revert Changes</source>
+				<target>Änderungen verwerfen</target>
+			</trans-unit>
+			<trans-unit id="formengine.spreadsheet.button.unset.title" xml:space="preserve">
+				<source>Unset field value</source>
 				<target>Zurücksetzen</target>
 			</trans-unit>
 			<trans-unit id="formengine.spreadsheet.label.direction.row-based" xml:space="preserve">

@@ -4,10 +4,10 @@ namespace Hoogi91\Spreadsheets\Tests\Unit\Domain\ValueObject;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\CellDataValueObject;
 use Hoogi91\Spreadsheets\Tests\Unit\TsfeSetupTrait;
-use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /**
  * Class CellDataValueObjectTest
@@ -94,10 +94,15 @@ class CellDataValueObjectTest extends UnitTestCase
         self::assertEquals('Hoch', $cellValue->getCalculatedValue());
         self::assertEquals(DataType::TYPE_STRING, $cellValue->getDataType());
         self::assertFalse($cellValue->isRichText());
-        self::assertTrue($cellValue->isSuperscript());
         self::assertFalse($cellValue->isSubscript());
         self::assertEmpty($cellValue->getHyperlink());
         self::assertEmpty($cellValue->getHyperlinkTitle());
+
+        self::markTestIncomplete(
+            "Currently superscript has a bug in PhpSpreadsheet and can be enabled again after next release >= 1.22.0\n" .
+            "https://github.com/PHPOffice/PhpSpreadsheet/pull/2619"
+        );
+        self::assertTrue($cellValue->isSuperscript());
     }
 
     public function testSubcriptCell(): void
