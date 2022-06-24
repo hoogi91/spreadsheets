@@ -23,12 +23,12 @@ jobs:
       - name: "Checkout"
         uses: "actions/checkout@v2"
 
-      - name: Checkout and composer install
+      - name: "Composer install"
         uses: ./.github/actions/composer
         with:
           php-version: '${{ matrix.php-version }}'
           dependencies: '${{ matrix.dependencies }}'
           extensions: json, mbstring
 
-      - name: PHPStan
+      - name: "PHPStan"
         run: .Build/bin/phpstan analyse --level 5 Classes/

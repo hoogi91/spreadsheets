@@ -18,11 +18,11 @@ jobs:
     runs-on: ${{ matrix.operating-system }}
 
     strategy:
+      fail-fast: false
       matrix:
         dependencies:
           - "lowest"
           - "highest"
-          - "locked"
         php-version:
           - "8.1"
           - "8.0"
@@ -53,20 +53,20 @@ jobs:
       - name: "Checkout"
         uses: "actions/checkout@v2"
 
-      - name: Checkout and composer install
+      - name: "Composer install"
         uses: ./.github/actions/composer
         with:
           php-version: '${{ matrix.php-version }}'
           dependencies: '${{ matrix.dependencies }}'
           extensions: json, mbstring, pdo_mysql, mysql
 
-      - name: Tests
+      - name: "Tests"
         uses: ./.github/actions/phpunit
         with:
           coverage: '${{ matrix.coverage }}'
           coverage-folder: ./coverage/
 
-      - name: Upload coverage
+      - name: "Upload coverage"
         uses: codecov/codecov-action@v2
         if: matrix.coverage == 'true'
         with:

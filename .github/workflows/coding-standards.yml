@@ -23,12 +23,12 @@ jobs:
       - name: "Checkout"
         uses: "actions/checkout@v2"
 
-      - name: Checkout and composer install
+      - name: "Composer install"
         uses: ./.github/actions/composer
         with:
           php-version: '${{ matrix.php-version }}'
           dependencies: '${{ matrix.dependencies }}'
           extensions: json, mbstring
 
-      - name: Coding Standard
+      - name: "Coding Standard"
         run: .Build/bin/phpcs -q -p --standard=PSR2 --report=checkstyle Classes/ | cs2pr
