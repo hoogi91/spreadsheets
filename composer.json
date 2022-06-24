@@ -54,8 +54,7 @@
   },
   "scripts": {
     "post-autoload-dump": [
-      "mkdir -p .Build/web/typo3conf/ext/",
-      "[ -L .Build/web/typo3conf/ext/spreadsheets ] || ln -snvf ../../../../. .Build/web/typo3conf/ext/spreadsheets"
+      "TYPO3\\TestingFramework\\Composer\\ExtensionTestEnvironment::prepare"
     ],
     "extension-spreadsheet-fallback": [
       "mkdir -p Resources/Private/Composer",
