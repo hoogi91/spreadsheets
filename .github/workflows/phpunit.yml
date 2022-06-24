@@ -56,7 +56,7 @@ jobs:
       - name: Checkout and composer install
         uses: ./.github/actions/composer
         with:
-          php-version: '${{ matrix.php_version }}'
+          php-version: '${{ matrix.php-version }}'
           dependencies: '${{ matrix.dependencies }}'
           extensions: json, mbstring, pdo_mysql, mysql
 
