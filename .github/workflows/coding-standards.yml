@@ -1,0 +1,31 @@
+name: "Check Coding Standards"
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  coding-standards:
+    name: "Check Coding Standards"
+
+    runs-on: ${{ matrix.operating-system }}
+
+    strategy:
+      matrix:
+        dependencies:
+          - "locked"
+        php-version:
+          - "8.1"
+        operating-system:
+          - "ubuntu-latest"
+
+    steps:
+      - name: Checkout and composer install
+        uses: ./.github/actions/php-checkout-and-composer
+        with:
+          php-version: '${{ matrix.php_version }}'
+          dependencies: '${{ matrix.dependencies }}'
+          extensions: json, mbstring
+
+      - name: Coding Standard
+        run: vendor/bin/phpcs -q -p --standard=PSR2 --report=checkstyle Classes/ | cs2pr
