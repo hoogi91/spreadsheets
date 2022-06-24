@@ -33,7 +33,7 @@ runs:
         fi
 
     - name: Unit tests with coverage
-      if: inputs.coverage !== 'false'
+      if: inputs.coverage != 'false'
       shell: bash
       run: |
         if [ -d "Tests/Unit" ]; then
@@ -41,7 +41,7 @@ runs:
         fi
 
     - name: Functional tests with coverage
-      if: inputs.coverage !== 'false'
+      if: inputs.coverage != 'false'
       shell: bash
       run: |
         if [ -d "Tests/Functional" ]; then
