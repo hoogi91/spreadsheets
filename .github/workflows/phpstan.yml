@@ -20,8 +20,11 @@ jobs:
           - "ubuntu-latest"
 
     steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v2"
+
       - name: Checkout and composer install
-        uses: ./.github/actions/php-checkout-and-composer
+        uses: ./.github/actions/composer
         with:
           php-version: '${{ matrix.php_version }}'
           dependencies: '${{ matrix.dependencies }}'

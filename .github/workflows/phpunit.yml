@@ -49,8 +49,11 @@ jobs:
         options: --health-cmd "mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 10
 
     steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v2"
+
       - name: Checkout and composer install
-        uses: ./.github/actions/php-checkout-and-composer
+        uses: ./.github/actions/composer
         with:
           php-version: '${{ matrix.php_version }}'
           dependencies: '${{ matrix.dependencies }}'

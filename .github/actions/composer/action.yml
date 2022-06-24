@@ -1,5 +1,5 @@
-name: 'Checkout and run composer'
-description: 'This action checks out the commit, sets up PHP and installs deps using composer.'
+name: 'Install php and composer dependencies'
+description: 'This action sets up PHP and installs deps using composer.'
 inputs:
   php-version:
     required: true
@@ -15,9 +15,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: "Checkout"
-      uses: "actions/checkout@v2"
-
     - name: "Install PHP"
       uses: "shivammathur/setup-php@v2"
       with:
