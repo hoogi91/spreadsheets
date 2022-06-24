@@ -31,4 +31,4 @@ jobs:
           extensions: json, mbstring
 
       - name: PHPStan
-        run: vendor/bin/phpstan analyse --level 5 Classes/
+        run: .Build/bin/phpstan analyse --level 5 Classes/

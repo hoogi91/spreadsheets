@@ -31,4 +31,4 @@ jobs:
           extensions: json, mbstring
 
       - name: Coding Standard
-        run: vendor/bin/phpcs -q -p --standard=PSR2 --report=checkstyle Classes/ | cs2pr
+        run: .Build/bin/phpcs -q -p --standard=PSR2 --report=checkstyle Classes/ | cs2pr
