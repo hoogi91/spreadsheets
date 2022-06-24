@@ -34,6 +34,7 @@ jobs:
         include:
           - dependencies: "locked"
             php-version: "8.1"
+            operating-system: "ubuntu-latest"
             coverage: "true"
 
     services:

@@ -35,12 +35,15 @@ runs:
 
     - name: "Install lowest dependencies"
       if: ${{ inputs.dependencies == 'lowest' }}
+      shell: bash
       run: "composer update --prefer-lowest --no-interaction --no-progress --no-suggest --ignore-platform-req=php"
 
     - name: "Install highest dependencies"
       if: ${{ inputs.dependencies == 'highest' }}
+      shell: bash
       run: "composer update --no-interaction --no-progress --no-suggest --ignore-platform-req=php"
 
     - name: "Install locked dependencies"
       if: ${{ inputs.dependencies == 'locked' }}
+      shell: bash
       run: "composer install --no-interaction --no-progress --no-suggest --ignore-platform-req=php"
