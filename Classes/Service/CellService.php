@@ -148,6 +148,7 @@ class CellService
                 $value = sprintf('%5.' . strlen($matches[3]) . 'E', $value);
             } else {
                 // otherwise do normal format logic with given format code
+                /** @psalm-suppress InvalidArgument */
                 $value = NumberFormat::toFormattedString($value, $formatCode, $callback);
             }
 
@@ -159,6 +160,7 @@ class CellService
             return (string)$value;
         }
 
+        /** @psalm-suppress InvalidArgument */
         return (string)NumberFormat::toFormattedString($value, NumberFormat::FORMAT_GENERAL, $callback);
     }
 }

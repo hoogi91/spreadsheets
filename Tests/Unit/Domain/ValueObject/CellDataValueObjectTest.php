@@ -97,11 +97,6 @@ class CellDataValueObjectTest extends UnitTestCase
         self::assertFalse($cellValue->isSubscript());
         self::assertEmpty($cellValue->getHyperlink());
         self::assertEmpty($cellValue->getHyperlinkTitle());
-
-        self::markTestIncomplete(
-            "Currently superscript has a bug in PhpSpreadsheet and can be enabled again after next release >= 1.22.0\n" .
-            "https://github.com/PHPOffice/PhpSpreadsheet/pull/2619"
-        );
         self::assertTrue($cellValue->isSuperscript());
     }
 
