@@ -21,7 +21,7 @@
     "php": "~7.4.0 || ~8.0.0 || ~8.1.0",
     "ext-json": "*",
     "ext-mbstring": "*",
-    "phpoffice/phpspreadsheet": "^1.18",
+    "phpoffice/phpspreadsheet": "^1.23",
     "typo3/cms-backend": "^10.4 || ^11.5",
     "typo3/cms-core": "^10.4 || ^11.5",
     "typo3/cms-extbase": "^10.4 || ^11.5",

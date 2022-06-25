@@ -4,6 +4,9 @@ namespace Hoogi91\Spreadsheets\Tests\Unit\Hooks;
 
 use Hoogi91\Spreadsheets\Hooks\DataHandlerHook;
 use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
+use TYPO3\CMS\Core\Database\Connection;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Resource\FileReference;
@@ -44,6 +47,12 @@ class DataHandlerHookTest extends UnitTestCase
         $property->setValue($this->testHandlerHook, [123456 => ['bodytext' => '']]);
     }
 
+    protected function tearDown(): void
+    {
+        GeneralUtility::purgeInstances();
+        parent::tearDown();
+    }
+
     /**
      * @dataProvider datamapProvider
      */
@@ -52,15 +61,20 @@ class DataHandlerHookTest extends UnitTestCase
         bool $updateTriggered = false,
         array $updateParams = []
     ): void {
-        $dataHandlerMock = $this->createMock(DataHandler::class);
-        $dataHandlerMock->substNEWwithIDs = self::DATA_HANDLER_NEW_IDS;
+        $connectionPool = $this->createMock(ConnectionPool::class);
+
         if ($updateTriggered === true) {
-            $dataHandlerMock->expects(self::once())->method('updateDB')->with(...array_values($updateParams));
+            $connectionMock = $this->createMock(Connection::class);
+            $connectionMock->expects(self::once())->method('update')->with(...array_values($updateParams));
+            $connectionPool->expects(self::once())->method('getConnectionForTable')->willReturn($connectionMock);
         } else {
-            $dataHandlerMock->expects(self::never())->method('updateDB');
+            $connectionPool->expects(self::never())->method('getConnectionForTable');
         }
+        GeneralUtility::addInstance(ConnectionPool::class, $connectionPool);
 
         // append data handler to hook params
+        $dataHandlerMock = $this->createMock(DataHandler::class);
+        $dataHandlerMock->substNEWwithIDs = self::DATA_HANDLER_NEW_IDS;
         $hookParams[] = $dataHandlerMock;
         $this->testHandlerHook->processDatamap_afterDatabaseOperations(...array_values($hookParams));
     }
@@ -117,7 +131,7 @@ class DataHandlerHookTest extends UnitTestCase
             '[UPDATED] has clean assets field' => [
                 'hookParams' => self::hookParams(['status' => 'update', 'fields' => ['tx_spreadsheets_assets' => 0]]),
                 'updateTriggered' => true,
-                'updateParams' => ['tt_content', 123456, ['bodytext' => '']],
+                'updateParams' => ['tt_content', ['bodytext' => ''], ['uid' => 123456]],
             ],
         ];
     }
@@ -153,7 +167,7 @@ class DataHandlerHookTest extends UnitTestCase
                 'hookParams' => self::hookParams(),
                 'references' => [456],
                 'updateTriggered' => true,
-                'updateParams' => ['tt_content', 123456, ['bodytext' => 'spreadsheet://456']],
+                'updateParams' => ['tt_content', ['bodytext' => 'spreadsheet://456'], ['uid' => 123456]],
             ],
         ];
     }
