@@ -35,6 +35,7 @@ class GetViewHelper extends AbstractViewHelper
      * @param RenderingContextInterface $renderingContext
      *
      * @return DsnValueObject|null
+     * @psalm-suppress ImplementedReturnTypeMismatch
      */
     public static function renderStatic(
         array $arguments,

@@ -3,9 +3,11 @@
 namespace Hoogi91\Spreadsheets\Hooks;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\FileRepository;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class DataHandlerHook
@@ -61,7 +63,9 @@ class DataHandlerHook
         // truncate bodytext after update if assets have been removed
         if ($fieldArray['tx_spreadsheets_assets'] === 0) {
             if ($status === 'update') {
-                $dataHandler->updateDB('tt_content', $uid, ['bodytext' => '']);
+                GeneralUtility::makeInstance(ConnectionPool::class)
+                    ->getConnectionForTable('tt_content')
+                    ->update('tt_content', ['bodytext' => ''], ['uid' => $uid]);
             }
             return;
         }
@@ -74,7 +78,9 @@ class DataHandlerHook
 
         // update bodytext to default file selection
         if (empty($this->getBackendRecordField($uid, 'bodytext')) === true) {
-            $dataHandler->updateDB('tt_content', $uid, ['bodytext' => 'spreadsheet://' . $relations[0]->getUid()]);
+            GeneralUtility::makeInstance(ConnectionPool::class)
+                ->getConnectionForTable('tt_content')
+                ->update('tt_content', ['bodytext' => 'spreadsheet://' . $relations[0]->getUid()], ['uid' => $uid]);
         }
     }
 

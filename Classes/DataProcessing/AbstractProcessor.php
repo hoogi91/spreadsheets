@@ -72,12 +72,10 @@ abstract class AbstractProcessor implements DataProcessorInterface
     }
 
     /**
-     * @param ContentObjectRenderer $cObj The content object renderer,
-     *                                                          which contains data of the content element
+     * @param ContentObjectRenderer $cObj The content object renderer, which contains data of the content element
      * @param array $contentObjectConfiguration The configuration of Content Object
      * @param array $processorConfiguration The configuration of this processor
-     * @param array $processedData Key/value store of processed data
-     *                                                          (e.g. to be passed to a Fluid View)
+     * @param array $processedData Key/value store of processed data (e.g. to be passed to a Fluid View)
      *
      * @return array the processed data as key/value store
      */
@@ -87,7 +85,7 @@ abstract class AbstractProcessor implements DataProcessorInterface
         array $processorConfiguration,
         array $processedData
     ): array {
-        $value = $cObj->stdWrapValue('value', $processorConfiguration, '');
+        $value = (string)$cObj->stdWrapValue('value', $processorConfiguration, '');
         if (empty($value)) {
             return $processedData;
         }
@@ -113,12 +111,16 @@ abstract class AbstractProcessor implements DataProcessorInterface
             return $processedData;
         }
 
-        $additionalStyles = $cObj->stdWrapValue('additionalStyles', $processorConfiguration['options.'] ?? []);
+        $additionalStyles = (string)$cObj->stdWrapValue('additionalStyles', $processorConfiguration['options.'] ?? []);
         if (empty($additionalStyles) === false) {
             $this->pageRenderer->addCssInlineBlock(__CLASS__, $additionalStyles);
         }
 
-        $htmlIdentifier = $cObj->stdWrapValue('htmlIdentifier', $processorConfiguration['options.'] ?? [], 'sheet');
+        $htmlIdentifier = (string)$cObj->stdWrapValue(
+            'htmlIdentifier',
+            $processorConfiguration['options.'] ?? [],
+            'sheet'
+        );
         $this->pageRenderer->addCssFile(
             GeneralUtility::writeStyleSheetContentToTemporaryFile(
                 $this->styleService->getStylesheet($spreadsheet)->toCSS($htmlIdentifier)
