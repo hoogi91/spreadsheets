@@ -120,12 +120,12 @@ class DataInputElement extends AbstractFormElement
     private function getTemplatePath(): string
     {
         if (empty($this->config['template'])) {
-            return GeneralUtility::getFileAbsFileName(static::DEFAULT_TEMPLATE_PATH);
+            return GeneralUtility::getFileAbsFileName(self::DEFAULT_TEMPLATE_PATH);
         }
 
         $templatePath = GeneralUtility::getFileAbsFileName($this->config['template']);
         if (is_file($templatePath) === false) {
-            return GeneralUtility::getFileAbsFileName(static::DEFAULT_TEMPLATE_PATH);
+            return GeneralUtility::getFileAbsFileName(self::DEFAULT_TEMPLATE_PATH);
         }
 
         return $templatePath;

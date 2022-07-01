@@ -44,8 +44,8 @@ class SpanService
     public function getIgnoredColumns(Worksheet $worksheet): array
     {
         $sheetHash = $this->getActiveSheetHashCode($worksheet->getParent(), $worksheet);
-        if (isset(static::$ignoredColumns[$sheetHash])) {
-            return static::$ignoredColumns[$sheetHash];
+        if (isset(self::$ignoredColumns[$sheetHash])) {
+            return self::$ignoredColumns[$sheetHash];
         }
 
         // map ignored cells by column
@@ -65,7 +65,7 @@ class SpanService
         );
 
         // only return row numbers of rows to ignore
-        return static::$ignoredColumns[$sheetHash] = array_keys(array_filter($ignoredColumnsByRow));
+        return self::$ignoredColumns[$sheetHash] = array_keys(array_filter($ignoredColumnsByRow));
     }
 
     /**
@@ -76,8 +76,8 @@ class SpanService
     public function getIgnoredRows(Worksheet $worksheet): array
     {
         $sheetHash = $this->getActiveSheetHashCode($worksheet->getParent(), $worksheet);
-        if (isset(static::$ignoredRows[$sheetHash])) {
-            return static::$ignoredRows[$sheetHash];
+        if (isset(self::$ignoredRows[$sheetHash])) {
+            return self::$ignoredRows[$sheetHash];
         }
 
         // map ignored cells by row
@@ -97,7 +97,7 @@ class SpanService
         );
 
         // only return row numbers of rows to ignore
-        return static::$ignoredRows[$sheetHash] = array_keys(array_filter($ignoredRowsByColumn));
+        return self::$ignoredRows[$sheetHash] = array_keys(array_filter($ignoredRowsByColumn));
     }
 
     /**
@@ -107,8 +107,8 @@ class SpanService
     public function getIgnoredCells(Worksheet $worksheet): array
     {
         $sheetHash = $this->getActiveSheetHashCode($worksheet->getParent(), $worksheet);
-        if (isset(static::$ignoredCells[$sheetHash])) {
-            return static::$ignoredCells[$sheetHash];
+        if (isset(self::$ignoredCells[$sheetHash])) {
+            return self::$ignoredCells[$sheetHash];
         }
 
         $ignoredCells = [];
@@ -123,7 +123,7 @@ class SpanService
             array_push($ignoredCells, ...$cellsByRange);
         }
 
-        return static::$ignoredCells[$sheetHash] = array_unique($ignoredCells);
+        return self::$ignoredCells[$sheetHash] = array_unique($ignoredCells);
     }
 
     /**
@@ -134,8 +134,8 @@ class SpanService
     public function getMergedCells(Worksheet $worksheet): array
     {
         $sheetHash = $this->getActiveSheetHashCode($worksheet->getParent(), $worksheet);
-        if (isset(static::$mergedCells[$sheetHash])) {
-            return static::$mergedCells[$sheetHash];
+        if (isset(self::$mergedCells[$sheetHash])) {
+            return self::$mergedCells[$sheetHash];
         }
 
         $rowCount = $worksheet->getHighestRow();
@@ -158,7 +158,7 @@ class SpanService
             ];
         }
 
-        return static::$mergedCells[$sheetHash] = $mergedCells;
+        return self::$mergedCells[$sheetHash] = $mergedCells;
     }
 
     /**
