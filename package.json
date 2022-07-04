@@ -23,7 +23,7 @@
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.2.5",
     "core-js": "^3.23.3",
-    "eslint": "^7.32.0",
+    "eslint": "^8.19.0",
     "eslint-loader": "^4.0.2",
     "terser-webpack-plugin": "^5.3.3",
     "webpack": "^5.73.0",
