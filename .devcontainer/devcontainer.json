@@ -18,8 +18,7 @@
   ],
   "forwardPorts": [
     3010,
-    3011,
-    3306
+    3011
   ],
   "onCreateCommand": "bash ./.devcontainer/onCreateCommand.sh"
 }
