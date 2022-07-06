@@ -1,0 +1,46 @@
+version: '3.6'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspace:cached
+    # Overrides default command so things don't shut down after the process ends.
+    command: sleep infinity
+    # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
+    network_mode: service:db
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:10.4
+    restart: unless-stopped
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+
+  typo3-11:
+    image: martinhelmich/typo3:11
+    command: bash -c "install -d -m 0755 -o www-data -g www-data /var/www/html/typo3conf/ext/ && sed -i 's/80/3011/g' /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf && apache2-foreground"
+    volumes:
+      - t3-11-data:/var/www/html/typo3conf/
+      - ../:/var/www/html/typo3conf/ext/spreadsheets/:ro
+    restart: unless-stopped
+    network_mode: service:db
+
+  typo3-10:
+    image: martinhelmich/typo3:10
+    command: bash -c "install -d -m 0755 -o www-data -g www-data /var/www/html/typo3conf/ext/ && sed -i 's/80/3010/g' /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf && apache2-foreground"
+    volumes:
+      - t3-10-data:/var/www/html/typo3conf/
+      - ../:/var/www/html/typo3conf/ext/spreadsheets/:ro
+    restart: unless-stopped
+    network_mode: service:db
+
+volumes:
+  mariadb-data: null
+  t3-11-data: null
+  t3-10-data: null
