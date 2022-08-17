@@ -1,7 +1,6 @@
-name: "Dependabot auto-approve"
+name: "Dependabot Pull Request Approve and Merge"
 
-on:
-  pull_request:
+on: pull_request_target
 
 permissions:
   contents: write
@@ -17,5 +16,11 @@ jobs:
       - name: Approve Dependabot PRs
         run: gh pr review --approve "$PR_URL"
         env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enable auto-merge for Dependabot PRs
+        run: gh pr merge --auto --merge "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
