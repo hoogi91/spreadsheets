@@ -86,7 +86,7 @@ class CellServiceTest extends UnitTestCase
         self::assertEquals(579.0, $this->cellService->getFormattedValue($worksheet->getCell('B2')));
         self::assertEquals(-333, $this->cellService->getFormattedValue($worksheet->getCell('B3')));
         self::assertEquals(56088, $this->cellService->getFormattedValue($worksheet->getCell('B4')));
-        self::assertEquals(3.7073170731707319, $this->cellService->getFormattedValue($worksheet->getCell('B5')));
+        self::assertEquals(3.7073170731707, $this->cellService->getFormattedValue($worksheet->getCell('B5')));
     }
 
     public function testReadingOfCalculatedAndFormattedValues(): void
