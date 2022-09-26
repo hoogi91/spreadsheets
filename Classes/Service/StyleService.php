@@ -79,7 +79,8 @@ class StyleService
     private function getAlignmentStyles(Style\Alignment $pStyle): array
     {
         $css = [];
-        $css['vertical-align'] = $this->mappingService->convertValue('valign', $pStyle->getVertical(), 'baseline');
+        // TODO: check if vertical align is set in future versions and do not use default value
+        $css['vertical-align'] = $this->mappingService->convertValue('valign', $pStyle->getVertical(), 'bottom');
 
         $textAlign = $this->mappingService->convertValue('halign', $pStyle->getHorizontal());
         if (empty($textAlign) === false) {
