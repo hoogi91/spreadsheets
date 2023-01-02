@@ -153,7 +153,7 @@ class CellService
             }
 
             // reset locale to previous state
-            if (!empty($this->currentLocales) && isset($currentLocale)) {
+            if (isset($currentLocale)) {
                 setlocale(LC_NUMERIC, $currentLocale);
             }
 
