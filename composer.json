@@ -30,6 +30,7 @@
     "typo3/cms-frontend": "^10.4 || ^11.5"
   },
   "require-dev": {
+    "helhum/typo3-console": "*",
     "phpstan/phpstan": "^1.8",
     "phpunit/phpunit": "^9.5",
     "roave/security-advisories": "dev-latest",
