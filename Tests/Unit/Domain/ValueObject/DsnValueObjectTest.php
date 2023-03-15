@@ -1,31 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Unit\Domain\ValueObject;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\DsnValueObject;
 use Hoogi91\Spreadsheets\Exception\InvalidDataSourceNameException;
 use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
-use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Container\ContainerInterface;
 use Throwable;
-use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-/**
- * Class DsnValueObjectTest
- * @package Hoogi91\Spreadsheets\Tests\Unit\Domain\ValueObject
- */
 class DsnValueObjectTest extends UnitTestCase
 {
-
     use FileRepositoryMockTrait;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        /** @var ContainerInterface|MockObject $container */
+        /** @var ContainerInterface&MockObject $container */
         $container = $this->getContainerMock();
         $container->method('get')->willReturn($this->getFileRepositoryMock());
         GeneralUtility::setContainer($container);
@@ -45,11 +41,11 @@ class DsnValueObjectTest extends UnitTestCase
         self::assertEquals(5, $value->getFileReference());
 
         self::assertEquals(
-            strpos($dsn, 'vertical') !== false ? 'vertical' : null,
+            str_contains($dsn, 'vertical') ? 'vertical' : null,
             $value->getDirectionOfSelection()
         );
 
-        if (strpos($dsn, '|0') === false) {
+        if (!str_contains($dsn, '|0')) {
             self::assertEquals(1, $value->getSheetIndex());
             self::assertEquals('D2:G5', $value->getSelection());
         } else {
@@ -58,37 +54,40 @@ class DsnValueObjectTest extends UnitTestCase
         }
     }
 
+    /**
+     * @return array<string, array<string>>
+     */
     public function legacyProvider(): array
     {
         return [
             'unknown file' => ['', InvalidDataSourceNameException::class],
             'with invalid file identifier' => [
                 'file:0unknwon|1!D2:G5!vertical',
-                InvalidDataSourceNameException::class
+                InvalidDataSourceNameException::class,
             ],
             'with invalid file reference' => [
                 'file:0|1!D2:G5!vertical',
-                InvalidDataSourceNameException::class
+                InvalidDataSourceNameException::class,
             ],
             'with invalid sheet index' => [
                 'file:5|-1!D2:G5!vertical',
-                InvalidDataSourceNameException::class
+                InvalidDataSourceNameException::class,
             ],
             'without file prefix' => [
                 '5|1!D2:G5!vertical',
-                'spreadsheet://5?index=1&range=D2%3AG5&direction=vertical'
+                'spreadsheet://5?index=1&range=D2%3AG5&direction=vertical',
             ],
             'without direction' => [
                 'file:5|1!D2:G5',
-                'spreadsheet://5?index=1&range=D2%3AG5'
+                'spreadsheet://5?index=1&range=D2%3AG5',
             ],
             'only file reference' => [
                 'file:5|0',
-                'spreadsheet://5?index=0'
+                'spreadsheet://5?index=0',
             ],
             'valid dsn' => [
                 'file:5|1!D2:G5!vertical',
-                'spreadsheet://5?index=1&range=D2%3AG5&direction=vertical'
+                'spreadsheet://5?index=1&range=D2%3AG5&direction=vertical',
             ],
         ];
     }
@@ -106,11 +105,11 @@ class DsnValueObjectTest extends UnitTestCase
         self::assertEquals($exceptionClassOrFinalDsn, (string)$value);
         self::assertEquals(5, $value->getFileReference());
         self::assertEquals(
-            strpos($dsn, 'vertical') !== false ? 'vertical' : null,
+            str_contains($dsn, 'vertical') ? 'vertical' : null,
             $value->getDirectionOfSelection()
         );
 
-        if (strpos($dsn, '?index') !== false) {
+        if (str_contains($dsn, '?index')) {
             self::assertEquals(1, $value->getSheetIndex());
             self::assertEquals('D2:G5', $value->getSelection());
         } else {
@@ -119,37 +118,40 @@ class DsnValueObjectTest extends UnitTestCase
         }
     }
 
+    /**
+     * @return array<string, array<string>>
+     */
     public function dsnProvider(): array
     {
         return [
             'unknown file' => ['', InvalidDataSourceNameException::class],
             'without file prefix' => [
                 '5?index=1&range=D2%3AG5&direction=vertical',
-                InvalidDataSourceNameException::class
+                InvalidDataSourceNameException::class,
             ],
             'with invalid file identifier' => [
                 'spreadsheet://0unknown?index=1&range=D2%3AG5&direction=vertical',
-                InvalidDataSourceNameException::class
+                InvalidDataSourceNameException::class,
             ],
             'with invalid file reference' => [
                 'spreadsheet://0?index=1&range=D2%3AG5&direction=vertical',
-                InvalidDataSourceNameException::class
+                InvalidDataSourceNameException::class,
             ],
             'with invalid sheet index' => [
                 'spreadsheet://5?index=-1&range=D2%3AG5&direction=vertical',
-                InvalidDataSourceNameException::class
+                InvalidDataSourceNameException::class,
             ],
             'without direction' => [
                 'spreadsheet://5?index=1&range=D2%3AG5',
-                'spreadsheet://5?index=1&range=D2%3AG5'
+                'spreadsheet://5?index=1&range=D2%3AG5',
             ],
             'only file reference' => [
                 'spreadsheet://5',
-                'spreadsheet://5?index=0'
+                'spreadsheet://5?index=0',
             ],
             'valid dsn' => [
                 'spreadsheet://5?index=1&range=D2%3AG5&direction=vertical',
-                'spreadsheet://5?index=1&range=D2%3AG5&direction=vertical'
+                'spreadsheet://5?index=1&range=D2%3AG5&direction=vertical',
             ],
         ];
     }

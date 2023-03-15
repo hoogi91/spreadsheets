@@ -6,35 +6,23 @@ namespace Hoogi91\Spreadsheets\Domain\ValueObject;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
-/**
- * Class ExtractionValueObject
- * @package Hoogi91\Spreadsheets\Domain\ValueObject
- */
 class ExtractionValueObject
 {
-
     /**
-     * @var Spreadsheet
+     * @param array<mixed> $bodyData
+     * @param array<mixed> $headData
      */
-    private $spreadsheet;
-
-    /**
-     * @var CellDataValueObject[][]
-     */
-    private $bodyData;
-
-    /**
-     * @var CellDataValueObject[][]
-     */
-    private $headData;
-
-    public function __construct(Spreadsheet $spreadsheet, array $bodyData, array $headData = [])
-    {
-        $this->spreadsheet = $spreadsheet;
-        $this->bodyData = $bodyData;
-        $this->headData = $headData;
+    public function __construct(
+        private readonly Spreadsheet $spreadsheet,
+        private readonly array $bodyData,
+        private readonly array $headData = []
+    ) {
     }
 
+    /**
+     * @param array<mixed> $bodyData
+     * @param array<mixed> $headData
+     */
     public static function create(
         Spreadsheet $spreadsheet,
         array $bodyData,
@@ -43,16 +31,13 @@ class ExtractionValueObject
         return new self($spreadsheet, $bodyData, $headData);
     }
 
-    /**
-     * @return Spreadsheet
-     */
     public function getSpreadsheet(): Spreadsheet
     {
         return $this->spreadsheet;
     }
 
     /**
-     * @return CellDataValueObject[][]
+     * @return array<mixed>
      */
     public function getHeadData(): array
     {
@@ -60,7 +45,7 @@ class ExtractionValueObject
     }
 
     /**
-     * @return CellDataValueObject[][]
+     * @return array<mixed>
      */
     public function getBodyData(): array
     {

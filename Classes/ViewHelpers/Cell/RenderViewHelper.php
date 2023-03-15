@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\ViewHelpers\Cell;
 
 use Closure;
@@ -8,27 +10,22 @@ use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 use TYPO3Fluid\Fluid\Core\ViewHelper\Traits\CompileWithRenderStatic;
 
-/**
- * Class RenderViewHelper
- * @package Hoogi91\Spreadsheets\ViewHelpers\Cell
- */
 class RenderViewHelper extends AbstractViewHelper
 {
     use CompileWithRenderStatic;
 
     /**
      * @var bool
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
      */
     protected $escapeChildren = false;
 
     /**
      * @var bool
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
      */
     protected $escapeOutput = false;
 
-    /**
-     * Initialize arguments.
-     */
     public function initializeArguments(): void
     {
         parent::initializeArguments();
@@ -43,11 +40,7 @@ class RenderViewHelper extends AbstractViewHelper
     }
 
     /**
-     * @param array $arguments
-     * @param Closure $renderChildrenClosure
-     * @param RenderingContextInterface $renderingContext
-     *
-     * @return string
+     * @param array<mixed> $arguments
      */
     public static function renderStatic(
         array $arguments,

@@ -11,78 +11,28 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\Reader\Exception as SpreadsheetReaderException;
 use PhpOffice\PhpSpreadsheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Column;
+use PhpOffice\PhpSpreadsheet\Worksheet\Row;
 use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
 use TYPO3\CMS\Core\Resource\FileRepository;
 
-/**
- * Class ExtractorService
- * @package Hoogi91\Spreadsheets\Service
- */
 class ExtractorService
 {
-    public const EXTRACT_DIRECTION_HORIZONTAL = 'horizontal';
-    public const EXTRACT_DIRECTION_VERTICAL = 'vertical';
+    final public const EXTRACT_DIRECTION_HORIZONTAL = 'horizontal';
+    final public const EXTRACT_DIRECTION_VERTICAL = 'vertical';
 
-    /**
-     * @var ReaderService
-     */
-    private $readerService;
-
-    /**
-     * @var CellService
-     */
-    private $cellService;
-
-    /**
-     * @var SpanService
-     */
-    private $spanService;
-
-    /**
-     * @var RangeService
-     */
-    private $rangeService;
-
-    /**
-     * @var ValueMappingService
-     */
-    private $mappingService;
-
-    /**
-     * @var FileRepository
-     */
-    private $fileRepository;
-
-    /**
-     * ExtractorService constructor.
-     *
-     * @param ReaderService $readerService
-     * @param CellService $cellService
-     * @param SpanService $spanService
-     * @param RangeService $rangeService
-     * @param ValueMappingService $mappingService
-     */
     public function __construct(
-        ReaderService $readerService,
-        CellService $cellService,
-        SpanService $spanService,
-        RangeService $rangeService,
-        ValueMappingService $mappingService,
-        FileRepository $fileRepository
+        private readonly ReaderService $readerService,
+        private readonly CellService $cellService,
+        private readonly SpanService $spanService,
+        private readonly RangeService $rangeService,
+        private readonly ValueMappingService $mappingService,
+        private readonly FileRepository $fileRepository
     ) {
-        $this->readerService = $readerService;
-        $this->cellService = $cellService;
-        $this->spanService = $spanService;
-        $this->rangeService = $rangeService;
-        $this->mappingService = $mappingService;
-        $this->fileRepository = $fileRepository;
     }
 
     /**
-     * @param ValueObject\DsnValueObject $dsnValue
-     * @param bool $returnCellRef
-     * @return ValueObject\ExtractionValueObject
      * @throws SpreadsheetReaderException
      * @throws ResourceDoesNotExistException
      */
@@ -115,15 +65,13 @@ class ExtractorService
             );
 
             return ValueObject\ExtractionValueObject::create($spreadsheet, $cellData);
-        } catch (SpreadsheetException $exception) { // @codeCoverageIgnoreStart
-            return ValueObject\ExtractionValueObject::create($spreadsheet, []); // @codeCoverageIgnoreEnd
+        } catch (SpreadsheetException) {
+            return ValueObject\ExtractionValueObject::create($spreadsheet, []);
         }
     }
 
     /**
-     * @param Worksheet\Worksheet $sheet
-     * @param bool $returnCellRef
-     * @return ValueObject\CellDataValueObject[][]
+     * @return array<array<ValueObject\CellDataValueObject>>
      */
     public function getHeadData(Worksheet\Worksheet $sheet, bool $returnCellRef = false): array
     {
@@ -134,45 +82,41 @@ class ExtractorService
 
             $rowsToRepeatAtTop = $sheet->getPageSetup()->getRowsToRepeatAtTop();
             $range = 'A1:' . $sheet->getHighestColumn() . $rowsToRepeatAtTop[1];
+
             return $this->rangeToCellArray($sheet, $range, self::EXTRACT_DIRECTION_HORIZONTAL, $returnCellRef);
-        } catch (SpreadsheetException $e) { // @codeCoverageIgnoreStart
+        } catch (SpreadsheetException) {
             // sheet or range of cells couldn't be loaded
-            return []; // @codeCoverageIgnoreEnd
+            return [];
         }
     }
 
     /**
-     * @param Worksheet\Worksheet $sheet
-     * @param bool $returnCellRef
-     * @return ValueObject\CellDataValueObject[][]
+     * @return array<array<ValueObject\CellDataValueObject>>
      */
     public function getBodyData(Worksheet\Worksheet $sheet, bool $returnCellRef = false): array
     {
         try {
             if ($sheet->getPageSetup()->isRowsToRepeatAtTopSet() === false) {
                 $range = 'A1:' . $sheet->getHighestColumn() . $sheet->getHighestRow();
+
                 return $this->rangeToCellArray($sheet, $range, self::EXTRACT_DIRECTION_HORIZONTAL, $returnCellRef);
             }
 
             $rowsToRepeatAtTop = $sheet->getPageSetup()->getRowsToRepeatAtTop();
             $range = 'A' . ($rowsToRepeatAtTop[1] + 1) . ':' . $sheet->getHighestColumn() . $sheet->getHighestRow();
+
             return $this->rangeToCellArray($sheet, $range, self::EXTRACT_DIRECTION_HORIZONTAL, $returnCellRef);
-        } catch (SpreadsheetException $e) { // @codeCoverageIgnoreStart
+        } catch (SpreadsheetException) {
             // sheet or range of cells couldn't be loaded
-            return []; // @codeCoverageIgnoreEnd
+            return [];
         }
     }
 
     /**
-     * Create array from a range of cells.
-     *
-     * @param Worksheet\Worksheet $sheet
      * @param string $range Range of cells (i.e. "A1:B10"), or just one cell (i.e. "A1")
-     * @param string $direction
      * @param bool $returnCellRef False - Return array of rows/columns indexed by number counting from zero
      *                                  True - Return rows and columns indexed by their actual row and column IDs
-     *
-     * @return ValueObject\CellDataValueObject[][]
+     * @return array<array<ValueObject\CellDataValueObject>>
      * @throws SpreadsheetException
      */
     public function rangeToCellArray(
@@ -185,8 +129,8 @@ class ExtractorService
         [$rangeStart, $rangeEnd] = Coordinate::rangeBoundaries($this->rangeService->convert($sheet, $range));
 
         // set ignored cells, cell iterator range and iterator type to use (column or row)
-        if ($direction === self::EXTRACT_DIRECTION_VERTICAL) {
-            $cellArray = $this->processIteratorCellsWithCallback(
+        $cellArray = $direction === self::EXTRACT_DIRECTION_VERTICAL
+            ? $this->processIteratorCellsWithCallback(
                 $sheet->getColumnIterator(
                     Coordinate::stringFromColumnIndex($rangeStart[0]),
                     Coordinate::stringFromColumnIndex($rangeEnd[0])
@@ -195,31 +139,30 @@ class ExtractorService
                 $this->spanService->getIgnoredColumns($sheet),
                 $this->spanService->getIgnoredCells($sheet),
                 $this->spanService->getMergedCells($sheet)
-            );
-        } else {
-            $cellArray = $this->processIteratorCellsWithCallback(
+            )
+            : $this->processIteratorCellsWithCallback(
                 $sheet->getRowIterator((int)$rangeStart[1], (int)$rangeEnd[1]),
                 [Coordinate::stringFromColumnIndex($rangeStart[0]), Coordinate::stringFromColumnIndex($rangeEnd[0])],
                 $this->spanService->getIgnoredRows($sheet),
                 $this->spanService->getIgnoredCells($sheet),
                 $this->spanService->getMergedCells($sheet)
             );
-        }
 
         if ($returnCellRef === true) {
             $cellArray = $this->updateColumnIndexesFromString($cellArray, $direction);
         }
+
         return $cellArray;
     }
 
     /**
-     * @param Iterator $iterator
-     * @param array $cellIteratorArgs
-     * @param array $ignoredCellLines
-     * @param array $ignoreCells
-     * @param array $mergedCells
+     * @param Iterator<int|string, Row|Column> $iterator
+     * @param array<int|string> $cellIteratorArgs
+     * @param array<mixed> $ignoredCellLines
+     * @param array<mixed> $ignoreCells
+     * @param array<int|string, array<string, int|array<int>>> $mergedCells
      *
-     * @return ValueObject\CellDataValueObject[][]
+     * @return array<array<ValueObject\CellDataValueObject>>
      * @throws SpreadsheetException
      */
     private function processIteratorCellsWithCallback(
@@ -241,8 +184,8 @@ class ExtractorService
 
             foreach ($cellIterator as $cellIndex => $cell) {
                 $cellReference = $cellIterator instanceof Worksheet\ColumnCellIterator
-                    ? ($line . $cellIndex)
-                    : ($cellIndex . $line);
+                    ? $line . $cellIndex
+                    : $cellIndex . $line;
 
                 if (in_array($cellReference, $ignoreCells, true)) {
                     continue; // ignore processing of this cell
@@ -258,14 +201,12 @@ class ExtractorService
                 }
             }
         }
+
         return $returnValue;
     }
 
     /**
-     * @param Cell $cell
-     * @param array $mergeInformation
-     *
-     * @return ValueObject\CellDataValueObject
+     * @param array<string, int|array<int>> $mergeInformation
      * @throws SpreadsheetException
      */
     private function getCellValue(Cell $cell, array $mergeInformation = []): ValueObject\CellDataValueObject
@@ -300,10 +241,9 @@ class ExtractorService
     }
 
     /**
-     * @param ValueObject\CellDataValueObject[][] $cellArray
-     * @param string $direction
+     * @param array<array<ValueObject\CellDataValueObject>> $cellArray
      *
-     * @return ValueObject\CellDataValueObject[][]
+     * @return array<array<ValueObject\CellDataValueObject>>
      */
     private function updateColumnIndexesFromString(
         array $cellArray,
@@ -314,9 +254,7 @@ class ExtractorService
             // before combine map all keys to get column index from string
             return array_combine(
                 array_map(
-                    static function ($key) {
-                        return Coordinate::columnIndexFromString($key);
-                    },
+                    static fn ($key) => Coordinate::columnIndexFromString($key),
                     array_keys($cellArray)
                 ),
                 array_values($cellArray)
@@ -327,9 +265,7 @@ class ExtractorService
         foreach ($cellArray as $row => $columns) {
             $cellArray[$row] = array_combine(
                 array_map(
-                    static function ($key) {
-                        return Coordinate::columnIndexFromString($key);
-                    },
+                    static fn ($key) => Coordinate::columnIndexFromString($key),
                     array_keys($columns)
                 ),
                 array_values($columns)

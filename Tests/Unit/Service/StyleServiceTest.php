@@ -1,30 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Unit\Service;
 
 use Hoogi91\Spreadsheets\Service;
-use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
+use Hoogi91\Spreadsheets\Service\StyleService;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\RichText\RichText;
 use PhpOffice\PhpSpreadsheet\RichText\Run;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-/**
- * Class StyleServiceTest
- * @package Hoogi91\Spreadsheets\Tests\Unit\Service
- */
 class StyleServiceTest extends UnitTestCase
 {
+    private StyleService $styleService;
 
-    /**
-     * @var Service\StyleService
-     */
-    private $styleService;
-
-    /**
-     * @var Spreadsheet
-     */
-    private $spreadsheet;
+    private Spreadsheet $spreadsheet;
 
     protected function setUp(): void
     {
@@ -45,7 +37,6 @@ class StyleServiceTest extends UnitTestCase
 
     public function testGettingStylesheetForRichTextElement(): void
     {
-        /** @var RichText|mixed $value */
         $value = $this->spreadsheet->getActiveSheet()->getCell('D5')->getValue();
         self::assertInstanceOf(RichText::class, $value);
         self::assertInstanceOf(Run::class, $value->getRichTextElements()[0]);

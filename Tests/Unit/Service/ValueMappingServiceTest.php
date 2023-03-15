@@ -1,22 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Unit\Service;
 
 use Hoogi91\Spreadsheets\Service\ValueMappingService;
-use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-/**
- * Class ValueMappingServiceTest
- * @package Hoogi91\Spreadsheets\Tests\Unit\Service
- */
 class ValueMappingServiceTest extends UnitTestCase
 {
-    /**
-     * @var ValueMappingService
-     */
-    private $valueMappingService;
+    private ValueMappingService $valueMappingService;
 
     protected function setUp(): void
     {
@@ -24,6 +19,9 @@ class ValueMappingServiceTest extends UnitTestCase
         $this->valueMappingService = new ValueMappingService();
     }
 
+    /**
+     * @return array<int, array<int, string|null>>
+     */
     public function valueMappingDataProvider(): array
     {
         return [
@@ -44,11 +42,6 @@ class ValueMappingServiceTest extends UnitTestCase
     }
 
     /**
-     * @param string $map
-     * @param string $value
-     * @param string|null $expected
-     * @param string|null $default
-     *
      * @dataProvider valueMappingDataProvider
      */
     public function testValueMapping(string $map, string $value, ?string $expected, ?string $default = null): void

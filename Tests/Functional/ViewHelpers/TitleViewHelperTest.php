@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Functional\ViewHelpers;
 
 use TYPO3\CMS\Core\Resource\FileRepository;
 
 class TitleViewHelperTest extends AbstractViewHelperTestCase
 {
-
     public function testRenderWithoutFile(): void
     {
         self::assertEmpty($this->getView('<test:reader.sheet.title/>')->render());

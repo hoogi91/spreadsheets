@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Functional\ViewHelpers;
 
 use TYPO3\CMS\Core\Resource\FileReference;
 
 class FileReferenceViewHelperTest extends AbstractViewHelperTestCase
 {
-
     public function testRenderWithoutFile(): void
     {
         self::assertNull($this->getView('<test:reader.fileReference uid=""/>')->render());

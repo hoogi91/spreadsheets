@@ -10,27 +10,24 @@ use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 use TYPO3Fluid\Fluid\Core\ViewHelper\Traits\CompileWithRenderStatic;
 
-/**
- * Class FormattedViewHelper
- * @package Hoogi91\Spreadsheets\ViewHelpers\Cell\Value
- */
+use const ENT_QUOTES;
+
 class FormattedViewHelper extends AbstractViewHelper
 {
     use CompileWithRenderStatic;
 
     /**
      * @var bool
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
      */
     protected $escapeChildren = false;
 
     /**
      * @var bool
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
      */
     protected $escapeOutput = false;
 
-    /**
-     * Initialize arguments.
-     */
     public function initializeArguments(): void
     {
         parent::initializeArguments();
@@ -50,11 +47,7 @@ class FormattedViewHelper extends AbstractViewHelper
     }
 
     /**
-     * @param array $arguments
-     * @param Closure $renderChildrenClosure
-     * @param RenderingContextInterface $renderingContext
-     *
-     * @return string
+     * @param array<string> $arguments
      */
     public static function renderStatic(
         array $arguments,

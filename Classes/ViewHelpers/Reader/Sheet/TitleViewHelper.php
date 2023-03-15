@@ -9,26 +9,12 @@ use PhpOffice\PhpSpreadsheet\Exception;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 
-/**
- * Class TitleViewHelper
- * @package Hoogi91\Spreadsheets\ViewHelpers\Reader\Sheet
- */
 class TitleViewHelper extends AbstractViewHelper
 {
-
-    /**
-     * @var ReaderService
-     */
-    private $readerService;
-
-    public function __construct(ReaderService $readerService)
+    public function __construct(private readonly ReaderService $readerService)
     {
-        $this->readerService = $readerService;
     }
 
-    /**
-     * Initialize arguments.
-     */
     public function initializeArguments(): void
     {
         parent::initializeArguments();
@@ -36,9 +22,6 @@ class TitleViewHelper extends AbstractViewHelper
         $this->registerArgument('index', 'integer', 'Index of worksheet that should be selected', false, 0);
     }
 
-    /**
-     * @return string
-     */
     public function render(): string
     {
         if (empty($this->arguments['file'])) {
@@ -50,9 +33,9 @@ class TitleViewHelper extends AbstractViewHelper
 
         try {
             return $this->readerService->getSpreadsheet($this->arguments['file'])
-                ->getSheet((int)$this->arguments['index'])
+                ->getSheet((int) $this->arguments['index'])
                 ->getTitle();
-        } catch (Exception $e) {
+        } catch (Exception) {
             return '';
         }
     }

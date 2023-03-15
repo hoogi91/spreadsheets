@@ -1,0 +1,9 @@
+parameters:
+	level: max
+	paths:
+		- Classes
+		- Tests
+
+includes:
+    - .Build/vendor/bnf/phpstan-psr-container/extension.neon
+    - .Build/vendor/friendsoftypo3/phpstan-typo3/extension.neon

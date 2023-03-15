@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Unit\Form\Element;
 
 use Hoogi91\Spreadsheets\Form\Element\DataInputElement;
 use Hoogi91\Spreadsheets\Service\ExtractorService;
 use Hoogi91\Spreadsheets\Service\ReaderService;
+use JsonSerializable;
 use PhpOffice\PhpSpreadsheet\Reader\Exception;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -15,13 +18,10 @@ use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-/**
- * Class DataInputElementTest
- * @package Hoogi91\Spreadsheets\Tests\Unit\Form\Element
- */
 class DataInputElementTest extends UnitTestCase
 {
     private const DEFAULT_UPLOAD_FIELD = 'tx_spreadsheets_assets';
@@ -33,9 +33,12 @@ class DataInputElementTest extends UnitTestCase
     ];
 
     private const FILE_REFERENCE_TYPE_MAP = [
-        0 => 'null', // this file does not exists
-        465 => 'xlsx', // should work
-        589 => 'pdf', // should fail
+        0 => 'null',
+        // this file does not exists
+        465 => 'xlsx',
+        // should work
+        589 => 'pdf',
+        // should fail
         678 => 'html|exception', // file reference says html but reader will throw exception
     ];
 
@@ -47,12 +50,12 @@ class DataInputElementTest extends UnitTestCase
         ],
         'processedTca' => [
             'columns' => [
-                self::DEFAULT_UPLOAD_FIELD => [/* any field configuration goes here */]
+                self::DEFAULT_UPLOAD_FIELD => [ /* any field configuration goes here */],
             ],
         ],
         'parameterArray' => [
             'itemFormElName' => 'my-form-identifier',
-            'itemFormElValue' => 'spreadsheet://465?index=1&range=D2%3AG5&direction=vertical'
+            'itemFormElValue' => 'spreadsheet://465?index=1&range=D2%3AG5&direction=vertical',
         ],
     ];
 
@@ -72,7 +75,7 @@ class DataInputElementTest extends UnitTestCase
             'renderType' => 'spreadsheetInput',
             'uploadField' => 'tx_spreadsheets_assets',
             'sheetsOnly' => true,
-            'size' => 100
+            'size' => 100,
         ],
         'sheetFiles' => [
             465 => ['ext' => 'xlsx'],
@@ -81,38 +84,32 @@ class DataInputElementTest extends UnitTestCase
             465 => [
                 ['name' => 'Fixture1', 'cells' => []],
                 ['name' => 'Fixture2', 'cells' => []],
-            ]
+            ],
         ],
         'valueObject' => 'spreadsheet://465?index=1&range=D2%3AG5&direction=vertical',
     ];
 
-    /**
-     * @var ReaderService|MockObject
-     */
-    private $readerService;
-    /**
-     * @var ExtractorService|MockObject
-     */
-    private $extractorService;
-    /**
-     * @var MockObject|StandaloneView
-     */
-    private $standaloneView;
-    /**
-     * @var MockObject|IconFactory
-     */
-    private $iconFactory;
-    /**
-     * @var MockObject|RelationHandler
-     */
-    private $relationHandler;
-    /**
-     * @var MockObject|ResourceFactory
-     */
-    private $resourceFactory;
+    private ReaderService&MockObject $readerService;
 
-    private static $assignedVariables = [];
+    private ExtractorService&MockObject $extractorService;
 
+    private MockObject&StandaloneView $standaloneView;
+
+    private MockObject&IconFactory $iconFactory;
+
+    private MockObject&RelationHandler $relationHandler;
+
+    private MockObject&ResourceFactory $resourceFactory;
+
+    /**
+     * @var array<mixed>
+     */
+    private static array $assignedVariables = [];
+
+    /**
+     * @var bool
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
+     */
     protected $resetSingletonInstances = true;
 
     protected function setUp(): void
@@ -125,14 +122,16 @@ class DataInputElementTest extends UnitTestCase
         $this->standaloneView->method('assign')->with(
             self::callback(
                 static function ($key) {
-                    static::$assignedVariables['_next'] = $key;
+                    self::$assignedVariables['_next'] = $key;
+
                     return true;
                 }
             ),
             self::callback(
                 static function ($value) {
-                    static::$assignedVariables[static::$assignedVariables['_next']] = $value;
-                    unset(static::$assignedVariables['_next']);
+                    self::$assignedVariables[self::$assignedVariables['_next']] = $value;
+                    unset(self::$assignedVariables['_next']);
+
                     return true;
                 }
             )
@@ -140,15 +139,14 @@ class DataInputElementTest extends UnitTestCase
         $this->standaloneView->method('assignMultiple')->with(
             self::callback(
                 static function ($values) {
-                    static::$assignedVariables = array_merge(static::$assignedVariables, $values);
+                    self::$assignedVariables = array_merge(self::$assignedVariables, $values);
+
                     return true;
                 }
             )
         )->willReturnSelf();
-        $this->standaloneView->method('render')->willReturn(
-            static function () {
-                return static::$assignedVariables;
-            }
+        $this->standaloneView->method('render')->willReturnCallback(
+            static fn () => self::$assignedVariables
         );
         $this->extractorService = $this->createMock(ExtractorService::class);
         $this->iconFactory = $this->createMock(IconFactory::class);
@@ -174,11 +172,15 @@ class DataInputElementTest extends UnitTestCase
     {
         GeneralUtility::purgeInstances();
         parent::tearDown();
-        static::$assignedVariables = [];
+        self::$assignedVariables = [];
     }
 
     /**
      * @dataProvider renderDataProvider
+     *
+     * @param array<mixed> $expected
+     * @param array<mixed> $data
+     * @param array<mixed> $fieldConfig
      */
     public function testRendering(
         array $expected = self::DEFAULT_EXPECTED_HTML_DATA,
@@ -186,36 +188,39 @@ class DataInputElementTest extends UnitTestCase
         array $fieldConfig = self::DEFAULT_FIELD_CONF
     ): void {
         // setup relation and resource factory to return file reference
-        $referenceFieldUid = (int)$data['databaseRow'][self::DEFAULT_UPLOAD_FIELD];
+        $dbData = (array)($data['databaseRow'] ?? []);
+        $referenceFieldUid = MathUtility::canBeInterpretedAsInteger($dbData[self::DEFAULT_UPLOAD_FIELD] ?? null)
+            ? (int) $dbData[self::DEFAULT_UPLOAD_FIELD]
+            : null;
         $referenceFileExtension = self::FILE_REFERENCE_TYPE_MAP[$referenceFieldUid] ?? 'xlsx';
         if ($referenceFileExtension !== 'null') {
             $this->relationHandler->tableArray = [
-                'sys_file_reference' => [$referenceFieldUid] // mocked file reference uid to spreadsheet file
+                'sys_file_reference' => [$referenceFieldUid], // mocked file reference uid to spreadsheet file
             ];
             $this->resourceFactory->method('getFileReferenceObject')->willReturn(
                 $this->createConfiguredMock(
                     FileReference::class,
                     [
                         'getUid' => $referenceFieldUid,
-                        'getExtension' => strpos($referenceFileExtension, '|exception') !== false
+                        'getExtension' => str_contains($referenceFileExtension, '|exception')
                             ? strtok($referenceFileExtension, '|')
                             : $referenceFileExtension,
                         'toArray' => [
-                            'ext' => strpos($referenceFileExtension, '|exception') !== false
-                                ? strtok($referenceFileExtension, '|')
-                                : $referenceFileExtension
-                        ]
+                            'ext' => str_contains($referenceFileExtension, '|exception')
+                            ? strtok($referenceFileExtension, '|')
+                            : $referenceFileExtension,
+                        ],
                     ]
                 )
             );
 
-            if (strpos($referenceFileExtension, '|exception') !== false) {
+            if (str_contains($referenceFileExtension, '|exception')) {
                 $this->readerService->method('getSpreadsheet')->willThrowException(new Exception());
             }
         } else {
             // no file references exists
             $this->relationHandler->tableArray = [
-                'sys_file_reference' => []
+                'sys_file_reference' => [],
             ];
         }
 
@@ -225,11 +230,9 @@ class DataInputElementTest extends UnitTestCase
 
         // extract mocked html variables from rendered data
         $renderedData = $element->render();
-        $htmlData = isset($renderedData['html']) ? call_user_func($renderedData['html']) : null;
+        $htmlData = (array)($renderedData['html'] ?? null);
         unset($renderedData['html']);
 
-        // assert rendered data
-        self::assertNotNull($htmlData);
         if (isset($expected['valueObject'])) {
             $expectedResult = self::EMPTY_EXPECTED_RESULT;
             $expectedResult['stylesheetFiles'] = ['EXT:spreadsheets/Resources/Public/Css/SpreadsheetDataInput.css'];
@@ -243,11 +246,11 @@ class DataInputElementTest extends UnitTestCase
         // create comparable array
         array_walk_recursive(
             $htmlData,
-            static function (&$item) {
-                if ($item instanceof \JsonSerializable) {
+            static function (&$item): void {
+                if ($item instanceof JsonSerializable) {
                     $item = $item->jsonSerialize();
                 }
-                if ((is_string($item) || is_object($item)) && method_exists($item, 'toArray')) {
+                if (is_object($item) && method_exists($item, 'toArray')) {
                     $item = $item->toArray();
                 }
             }
@@ -255,6 +258,9 @@ class DataInputElementTest extends UnitTestCase
         self::assertEquals($expected, $htmlData);
     }
 
+    /**
+     * @return Traversable<string, array<string, mixed>>
+     */
     public function renderDataProvider(): Traversable
     {
         yield 'missing upload field' => [
@@ -274,7 +280,7 @@ class DataInputElementTest extends UnitTestCase
                 [
                     'databaseRow' => ['uid' => 1, self::DEFAULT_UPLOAD_FIELD => 589],
                     'parameterArray' => [
-                        'itemFormElValue' => 'spreadsheet://589?index=1&range=D2%3AG5&direction=vertical'
+                        'itemFormElValue' => 'spreadsheet://589?index=1&range=D2%3AG5&direction=vertical',
                     ],
                 ]
             ),
@@ -299,7 +305,7 @@ class DataInputElementTest extends UnitTestCase
                 [
                     'databaseRow' => ['uid' => 1, self::DEFAULT_UPLOAD_FIELD => 678],
                     'parameterArray' => [
-                        'itemFormElValue' => 'spreadsheet://678?index=1&range=D2%3AG5&direction=vertical'
+                        'itemFormElValue' => 'spreadsheet://678?index=1&range=D2%3AG5&direction=vertical',
                     ],
                 ]
             ),
@@ -308,6 +314,7 @@ class DataInputElementTest extends UnitTestCase
         yield 'successful input element rendering' => [];
 
         $templatePath = 'EXT:spreadsheets/Resources/Private/Templates/FormElement/DataInput.html';
+
         yield 'successful input element rendering with custom template path' => [
             'expected' => array_replace_recursive(
                 self::DEFAULT_EXPECTED_HTML_DATA,
@@ -318,6 +325,7 @@ class DataInputElementTest extends UnitTestCase
         ];
 
         $templatePath = 'EXT:spreadsheets/Resources/Private/Templates/FormElement/ThisFileDoesNotExists.html';
+
         yield 'successful input element rendering with unknown template path' => [
             'expected' => array_replace_recursive(
                 self::DEFAULT_EXPECTED_HTML_DATA,

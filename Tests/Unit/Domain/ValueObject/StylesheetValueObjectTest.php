@@ -1,14 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Unit\Domain\ValueObject;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\StylesheetValueObject;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-/**
- * Class StylesheetValueObjectTest
- * @package Hoogi91\Spreadsheets\Tests\Unit\Domain\ValueObject
- */
 class StylesheetValueObjectTest extends UnitTestCase
 {
     private const DEFAULT_STYLES = [

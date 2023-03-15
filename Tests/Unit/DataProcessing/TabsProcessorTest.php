@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Unit\DataProcessing;
 
 use Hoogi91\Spreadsheets\DataProcessing\AbstractProcessor;
@@ -8,13 +10,8 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PHPUnit\Framework\MockObject\MockObject;
 
-/**
- * Class TabsProcessorTest
- * @package Hoogi91\Spreadsheets\Tests\Unit\DataProcessing
- */
 class TabsProcessorTest extends AbstractProcessorTest
 {
-
     protected function getDataProcessor(): AbstractProcessor
     {
         return new TabsProcessor(
@@ -27,8 +24,7 @@ class TabsProcessorTest extends AbstractProcessorTest
     }
 
     /**
-     * @param MockObject|Spreadsheet $spreadsheetMock
-     * @return void
+     * @param MockObject&Spreadsheet $spreadsheetMock
      */
     protected function validInputExpectations(MockObject $spreadsheetMock): void
     {
@@ -37,7 +33,7 @@ class TabsProcessorTest extends AbstractProcessorTest
             Worksheet::class,
             [
                 'getTitle' => 'Worksheet #1',
-                'getHashCode' => '263df821f3760dc1ec4e'
+                'getHashCode' => '263df821f3760dc1ec4e',
             ]
         );
         $spreadsheetMock->expects(self::once())->method('getAllSheets')->willReturn([$worksheetMock]);
@@ -59,6 +55,9 @@ class TabsProcessorTest extends AbstractProcessorTest
         $this->extractorService->expects(self::never())->method('getHeadData');
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function processingDataProvider(): array
     {
         return [
@@ -86,13 +85,13 @@ class TabsProcessorTest extends AbstractProcessorTest
                             'bodyData' => ['body-data-mocked'],
                             'headData' => ['head-data-mocked'],
                         ],
-                    ]
+                    ],
                 ],
             ],
             'default named variable and page renderer has been called' => [
                 'processConfig' => [
                     'value' => 'file:123|2!A1:B2',
-                    'options.' => ['additionalStyles' => '.test{color: "#fff"}',]
+                    'options.' => ['additionalStyles' => '.test{color: "#fff"}',],
                 ],
                 'processedData' => [],
                 'expectedResult' => [
@@ -103,7 +102,7 @@ class TabsProcessorTest extends AbstractProcessorTest
                             'bodyData' => ['body-data-mocked'],
                             'headData' => ['head-data-mocked'],
                         ],
-                    ]
+                    ],
                 ],
             ],
         ];

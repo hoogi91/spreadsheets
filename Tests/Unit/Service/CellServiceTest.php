@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Unit\Service;
 
 use Hoogi91\Spreadsheets\Service\CellService;
@@ -15,28 +17,24 @@ use PhpOffice\PhpSpreadsheet\RichText\Run;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PHPUnit\Framework\MockObject\MockObject;
+use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-/**
- * Class CellServiceTest
- * @package Hoogi91\Spreadsheets\Tests\Unit\Service
- */
 class CellServiceTest extends UnitTestCase
 {
     use TsfeSetupTrait;
 
     private const TEST_FORMATTING_SHEET_INDEX = 1;
 
-    /**
-     * @var Spreadsheet
-     */
-    private $spreadsheet;
+    private Spreadsheet $spreadsheet;
+
+    protected CellService $cellService;
 
     /**
-     * @var CellService
+     * @var bool
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
      */
-    protected $cellService;
-
     protected $resetSingletonInstances = true;
 
     protected function setUp(): void
@@ -47,7 +45,11 @@ class CellServiceTest extends UnitTestCase
 
         $mappingService = $this->createTestProxy(ValueMappingService::class);
         $styleService = $this->createTestProxy(StyleService::class, [$mappingService]);
-        $this->cellService = new CellService($styleService);
+        $this->cellService = new CellService(
+            $styleService,
+            $this->createMock(SiteFinder::class),
+            $this->createMock(Context::class)
+        );
     }
 
     public function testReadingOfCellValues(): void
@@ -62,7 +64,8 @@ class CellServiceTest extends UnitTestCase
         self::assertEquals('Hoch', $this->cellService->getFormattedValue($worksheet->getCell('E5')));
         self::assertEquals('2018', $this->cellService->getFormattedValue($worksheet->getCell('E6')));
         self::assertEquals(
-            '<span style="color:#000000"><sup>Hoch</sup></span><span style="color:#000000"> Test </span><span style="color:#000000"><sub>Tief</sub></span>',
+            '<span style="color:#000000"><sup>Hoch</sup></span>' .
+            '<span style="color:#000000"> Test </span><span style="color:#000000"><sub>Tief</sub></span>',
             $this->cellService->getFormattedValue($worksheet->getCell('D5'))
         );
     }
@@ -85,8 +88,8 @@ class CellServiceTest extends UnitTestCase
         // assert data from value
         self::assertEquals(579.0, $this->cellService->getFormattedValue($worksheet->getCell('B2')));
         self::assertEquals(-333, $this->cellService->getFormattedValue($worksheet->getCell('B3')));
-        self::assertEquals(56088, $this->cellService->getFormattedValue($worksheet->getCell('B4')));
-        self::assertEquals(3.7073170731707, $this->cellService->getFormattedValue($worksheet->getCell('B5')));
+        self::assertEquals(56_088, $this->cellService->getFormattedValue($worksheet->getCell('B4')));
+        self::assertEquals(3.707_317_073_170_7, $this->cellService->getFormattedValue($worksheet->getCell('B5')));
     }
 
     public function testReadingOfCalculatedAndFormattedValues(): void
@@ -103,7 +106,7 @@ class CellServiceTest extends UnitTestCase
         self::assertEquals('370.73%', $this->cellService->getFormattedValue($worksheet->getCell('C7')));
 
         // check date field calculated and complete formatted
-        self::assertEquals(43544.0, $worksheet->getCell('C8')->getCalculatedValue());
+        self::assertEquals(43_544.0, $worksheet->getCell('C8')->getCalculatedValue());
         self::assertEquals(
             'Wednesday, March 20, 2019',
             $this->cellService->getFormattedValue($worksheet->getCell('C8'))
@@ -113,7 +116,7 @@ class CellServiceTest extends UnitTestCase
     public function testCatchingOfCalculatedCellValues(): void
     {
         // create cell mock to get test exception in cell service
-        /** @var MockObject|Cell $mockedCell */
+        /** @var MockObject&Cell $mockedCell */
         $mockedCell = $this->getMockBuilder(Cell::class)->disableOriginalConstructor()->getMock();
         $mockedCell->method('getCalculatedValue')->willThrowException(new SpreadsheetException());
         $mockedCell->method('getValue')->willReturn('MockValue');
