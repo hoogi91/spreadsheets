@@ -27,7 +27,10 @@ class TitleViewHelper extends AbstractViewHelper
         if (empty($this->arguments['file'])) {
             $this->arguments['file'] = $this->renderChildren();
         }
-        if ($this->arguments['file'] instanceof FileReference === false) {
+        if (
+            $this->arguments['file'] instanceof FileReference === false
+            || is_numeric($this->arguments['index']) === false
+        ) {
             return '';
         }
 

@@ -26,9 +26,12 @@ class FileReferenceViewHelper extends AbstractViewHelper
         if (empty($this->arguments['uid'])) {
             $this->arguments['uid'] = $this->renderChildren();
         }
+        if (is_numeric($this->arguments['uid']) === false) {
+            return null;
+        }
 
         try {
-            $fileReference = $this->fileRepository->findFileReferenceByUid($this->arguments['uid']);
+            $fileReference = $this->fileRepository->findFileReferenceByUid((int) $this->arguments['uid']);
         } catch (InvalidArgumentException) {
             $fileReference = false;
         }

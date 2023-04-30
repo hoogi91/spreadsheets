@@ -31,11 +31,7 @@ class CellServiceTest extends UnitTestCase
 
     protected CellService $cellService;
 
-    /**
-     * @var bool
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
-     */
-    protected $resetSingletonInstances = true;
+    protected bool $resetSingletonInstances = true;
 
     protected function setUp(): void
     {

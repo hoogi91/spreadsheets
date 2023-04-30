@@ -66,6 +66,7 @@ class DataInputElementTest extends UnitTestCase
         'stylesheetFiles' => [],
         'requireJsModules' => [],
         'inlineData' => [],
+        'javaScriptModules' => [],
     ];
 
     private const DEFAULT_EXPECTED_HTML_DATA = [
@@ -106,11 +107,7 @@ class DataInputElementTest extends UnitTestCase
      */
     private static array $assignedVariables = [];
 
-    /**
-     * @var bool
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
-     */
-    protected $resetSingletonInstances = true;
+    protected bool $resetSingletonInstances = true;
 
     protected function setUp(): void
     {

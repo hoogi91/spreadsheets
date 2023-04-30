@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Tests\Functional\ViewHelpers;
 
-use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Fluid\Core\ViewHelper\ViewHelperResolver;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 use TYPO3Fluid\Fluid\View\TemplateView;
@@ -13,17 +12,15 @@ abstract class AbstractViewHelperTestCase extends FunctionalTestCase
 {
     /**
      * @var array<string, non-empty-string>
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
      */
-    protected $pathsToLinkInTestInstance = [
+    protected array $pathsToLinkInTestInstance = [
         'typo3conf/ext/spreadsheets/Tests/Fixtures/' => 'fileadmin/user_upload',
     ];
 
     /**
      * @var array<non-empty-string>
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
      */
-    protected $testExtensionsToLoad = [
+    protected array $testExtensionsToLoad = [
         'typo3conf/ext/spreadsheets',
     ];
 
@@ -37,7 +34,6 @@ abstract class AbstractViewHelperTestCase extends FunctionalTestCase
         $view->getRenderingContext()->setViewHelperResolver(
             new ViewHelperResolver(
                 $this->getContainer(),
-                $this->getContainer()->get(ObjectManager::class),
                 $GLOBALS['TYPO3_CONF_VARS']['SYS']['fluid']['namespaces'] ?? []
             )
         );

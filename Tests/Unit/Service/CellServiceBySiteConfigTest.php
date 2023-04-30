@@ -10,6 +10,8 @@ use Hoogi91\Spreadsheets\Service\ValueMappingService;
 use stdClass;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Context\LanguageAspect;
+use TYPO3\CMS\Core\Information\Typo3Version;
+use TYPO3\CMS\Core\Localization\Locale;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use TYPO3\CMS\Core\Site\SiteFinder;
@@ -25,9 +27,15 @@ class CellServiceBySiteConfigTest extends CellServiceTest
         $GLOBALS['TSFE'] = new stdClass();
         $GLOBALS['TSFE']->id = 1;
 
+        $locale = 'de';
+        if ((new Typo3Version())->getMajorVersion() > 11) {
+            $locale = $this->createMock(Locale::class);
+            $locale->expects(self::once())->method('getLanguageCode')->willReturn('de');
+        }
+
         // mock site finder to get language
         $siteLanguage = $this->createMock(SiteLanguage::class);
-        $siteLanguage->expects(self::once())->method('getLocale')->willReturn('de');
+        $siteLanguage->expects(self::once())->method('getLocale')->willReturn($locale);
         $site = $this->createMock(Site::class);
         $site->expects(self::once())->method('getLanguageById')->with(123)->willReturn($siteLanguage);
         $siteFinder = $this->createMock(SiteFinder::class);

@@ -3,6 +3,11 @@ parameters:
 	paths:
 		- Classes
 		- Tests
+	ignoreErrors:
+		-
+			message: '#Property Hoogi91\\Spreadsheets\\Service\\CellService::\$currentLocales.*does not accept TYPO3\\CMS\\Core\\Localization\\Locale#'
+			path: Classes/Service/CellService.php
+			count: 1
 
 includes:
     - .Build/vendor/bnf/phpstan-psr-container/extension.neon

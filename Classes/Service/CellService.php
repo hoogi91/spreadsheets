@@ -11,6 +11,7 @@ use PhpOffice\PhpSpreadsheet\RichText\Run;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Style\Style;
 use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -29,6 +30,15 @@ class CellService
         }
 
         $languageAspect = $context->getAspect('language');
+        if ((new Typo3Version())->getMajorVersion() > 11) {
+            $this->currentLocales = $siteFinder->getSiteByPageId($GLOBALS['TSFE']->id)
+                ->getLanguageById($languageAspect->getId())
+                ->getLocale()
+                ->getLanguageCode();
+
+            return;
+        }
+
         $this->currentLocales = $siteFinder->getSiteByPageId($GLOBALS['TSFE']->id)
             ->getLanguageById($languageAspect->getId())
             ->getLocale();
