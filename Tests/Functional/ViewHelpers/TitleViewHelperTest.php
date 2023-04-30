@@ -20,8 +20,10 @@ class TitleViewHelperTest extends AbstractViewHelperTestCase
      */
     public function testRender(string $expected, int $sheetIndex): void
     {
-        $this->setUpBackendUserFromFixture(1);
-        $this->importDataSet(__DIR__ . '/Fixtures/sys_file_reference.xml');
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/be_users.csv');
+        $this->setUpBackendUser(1);
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/sys_file.csv');
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/sys_file_reference.csv');
         $fileReference = $this->getContainer()->get(FileRepository::class)->findFileReferenceByUid(123);
         self::assertEquals(
             $expected,

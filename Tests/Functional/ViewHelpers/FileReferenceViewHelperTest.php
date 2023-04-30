@@ -21,8 +21,10 @@ class FileReferenceViewHelperTest extends AbstractViewHelperTestCase
     {
         $view = $this->getView('<test:reader.fileReference uid="{uid}"/>', ['uid' => $fileReferenceUid]);
         if ($expectFileReference === true) {
-            $this->setUpBackendUserFromFixture(1);
-            $this->importDataSet(__DIR__ . '/Fixtures/sys_file_reference.xml'); // import dataset first, then render
+            $this->importCSVDataSet(__DIR__ . '/Fixtures/be_users.csv');
+            $this->setUpBackendUser(1);
+            $this->importCSVDataSet(__DIR__ . '/Fixtures/sys_file.csv');
+            $this->importCSVDataSet(__DIR__ . '/Fixtures/sys_file_reference.csv'); // import dataset first, then render
             self::assertInstanceOf(FileReference::class, $view->render());
         } else {
             self::assertNull($view->render());
