@@ -31,18 +31,14 @@ abstract class AbstractViewHelperTestCase extends FunctionalTestCase
      */
     protected function getView(string $template, array $arguments = []): TemplateView
     {
-        if ((new Typo3Version())->getMajorVersion() > 11) {
-            $resolver = new ViewHelperResolver(
+        $namespaces = $GLOBALS['TYPO3_CONF_VARS']['SYS']['fluid']['namespaces'] ?? [];
+        $resolver = (new Typo3Version())->getMajorVersion() > 11
+            ? new ViewHelperResolver($this->getContainer(), $namespaces)
+            : new ViewHelperResolver(
                 $this->getContainer(),
-                $GLOBALS['TYPO3_CONF_VARS']['SYS']['fluid']['namespaces'] ?? []
+                $this->getContainer()->get(ObjectManager::class),
+                $namespaces
             );
-        } else {
-            $resolver = new ViewHelperResolver(
-                $this->getContainer(),
-                $this->getContainer()->get(ObjectManager::class)
-                $GLOBALS['TYPO3_CONF_VARS']['SYS']['fluid']['namespaces'] ?? []
-            );
-        }
 
         $view = new TemplateView();
         $view->getRenderingContext()->getTemplatePaths()->setTemplateSource($template);
