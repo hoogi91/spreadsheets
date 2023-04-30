@@ -68,8 +68,5 @@ use TYPO3\TestingFramework\Core\Testbase;
         $packageManager
     );
     ExtensionManagementUtility::setPackageManager($packageManager);
-
-    $testbase->dumpClassLoadingInformation();
-
     GeneralUtility::purgeInstances();
 })();
