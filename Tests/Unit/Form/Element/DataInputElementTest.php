@@ -15,6 +15,7 @@ use Traversable;
 use TYPO3\CMS\Backend\Form\NodeFactory;
 use TYPO3\CMS\Core\Database\RelationHandler;
 use TYPO3\CMS\Core\Imaging\IconFactory;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -66,7 +67,6 @@ class DataInputElementTest extends UnitTestCase
         'stylesheetFiles' => [],
         'requireJsModules' => [],
         'inlineData' => [],
-        'javaScriptModules' => [],
     ];
 
     private const DEFAULT_EXPECTED_HTML_DATA = [
@@ -230,14 +230,18 @@ class DataInputElementTest extends UnitTestCase
         $htmlData = (array)($renderedData['html'] ?? null);
         unset($renderedData['html']);
 
+        $expectedResult = self::EMPTY_EXPECTED_RESULT;
+        if ((new Typo3Version())->getMajorVersion() > 11) {
+            $expectedResult['javaScriptModules'] = [];
+        }
+
         if (isset($expected['valueObject'])) {
-            $expectedResult = self::EMPTY_EXPECTED_RESULT;
             $expectedResult['stylesheetFiles'] = ['EXT:spreadsheets/Resources/Public/Css/SpreadsheetDataInput.css'];
             $expectedResult['requireJsModules'] = ['TYPO3/CMS/Spreadsheets/SpreadsheetDataInput'];
             self::assertEquals($expectedResult, $renderedData);
         } else {
             // no value object means we should have an empty form element result
-            self::assertEquals(self::EMPTY_EXPECTED_RESULT, $renderedData);
+            self::assertEquals($expectedResult, $renderedData);
         }
 
         // create comparable array
