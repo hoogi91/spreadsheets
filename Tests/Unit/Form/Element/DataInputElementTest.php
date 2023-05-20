@@ -86,8 +86,8 @@ class DataInputElementTest extends UnitTestCase
         ],
         'sheetData' => [
             465 => [
-                ['name' => 'Fixture1', 'cells' => []],
-                ['name' => 'Fixture2', 'cells' => []],
+                ['name' => 'Fixture1', 'cells' => ['A1' => 'Hírek']],
+                ['name' => 'Fixture2', 'cells' => ['A1' => 'Hírek']],
             ],
         ],
         'valueObject' => 'spreadsheet://465?index=1&range=D2%3AG5&direction=vertical',
@@ -135,6 +135,9 @@ class DataInputElementTest extends UnitTestCase
         ))->willReturnSelf();
         $this->standaloneView->method('render')->willReturnCallback(static fn () => self::$assignedVariables);
         $this->extractorService = $this->createMock(ExtractorService::class);
+        $this->extractorService->method('rangeToCellArray')->willReturn([
+            'A1' => file_get_contents(dirname(__DIR__, 3) . '/Fixtures/latin1-content.txt'),
+        ]);
         $this->iconFactory = $this->createMock(IconFactory::class);
 
         GeneralUtility::addInstance(ReaderService::class, $this->readerService);
