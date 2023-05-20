@@ -45,5 +45,12 @@ class StyleServiceTest extends UnitTestCase
             'color:#000000',
             $this->styleService->getStylesheetForRichTextElement($value->getRichTextElements()[0])->toInlineCSS()
         );
+
+        // update font and see if it has been cleared
+        $value->getRichTextElements()[0]->setFont(null);
+        self::assertSame(
+            '',
+            $this->styleService->getStylesheetForRichTextElement($value->getRichTextElements()[0])->toInlineCSS()
+        );
     }
 }

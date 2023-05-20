@@ -8,7 +8,8 @@ use Hoogi91\Spreadsheets\Form\Element\DataInputElement;
 use Hoogi91\Spreadsheets\Service\ExtractorService;
 use Hoogi91\Spreadsheets\Service\ReaderService;
 use JsonSerializable;
-use PhpOffice\PhpSpreadsheet\Reader\Exception;
+use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
+use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PHPUnit\Framework\MockObject\MockObject;
 use Traversable;
@@ -40,7 +41,9 @@ class DataInputElementTest extends UnitTestCase
         // should work
         589 => 'pdf',
         // should fail
-        678 => 'html|exception', // file reference says html but reader will throw exception
+        678 => 'html|exceptionRead', // file reference says html but reader will throw exception
+        // should fail on read
+        679 => 'csv|exceptionCell', // file reference says csv but rangeToCellArray will throw exception
     ];
 
     private const DEFAULT_DATA = [
@@ -111,40 +114,26 @@ class DataInputElementTest extends UnitTestCase
 
     protected function setUp(): void
     {
+        $trueCallback = static fn (callable $callback) => self::callback(
+            static fn () => call_user_func_array($callback, func_get_args()) !== false
+        );
+
         parent::setUp();
         $spreadsheet = (new Xlsx())->load(dirname(__DIR__, 3) . '/Fixtures/01_fixture.xlsx');
         $this->readerService = $this->createMock(ReaderService::class);
         $this->readerService->method('getSpreadsheet')->willReturn($spreadsheet);
         $this->standaloneView = $this->createMock(StandaloneView::class);
         $this->standaloneView->method('assign')->with(
-            self::callback(
-                static function ($key) {
-                    self::$assignedVariables['_next'] = $key;
-
-                    return true;
-                }
-            ),
-            self::callback(
-                static function ($value) {
-                    self::$assignedVariables[self::$assignedVariables['_next']] = $value;
-                    unset(self::$assignedVariables['_next']);
-
-                    return true;
-                }
-            )
+            $trueCallback(static fn ($key) => self::$assignedVariables['_next'] = $key),
+            $trueCallback(static function ($value): void {
+                self::$assignedVariables[self::$assignedVariables['_next']] = $value;
+                unset(self::$assignedVariables['_next']);
+            })
         )->willReturnSelf();
-        $this->standaloneView->method('assignMultiple')->with(
-            self::callback(
-                static function ($values) {
-                    self::$assignedVariables = array_merge(self::$assignedVariables, $values);
-
-                    return true;
-                }
-            )
-        )->willReturnSelf();
-        $this->standaloneView->method('render')->willReturnCallback(
-            static fn () => self::$assignedVariables
-        );
+        $this->standaloneView->method('assignMultiple')->with($trueCallback(
+            static fn ($values) => self::$assignedVariables = array_merge(self::$assignedVariables, $values)
+        ))->willReturnSelf();
+        $this->standaloneView->method('render')->willReturnCallback(static fn () => self::$assignedVariables);
         $this->extractorService = $this->createMock(ExtractorService::class);
         $this->iconFactory = $this->createMock(IconFactory::class);
 
@@ -211,8 +200,11 @@ class DataInputElementTest extends UnitTestCase
                 )
             );
 
-            if (str_contains($referenceFileExtension, '|exception')) {
-                $this->readerService->method('getSpreadsheet')->willThrowException(new Exception());
+            if (str_contains($referenceFileExtension, '|exceptionRead')) {
+                $this->readerService->method('getSpreadsheet')->willThrowException(new ReaderException());
+            }
+            if (str_contains($referenceFileExtension, '|exceptionCell')) {
+                $this->extractorService->method('rangeToCellArray')->willThrowException(new SpreadsheetException());
             }
         } else {
             // no file references exists
@@ -264,6 +256,16 @@ class DataInputElementTest extends UnitTestCase
      */
     public function renderDataProvider(): Traversable
     {
+        $dataBuilder = static fn (int $type) => array_replace_recursive(
+            self::DEFAULT_DATA,
+            [
+                'databaseRow' => ['uid' => 1, self::DEFAULT_UPLOAD_FIELD => $type],
+                'parameterArray' => [
+                    'itemFormElValue' => 'spreadsheet://' . $type . '?index=1&range=D2%3AG5&direction=vertical',
+                ],
+            ]
+        );
+
         yield 'missing upload field' => [
             'expected' => ['inputSize' => 100, 'missingUploadField' => true],
             'data' => ['processedTca' => null] + self::DEFAULT_DATA,
@@ -276,15 +278,7 @@ class DataInputElementTest extends UnitTestCase
 
         yield 'missing valid upload reference' => [
             'expected' => ['inputSize' => 100, 'nonValidReferences' => true],
-            'data' => array_replace_recursive(
-                self::DEFAULT_DATA,
-                [
-                    'databaseRow' => ['uid' => 1, self::DEFAULT_UPLOAD_FIELD => 589],
-                    'parameterArray' => [
-                        'itemFormElValue' => 'spreadsheet://589?index=1&range=D2%3AG5&direction=vertical',
-                    ],
-                ]
-            ),
+            'data' => $dataBuilder(589),
         ];
 
         yield 'invalid DSN found' => [
@@ -301,39 +295,38 @@ class DataInputElementTest extends UnitTestCase
                     'valueObject' => 'spreadsheet://678?index=1&range=D2%3AG5&direction=vertical',
                 ]
             ),
-            'data' => array_replace_recursive(
-                self::DEFAULT_DATA,
+            'data' => $dataBuilder(678),
+        ];
+
+        yield 'spreadsheet range to cell array exception' => [
+            'expected' => array_replace(
+                self::DEFAULT_EXPECTED_HTML_DATA,
                 [
-                    'databaseRow' => ['uid' => 1, self::DEFAULT_UPLOAD_FIELD => 678],
-                    'parameterArray' => [
-                        'itemFormElValue' => 'spreadsheet://678?index=1&range=D2%3AG5&direction=vertical',
-                    ],
+                    'sheetFiles' => [679 => ['ext' => 'csv']],
+                    'sheetData' => [679 => []], // because of extraction exception this file sheets are empty
+                    'valueObject' => 'spreadsheet://679?index=1&range=D2%3AG5&direction=vertical',
                 ]
             ),
+            'data' => $dataBuilder(679),
         ];
 
         yield 'successful input element rendering' => [];
 
-        $templatePath = 'EXT:spreadsheets/Resources/Private/Templates/FormElement/DataInput.html';
-
-        yield 'successful input element rendering with custom template path' => [
+        $templateBuilder = static fn (string $template) => [
             'expected' => array_replace_recursive(
                 self::DEFAULT_EXPECTED_HTML_DATA,
-                ['config' => ['template' => $templatePath]]
+                ['config' => ['template' => $template]]
             ),
             'data' => self::DEFAULT_DATA,
-            'fieldConfig' => ['template' => $templatePath] + self::DEFAULT_FIELD_CONF,
+            'fieldConfig' => ['template' => $template] + self::DEFAULT_FIELD_CONF,
         ];
 
-        $templatePath = 'EXT:spreadsheets/Resources/Private/Templates/FormElement/ThisFileDoesNotExists.html';
+        yield 'successful input element rendering with custom template path' => $templateBuilder(
+            'EXT:spreadsheets/Resources/Private/Templates/FormElement/DataInput.html'
+        );
 
-        yield 'successful input element rendering with unknown template path' => [
-            'expected' => array_replace_recursive(
-                self::DEFAULT_EXPECTED_HTML_DATA,
-                ['config' => ['template' => $templatePath]]
-            ),
-            'data' => self::DEFAULT_DATA,
-            'fieldConfig' => ['template' => $templatePath] + self::DEFAULT_FIELD_CONF,
-        ];
+        yield 'successful input element rendering with unknown template path' => $templateBuilder(
+            'EXT:spreadsheets/Resources/Private/Templates/FormElement/ThisFileDoesNotExists.html'
+        );
     }
 }

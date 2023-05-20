@@ -151,9 +151,9 @@ class DataInputElement extends AbstractFormElement
         array_walk_recursive(
             $sheetData,
             static function (&$item): void {
-                if (is_string($item) && mb_detect_encoding($item, 'utf-8', true) === false) {
-                    $item = utf8_encode($item);
-                }
+                $item = is_string($item) && mb_detect_encoding($item, 'utf-8', true) === false
+                    ? utf8_encode($item)
+                    : $item;
             }
         );
 

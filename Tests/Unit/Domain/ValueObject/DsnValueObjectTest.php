@@ -45,7 +45,7 @@ class DsnValueObjectTest extends UnitTestCase
             $value->getDirectionOfSelection()
         );
 
-        if (!str_contains($dsn, '|0')) {
+        if (str_contains($dsn, '|1')) {
             self::assertEquals(1, $value->getSheetIndex());
             self::assertEquals('D2:G5', $value->getSelection());
         } else {
@@ -81,7 +81,11 @@ class DsnValueObjectTest extends UnitTestCase
                 'file:5|1!D2:G5',
                 'spreadsheet://5?index=1&range=D2%3AG5',
             ],
-            'only file reference' => [
+            'only file reference #1' => [
+                'file:5|',
+                'spreadsheet://5?index=0',
+            ],
+            'only file reference #2' => [
                 'file:5|0',
                 'spreadsheet://5?index=0',
             ],

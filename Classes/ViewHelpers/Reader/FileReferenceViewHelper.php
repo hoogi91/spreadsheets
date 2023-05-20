@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\ViewHelpers\Reader;
 
-use InvalidArgumentException;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
@@ -30,11 +29,7 @@ class FileReferenceViewHelper extends AbstractViewHelper
             return null;
         }
 
-        try {
-            $fileReference = $this->fileRepository->findFileReferenceByUid((int) $this->arguments['uid']);
-        } catch (InvalidArgumentException) {
-            $fileReference = false;
-        }
+        $fileReference = $this->fileRepository->findFileReferenceByUid((int) $this->arguments['uid']);
 
         return !is_bool($fileReference) ? $fileReference : null;
     }

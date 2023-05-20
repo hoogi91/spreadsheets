@@ -22,7 +22,7 @@ class DsnValueObject implements JsonSerializable, Stringable
      *   - file:10|2!A2:B555!vertical2
      *   - 5|1!D2:G5!vertical
      */
-    private const LEGACY_DSN_PATTERN = '/(file:)?(\d+)\|(\d+)(![A-Z]+\d+)?(:[A-Z]+\d+)?(!\w+)?/';
+    private const LEGACY_DSN_PATTERN = '/(file:)?(\d+)\|(\d+)?(![A-Z]+\d+)?(:[A-Z]+\d+)?(!\w+)?/';
 
     /**
      * DSN pattern will match strings like

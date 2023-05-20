@@ -11,6 +11,7 @@ use Hoogi91\Spreadsheets\Service;
 use Hoogi91\Spreadsheets\Service\ExtractorService;
 use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
 use Hoogi91\Spreadsheets\Tests\Unit\TsfeSetupTrait;
+use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -28,6 +29,11 @@ class ExtractorServiceTest extends UnitTestCase
     private ExtractorService $extractorService;
 
     private Spreadsheet $spreadsheet;
+
+    /**
+     * @var Service\SpanService&MockObject
+     */
+    private MockObject $spanService;
 
     protected function setUp(): void
     {
@@ -51,10 +57,11 @@ class ExtractorServiceTest extends UnitTestCase
             Service\CellService::class,
             [$styleService, $this->createMock(SiteFinder::class), $this->createMock(Context::class)]
         );
+        $this->spanService = $this->createTestProxy(Service\SpanService::class);
         $this->extractorService = new Service\ExtractorService(
             $readerService,
             $cellService,
-            $this->createTestProxy(Service\SpanService::class),
+            $this->spanService,
             $this->createTestProxy(Service\RangeService::class),
             $mappingService,
             $this->getFileRepositoryMock()
@@ -71,6 +78,21 @@ class ExtractorServiceTest extends UnitTestCase
     {
         $this->expectException(InvalidDataSourceNameException::class);
         $this->extractorService->getDataByDsnValueObject(DsnValueObject::createFromDSN('file:0|0'));
+    }
+
+    public function testExtractionWithExceptionHandling(): void
+    {
+        /** @var MockObject&DsnValueObject $mockDsnValueObject */
+        $mockDsnValueObject = $this->getMockBuilder(DsnValueObject::class)->disableOriginalConstructor()->getMock();
+        $mockDsnValueObject->expects(self::once())->method('getSheetIndex')->willReturn(0);
+        $mockDsnValueObject->expects(self::once())->method('getFileReference')->willReturn(456);
+        $mockDsnValueObject->expects(self::once())->method('getSelection')->willReturn('A1:B5');
+
+        $this->spanService->method('getIgnoredRows')->willThrowException(new SpreadsheetException());
+        $result = $this->extractorService->getDataByDsnValueObject($mockDsnValueObject);
+        self::assertSame($this->spreadsheet, $result->getSpreadsheet());
+        self::assertEmpty($result->getHeadData());
+        self::assertEmpty($result->getBodyData());
     }
 
     public function testExtractionOfDataByDsnValueObject(): void
@@ -104,6 +126,24 @@ class ExtractorServiceTest extends UnitTestCase
     public function testHeadDataExtraction(): void
     {
         $worksheet = $this->spreadsheet->getSheet(0);
+        $worksheet->getPageSetup()->setRowsToRepeatAtTop([1, 2]); // first two rows
+        $headData = $this->extractorService->getHeadData($worksheet, true);
+
+        self::assertIsArray($headData);
+        self::assertCount(2, $headData);
+
+        /** @var CellDataValueObject $cellValueA1 */
+        $cellValueA1 = $headData[1][1];
+        self::assertInstanceOf(CellDataValueObject::class, $cellValueA1);
+        self::assertEquals('2014', $cellValueA1->getRenderedValue());
+    }
+
+    public function testHeadDataExtractionOnException(): void
+    {
+        $worksheet = $this->spreadsheet->getSheet(0);
+        $worksheet->getPageSetup()->setRowsToRepeatAtTop([1, 2]); // first two rows
+
+        $this->spanService->method('getIgnoredRows')->willThrowException(new SpreadsheetException());
         self::assertEmpty($this->extractorService->getHeadData($worksheet, true));
     }
 
@@ -129,6 +169,12 @@ class ExtractorServiceTest extends UnitTestCase
             '<span style="color:#000000"> Test </span><span style="color:#000000"><sub>Tief</sub></span>',
             $cellValueD5->getRenderedValue()
         );
+    }
+
+    public function testBodyDataExtractionOnException(): void
+    {
+        $this->spanService->method('getIgnoredRows')->willThrowException(new SpreadsheetException());
+        self::assertEmpty($this->extractorService->getBodyData($this->spreadsheet->getSheet(0), true));
     }
 
     /**

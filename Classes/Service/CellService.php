@@ -39,9 +39,12 @@ class CellService
             return;
         }
 
+        // @codeCoverageIgnoreStart
+        // This block is for legacy support and will not be tested during test run with coverage
         $this->currentLocales = $siteFinder->getSiteByPageId($GLOBALS['TSFE']->id)
             ->getLanguageById($languageAspect->getId())
             ->getLocale();
+        // @codeCoverageIgnoreEnd
     }
 
     public function getFormattedValue(Cell $cell): string

@@ -86,7 +86,7 @@ class DataHandlerHook
     private function getBackendRecordField(int $uid, string $field): mixed
     {
         if (!isset($this->records[$uid])) {
-            $this->records[$uid] = BackendUtility::getRecord('tt_content', $uid);
+            $this->records[$uid] = BackendUtility::getRecord('tt_content', $uid); // @codeCoverageIgnore
         }
 
         return $this->records[$uid][$field] ?? null;
