@@ -1,28 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Unit\Service;
 
 use Hoogi91\Spreadsheets\Service\RangeService;
-use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-/**
- * Class RangeServiceTest
- * @package Hoogi91\Spreadsheets\Tests\Unit\Service
- */
 class RangeServiceTest extends UnitTestCase
 {
-    /**
-     * @var RangeService
-     */
-    private $rangeService;
+    private RangeService $rangeService;
 
-    /**
-     * @var Spreadsheet
-     */
-    private $spreadsheet;
+    private Spreadsheet $spreadsheet;
 
     protected function setUp(): void
     {
@@ -31,6 +23,9 @@ class RangeServiceTest extends UnitTestCase
         $this->rangeService = new RangeService();
     }
 
+    /**
+     * @return array<int, array<string>>
+     */
     public function rangeConvertingDataProvider(): array
     {
         // input ranges will be shrinked to fit into fixture data structure
@@ -54,9 +49,6 @@ class RangeServiceTest extends UnitTestCase
     }
 
     /**
-     * @param string $input
-     * @param string $expectedOutput
-     *
      * @dataProvider rangeConvertingDataProvider
      */
     public function testRangeConverting(string $input, string $expectedOutput): void

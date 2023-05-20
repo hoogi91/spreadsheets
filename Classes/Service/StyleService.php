@@ -9,13 +9,8 @@ use PhpOffice\PhpSpreadsheet\RichText\Run;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style;
 
-/**
- * Class StyleService
- * @package Hoogi91\Spreadsheets\Service
- */
 class StyleService
 {
-
     private const DEFAULT_STYLES = [
         '.cell-type-b' => ['text-align' => 'center'], // BOOL
         '.cell-type-e' => ['text-align' => 'center'], // ERROR
@@ -25,24 +20,10 @@ class StyleService
         '.cell-type-s' => ['text-align' => 'left'], // STRING
     ];
 
-    /**
-     * @var ValueMappingService
-     */
-    private $mappingService;
-
-    /**
-     * StyleService constructor.
-     * @param ValueMappingService $mappingService
-     */
-    public function __construct(ValueMappingService $mappingService)
+    public function __construct(private readonly ValueMappingService $mappingService)
     {
-        $this->mappingService = $mappingService;
     }
 
-    /**
-     * @param Spreadsheet $spreadsheet
-     * @return StylesheetValueObject
-     */
     public function getStylesheet(Spreadsheet $spreadsheet): StylesheetValueObject
     {
         // get default styles
@@ -66,15 +47,14 @@ class StyleService
     {
         // extract font styles for current element
         $fontStyles = $this->getFontStyles($text->getFont());
+
         return StylesheetValueObject::create($fontStyles);
     }
 
     /**
-     * Create CSS style (\PhpOffice\PhpSpreadsheet\Style\Alignment).
-     *
      * @param Style\Alignment $pStyle \PhpOffice\PhpSpreadsheet\Style\Alignment
      *
-     * @return array
+     * @return array<mixed>
      */
     private function getAlignmentStyles(Style\Alignment $pStyle): array
     {
@@ -85,19 +65,18 @@ class StyleService
         $textAlign = $this->mappingService->convertValue('halign', $pStyle->getHorizontal());
         if (empty($textAlign) === false) {
             $css['text-align'] = $textAlign;
-            if (in_array($textAlign, ['left', 'right'])) {
+            if (in_array(strtolower($textAlign), ['left', 'right'], true)) {
                 $css['padding-' . $textAlign] = ($pStyle->getIndent() * 9) . 'px';
             }
         }
+
         return $css;
     }
 
     /**
-     * Create CSS style (Borders).
-     *
      * @param Style\Borders $pStyle Borders
      *
-     * @return array
+     * @return array<mixed>
      */
     private function getBorderStyles(Style\Borders $pStyle): array
     {
@@ -114,15 +93,12 @@ class StyleService
         if ($pStyle->getRight()->getBorderStyle() !== Style\Border::BORDER_NONE) {
             $css['border-right'] = $this->getBorderStyle($pStyle->getRight());
         }
+
         return $css;
     }
 
     /**
-     * Create CSS style (Border).
-     *
      * @param Style\Border $pStyle Border
-     *
-     * @return string
      */
     private function getBorderStyle(Style\Border $pStyle): string
     {
@@ -132,18 +108,19 @@ class StyleService
             $pStyle->getBorderStyle(),
             '1px solid'
         );
-        return $borderStyle . ' #' . $pStyle->getColor()->getRGB() . (($borderStyle === 'none') ? '' : ' !important');
+
+        return $borderStyle . ' #' . $pStyle->getColor()->getRGB() . ($borderStyle === 'none' ? '' : ' !important');
     }
 
     /**
-     * Create CSS style (\PhpOffice\PhpSpreadsheet\Style\Font).
-     *
-     * @param Style\Font $pStyle
-     *
-     * @return array
+     * @return array<mixed>
      */
-    private function getFontStyles(Style\Font $pStyle): array
+    private function getFontStyles(?Style\Font $pStyle): array
     {
+        if ($pStyle === null) {
+            return [];
+        }
+
         $css = [];
         $css['color'] = '#' . $pStyle->getColor()->getRGB();
 
@@ -167,11 +144,9 @@ class StyleService
     }
 
     /**
-     * Create CSS style (Fill).
-     *
      * @param Style\Fill $pStyle Fill
      *
-     * @return array
+     * @return array<mixed>
      */
     private function getBackgroundStyles(Style\Fill $pStyle): array
     {
@@ -179,6 +154,7 @@ class StyleService
         if ($pStyle->getFillType() !== Style\Fill::FILL_NONE) {
             $css['background-color'] = '#' . $pStyle->getStartColor()->getRGB();
         }
+
         return $css;
     }
 }

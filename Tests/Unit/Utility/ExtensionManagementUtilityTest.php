@@ -1,28 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Unit\Utility;
 
 use Hoogi91\Spreadsheets\Utility\ExtensionManagementUtility;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-/**
- * Class ExtensionManagementUtilityTest
- * @package Hoogi91\Spreadsheets\Tests\Unit\Utility
- */
 class ExtensionManagementUtilityTest extends UnitTestCase
 {
     /**
-     * @var array
+     * @var array<string>
      */
-    private static $elementToInsert = [
+    private static array $elementToInsert = [
         'Title of Plugin/Element',
         'element_key',
         'icon-identifier-of-element',
     ];
 
-    /**
-     * initialize with typical TCA structure of tt_content's CType column
-     */
     public function setUp(): void
     {
         parent::setUp();

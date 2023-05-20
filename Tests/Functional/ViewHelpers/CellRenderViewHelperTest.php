@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Functional\ViewHelpers;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\CellDataValueObject;
@@ -11,6 +13,8 @@ class CellRenderViewHelperTest extends AbstractViewHelperTestCase
 
     /**
      * @dataProvider cellProvider
+     *
+     * @param array<mixed>|null $cellMock
      */
     public function testRender(
         string $expectedAttributes,
@@ -36,6 +40,8 @@ class CellRenderViewHelperTest extends AbstractViewHelperTestCase
 
     /**
      * @dataProvider cellProvider
+     *
+     * @param array<mixed>|null $cellMock
      */
     public function testRenderAsHeader(string $expectedAttributes, ?array $cellMock): void
     {
@@ -44,6 +50,8 @@ class CellRenderViewHelperTest extends AbstractViewHelperTestCase
 
     /**
      * @dataProvider cellProvider
+     *
+     * @param array<mixed>|null $cellMock
      */
     public function testRenderWithRowScope(string $expectedAttributes, ?array $cellMock): void
     {
@@ -52,6 +60,8 @@ class CellRenderViewHelperTest extends AbstractViewHelperTestCase
 
     /**
      * @dataProvider cellProvider
+     *
+     * @param array<mixed>|null $cellMock
      */
     public function testRenderAsHeaderWithRowScope(string $expectedAttributes, ?array $cellMock): void
     {
@@ -61,6 +71,8 @@ class CellRenderViewHelperTest extends AbstractViewHelperTestCase
 
     /**
      * @dataProvider cellProvider
+     *
+     * @param array<mixed>|null $cellMock
      */
     public function testRenderAsHeaderWithColScope(string $expectedAttributes, ?array $cellMock): void
     {
@@ -69,8 +81,7 @@ class CellRenderViewHelperTest extends AbstractViewHelperTestCase
     }
 
     /**
-     * Based on 01_fixture.xlsx cell coordinates
-     * @return array
+     * @return array<string, mixed>
      */
     public function cellProvider(): array
     {
@@ -78,35 +89,35 @@ class CellRenderViewHelperTest extends AbstractViewHelperTestCase
             'no cell' => ['', null],
             'no attributes' => [
                 '',
-                ['getClass' => '', 'getRowspan' => 0, 'getColspan' => 0]
+                ['getClass' => '', 'getRowspan' => 0, 'getColspan' => 0],
             ],
             'only class' => [
                 'class="cell"',
-                ['getClass' => 'cell', 'getRowspan' => 0, 'getColspan' => 0]
+                ['getClass' => 'cell', 'getRowspan' => 0, 'getColspan' => 0],
             ],
             'only rowspan' => [
                 'rowspan="1"',
-                ['getClass' => '', 'getRowspan' => 1, 'getColspan' => 0]
+                ['getClass' => '', 'getRowspan' => 1, 'getColspan' => 0],
             ],
             'only colspan' => [
                 'colspan="1"',
-                ['getClass' => '', 'getRowspan' => 0, 'getColspan' => 1]
+                ['getClass' => '', 'getRowspan' => 0, 'getColspan' => 1],
             ],
             'class + rowspan' => [
                 'class="cell" rowspan="2"',
-                ['getClass' => 'cell', 'getRowspan' => 2, 'getColspan' => 0]
+                ['getClass' => 'cell', 'getRowspan' => 2, 'getColspan' => 0],
             ],
             'class + colspan' => [
                 'class="cell" colspan="2"',
-                ['getClass' => 'cell', 'getRowspan' => 0, 'getColspan' => 2]
+                ['getClass' => 'cell', 'getRowspan' => 0, 'getColspan' => 2],
             ],
             'rowspan + colspan' => [
                 'rowspan="3" colspan="3"',
-                ['getClass' => '', 'getRowspan' => 3, 'getColspan' => 3]
+                ['getClass' => '', 'getRowspan' => 3, 'getColspan' => 3],
             ],
             'class + rowspan + colspan' => [
                 'class="cell" rowspan="4" colspan="4"',
-                ['getClass' => 'cell', 'getRowspan' => 4, 'getColspan' => 4]
+                ['getClass' => 'cell', 'getRowspan' => 4, 'getColspan' => 4],
             ],
         ];
     }

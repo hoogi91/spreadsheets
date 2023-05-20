@@ -1,0 +1,3 @@
+"sys_file_reference"
+,"uid","pid","uid_local","uid_foreign","tablenames","fieldname"
+,123,1,321,1,"tt_content","ref_field"

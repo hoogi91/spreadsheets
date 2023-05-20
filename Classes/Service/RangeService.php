@@ -7,13 +7,8 @@ namespace Hoogi91\Spreadsheets\Service;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-/**
- * Class RangeService
- * @package Hoogi91\Spreadsheets\Service
- */
 class RangeService
 {
-
     // match against => 2:24
     private const MATCH_PATTERN_1 = '/^(\d+):(\d+)$/';
 
@@ -45,19 +40,15 @@ class RangeService
     private const MATCH_PATTERN_10 = '/^([a-zA-Z]+):([a-zA-Z]+)(\d+)$/';
 
     /**
-     * converts range string from database value for given worksheet
-     *
-     * @param Worksheet $sheet
-     * @param string $range
-     *
-     * @return string
      * @throws SpreadsheetException
      */
     public function convert(Worksheet $sheet, string $range): string
     {
-        if ($sheet->getHighestColumn() === 'A'
+        if (
+            $sheet->getHighestColumn() === 'A'
             && $sheet->getHighestRow() === 1
-            && $sheet->cellExists('A1') === false) {
+            && $sheet->cellExists('A1') === false
+        ) {
             return '';
         }
 
@@ -92,17 +83,10 @@ class RangeService
             // return range => B24:D24 (cause second part sets row)
             $range = $this->buildRange($matches[1], (int)$matches[3], $matches[2], (int)$matches[3]);
         }
+
         return $sheet->shrinkRangeToFit($range);
     }
 
-    /**
-     * @param string $startColumn
-     * @param int $startRow
-     * @param string $endColumn
-     * @param int $endRow
-     *
-     * @return string
-     */
     private function buildRange(
         string $startColumn,
         int $startRow,

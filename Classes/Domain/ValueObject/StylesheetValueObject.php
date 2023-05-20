@@ -4,49 +4,38 @@ declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Domain\ValueObject;
 
-/**
- * Class StylesheetValueObject
- * @package Hoogi91\Spreadsheets\Domain\ValueObject
- */
-class StylesheetValueObject
+use Stringable;
+
+use const PHP_EOL;
+
+class StylesheetValueObject implements Stringable
 {
-
     /**
-     * @var array
+     * @param array<string, mixed> $styles
      */
-    private $styles;
-
-    /**
-     * StylesheetValueObject constructor.
-     * @param array $styles
-     */
-    public function __construct(array $styles)
+    public function __construct(private readonly array $styles)
     {
-        $this->styles = $styles;
     }
 
     /**
-     * @param array $styles
-     * @return StylesheetValueObject
+     * @param array<string, mixed> $styles
      */
     public static function create(array $styles): StylesheetValueObject
     {
         return new self($styles);
     }
 
-    /**
-     * Takes array where of CSS properties / values and converts to CSS string.
-     *
-     * @param array $styles
-     *
-     * @return string
-     */
-    private function assembleStyles(array $styles = []): string
+    private function assembleStyles(mixed $styles = []): string
     {
+        if (is_array($styles) === false) {
+            return '';
+        }
+
         $pairs = [];
         foreach ($styles as $property => $value) {
             $pairs[] = $property . ':' . $value;
         }
+
         return implode(';', $pairs);
     }
 
@@ -55,10 +44,6 @@ class StylesheetValueObject
         return $this->assembleStyles($this->styles);
     }
 
-    /**
-     * @param string|null $htmlIdentifier
-     * @return string
-     */
     public function toCSS(?string $htmlIdentifier = null): string
     {
         // write all styles with table selector prefix
@@ -77,6 +62,7 @@ class StylesheetValueObject
                 );
             }
         }
+
         return $content;
     }
 

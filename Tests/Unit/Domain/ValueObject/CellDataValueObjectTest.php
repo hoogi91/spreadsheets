@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Unit\Domain\ValueObject;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\CellDataValueObject;
@@ -9,18 +11,13 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-/**
- * Class CellDataValueObjectTest
- * @package Hoogi91\Spreadsheets\Tests\Unit\Domain\ValueObject
- */
+use const JSON_THROW_ON_ERROR;
+
 class CellDataValueObjectTest extends UnitTestCase
 {
     use TsfeSetupTrait;
 
-    /**
-     * @var Worksheet
-     */
-    private $sheet;
+    private Worksheet $sheet;
 
     protected function setUp(): void
     {
@@ -143,6 +140,6 @@ class CellDataValueObjectTest extends UnitTestCase
             ['backendCellClasses' => ['c', 't']]
         );
 
-        self::assertEquals('{"val":"2015","row":2,"col":2,"css":"c-t"}', json_encode($cellValue));
+        self::assertEquals('{"val":"2015","row":2,"col":2,"css":"c-t"}', json_encode($cellValue, JSON_THROW_ON_ERROR));
     }
 }

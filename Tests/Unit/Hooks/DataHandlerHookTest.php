@@ -1,50 +1,47 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Unit\Hooks;
 
 use Hoogi91\Spreadsheets\Hooks\DataHandlerHook;
 use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
+use PHPUnit\Framework\MockObject\MockObject;
+use ReflectionProperty;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\FileRepository;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-/**
- * Class DataHandlerHookTest
- * @package Hoogi91\Spreadsheets\Tests\Unit\Hooks
- */
 class DataHandlerHookTest extends UnitTestCase
 {
     use FileRepositoryMockTrait;
 
     private const DATA_HANDLER_NEW_IDS = [
-        'NEW123456' => 123456,
+        'NEW123456' => 123_456,
     ];
 
-    /**
-     * @var FileRepository
-     */
-    private $fileRepositoryMock;
+    private MockObject&FileRepository $fileRepositoryMock;
 
-    /**
-     * @var DataHandlerHook
-     */
-    private $testHandlerHook;
+    private MockObject&ConnectionPool $connectionPool;
+
+    private DataHandlerHook $testHandlerHook;
 
     public function setUp(): void
     {
         parent::setUp();
 
         $this->fileRepositoryMock = $this->getFileRepositoryMock();
-        $this->testHandlerHook = new DataHandlerHook($this->fileRepositoryMock);
+        $this->connectionPool = $this->createMock(ConnectionPool::class);
+        $this->testHandlerHook = new DataHandlerHook($this->fileRepositoryMock, $this->connectionPool);
 
         // default record has no bodytext
-        $property = new \ReflectionProperty($this->testHandlerHook, 'records');
+        $property = new ReflectionProperty($this->testHandlerHook, 'records');
         $property->setAccessible(true);
-        $property->setValue($this->testHandlerHook, [123456 => ['bodytext' => '']]);
+        $property->setValue($this->testHandlerHook, [123_456 => ['bodytext' => '']]);
     }
 
     protected function tearDown(): void
@@ -55,22 +52,22 @@ class DataHandlerHookTest extends UnitTestCase
 
     /**
      * @dataProvider datamapProvider
+     *
+     * @param array<mixed> $hookParams
+     * @param array<mixed> $updateParams
      */
     public function testProcessDatamapHook(
         array $hookParams,
         bool $updateTriggered = false,
         array $updateParams = []
     ): void {
-        $connectionPool = $this->createMock(ConnectionPool::class);
-
         if ($updateTriggered === true) {
             $connectionMock = $this->createMock(Connection::class);
             $connectionMock->expects(self::once())->method('update')->with(...array_values($updateParams));
-            $connectionPool->expects(self::once())->method('getConnectionForTable')->willReturn($connectionMock);
+            $this->connectionPool->expects(self::once())->method('getConnectionForTable')->willReturn($connectionMock);
         } else {
-            $connectionPool->expects(self::never())->method('getConnectionForTable');
+            $this->connectionPool->expects(self::never())->method('getConnectionForTable');
         }
-        GeneralUtility::addInstance(ConnectionPool::class, $connectionPool);
 
         // append data handler to hook params
         $dataHandlerMock = $this->createMock(DataHandler::class);
@@ -81,6 +78,10 @@ class DataHandlerHookTest extends UnitTestCase
 
     /**
      * @dataProvider datamapWithFileReferenceProvider
+     *
+     * @param array<mixed> $hookParams
+     * @param array<mixed> $references
+     * @param array<mixed> $updateParams
      */
     public function testProcessDatamapHookWithFileRelations(
         array $hookParams,
@@ -93,6 +94,7 @@ class DataHandlerHookTest extends UnitTestCase
         $references = array_map(function ($reference) {
             $mock = $this->getMockBuilder(FileReference::class)->disableOriginalConstructor()->getMock();
             $mock->method('getUid')->willReturn($reference);
+
             return $mock;
         }, $references);
         $this->fileRepositoryMock->method('findByRelation')->willReturn($references);
@@ -106,6 +108,9 @@ class DataHandlerHookTest extends UnitTestCase
         $this->testProcessDatamapHook($hookParams, $updateTriggered, $updateParams);
     }
 
+    /**
+     * @return array<string, array<string, int|string|bool|array<mixed>>>
+     */
     public function datamapProvider(): array
     {
         return [
@@ -131,11 +136,14 @@ class DataHandlerHookTest extends UnitTestCase
             '[UPDATED] has clean assets field' => [
                 'hookParams' => self::hookParams(['status' => 'update', 'fields' => ['tx_spreadsheets_assets' => 0]]),
                 'updateTriggered' => true,
-                'updateParams' => ['tt_content', ['bodytext' => ''], ['uid' => 123456]],
+                'updateParams' => ['tt_content', ['bodytext' => ''], ['uid' => 123_456]],
             ],
         ];
     }
 
+    /**
+     * @return array<string, array<string, mixed>>
+     */
     public function datamapWithFileReferenceProvider(): array
     {
         return [
@@ -150,15 +158,15 @@ class DataHandlerHookTest extends UnitTestCase
                 'references' => [123],
                 'updateTriggered' => false,
                 'updateParams' => [],
-                'closure' => function ($handler) {
-                    $property = new \ReflectionProperty($handler, 'records');
+                'closure' => static function ($handler): void {
+                    $property = new ReflectionProperty($handler, 'records');
                     $property->setAccessible(true);
                     $property->setValue($handler, [
-                        123456 => [
+                        123_456 => [
                             'CType' => 'spreadsheets_table',
                             'tx_spreadsheets_assets' => 1,
                             'bodytext' => 'spreadsheet://456',
-                        ]
+                        ],
                     ]);
                 },
             ],
@@ -167,11 +175,16 @@ class DataHandlerHookTest extends UnitTestCase
                 'hookParams' => self::hookParams(),
                 'references' => [456],
                 'updateTriggered' => true,
-                'updateParams' => ['tt_content', ['bodytext' => 'spreadsheet://456'], ['uid' => 123456]],
+                'updateParams' => ['tt_content', ['bodytext' => 'spreadsheet://456'], ['uid' => 123_456]],
             ],
         ];
     }
 
+    /**
+     * @param array<string, string|array<mixed>> $data
+     *
+     * @return array<string, int|string|array<mixed>>
+     */
     private static function hookParams(array $data = []): array
     {
         return [
@@ -181,9 +194,10 @@ class DataHandlerHookTest extends UnitTestCase
             'fields' => array_replace_recursive(
                 [
                     'CType' => 'spreadsheets_table',
-                    'tx_spreadsheets_assets' => 1, // on default every request has one asset
+                    'tx_spreadsheets_assets' => 1,
+                    // on default every request has one asset
                 ],
-                $data['fields'] ?? []
+                (array)($data['fields'] ?? [])
             ),
         ];
     }

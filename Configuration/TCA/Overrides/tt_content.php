@@ -28,6 +28,7 @@ defined('TYPO3') or die();
             'config' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getFileFieldTCAConfig(
                 'tx_spreadsheets_assets',
                 [
+                    'foreign_table' => 'sys_file_reference',
                     'appearance' => [
                         'createNewRelationLinkTitle' => 'LLL:EXT:frontend/Resources/Private/Language/Database.xlf:tt_content.asset_references.addFileReference',
                     ],

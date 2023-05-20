@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\DataProcessing;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\DsnValueObject;
@@ -18,52 +20,13 @@ use TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface;
 
 abstract class AbstractProcessor implements DataProcessorInterface
 {
-
-    /**
-     * @var ReaderService
-     */
-    private $readerService;
-
-    /**
-     * @var ExtractorService
-     */
-    private $extractorService;
-
-    /**
-     * @var StyleService
-     */
-    private $styleService;
-
-    /**
-     * @var FileRepository
-     */
-    private $fileRepository;
-
-    /**
-     * @var PageRenderer
-     */
-    private $pageRenderer;
-
-    /**
-     * AbstractProcessor constructor.
-     * @param ReaderService $readerService
-     * @param ExtractorService $extractorService
-     * @param StyleService $styleService
-     * @param FileRepository $fileRepository
-     * @param PageRenderer $pageRenderer
-     */
     public function __construct(
-        ReaderService $readerService,
-        ExtractorService $extractorService,
-        StyleService $styleService,
-        FileRepository $fileRepository,
-        PageRenderer $pageRenderer
+        private readonly ReaderService $readerService,
+        private readonly ExtractorService $extractorService,
+        private readonly StyleService $styleService,
+        private readonly FileRepository $fileRepository,
+        private readonly PageRenderer $pageRenderer
     ) {
-        $this->readerService = $readerService;
-        $this->extractorService = $extractorService;
-        $this->styleService = $styleService;
-        $this->fileRepository = $fileRepository;
-        $this->pageRenderer = $pageRenderer;
     }
 
     public function getExtractorService(): ExtractorService
@@ -73,11 +36,11 @@ abstract class AbstractProcessor implements DataProcessorInterface
 
     /**
      * @param ContentObjectRenderer $cObj The content object renderer, which contains data of the content element
-     * @param array $contentObjectConfiguration The configuration of Content Object
-     * @param array $processorConfiguration The configuration of this processor
-     * @param array $processedData Key/value store of processed data (e.g. to be passed to a Fluid View)
+     * @param array<mixed> $contentObjectConfiguration The configuration of Content Object
+     * @param array<string, array<mixed>> $processorConfiguration The configuration of this processor
+     * @param array<mixed> $processedData Key/value store of processed data (e.g. to be passed to a Fluid View)
      *
-     * @return array the processed data as key/value store
+     * @return array<mixed> the processed data as key/value store
      */
     public function process(
         ContentObjectRenderer $cObj,
@@ -100,7 +63,7 @@ abstract class AbstractProcessor implements DataProcessorInterface
             );
 
             $processedData[$targetVariableName] = $this->getTemplateData($dsnValue, $spreadsheet, $processedData);
-        } catch (InvalidDataSourceNameException|ResourceDoesNotExistException|ReaderException $exception) {
+        } catch (InvalidDataSourceNameException | ResourceDoesNotExistException | ReaderException) {
             // if DSN could not be parsed or is invalid the output is empty
             // or the extraction failed
             return $processedData;
@@ -113,7 +76,7 @@ abstract class AbstractProcessor implements DataProcessorInterface
 
         $additionalStyles = (string)$cObj->stdWrapValue('additionalStyles', $processorConfiguration['options.'] ?? []);
         if (empty($additionalStyles) === false) {
-            $this->pageRenderer->addCssInlineBlock(__CLASS__, $additionalStyles);
+            $this->pageRenderer->addCssInlineBlock(self::class, $additionalStyles);
         }
 
         $htmlIdentifier = (string)$cObj->stdWrapValue(
@@ -130,6 +93,11 @@ abstract class AbstractProcessor implements DataProcessorInterface
         return $processedData;
     }
 
+    /**
+     * @param array<mixed> $processedData Key/value store of processed data (e.g. to be passed to a Fluid View)
+     *
+     * @return array<mixed>
+     */
     abstract protected function getTemplateData(
         DsnValueObject $dsn,
         Spreadsheet $spreadsheet,
