@@ -26,7 +26,7 @@ class RangeServiceTest extends UnitTestCase
     /**
      * @return array<int, array<string>>
      */
-    public function rangeConvertingDataProvider(): array
+    public static function rangeConvertingDataProvider(): array
     {
         // input ranges will be shrinked to fit into fixture data structure
         return [

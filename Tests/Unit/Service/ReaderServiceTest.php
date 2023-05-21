@@ -17,7 +17,7 @@ class ReaderServiceTest extends UnitTestCase
     /**
      * @return array<int, array<string>>
      */
-    public function readerTypeDataProvider(): array
+    public static function readerTypeDataProvider(): array
     {
         return [
             ['01_fixture.xlsx', 'xlsx'],
