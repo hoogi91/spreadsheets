@@ -10,7 +10,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PHPUnit\Framework\MockObject\MockObject;
 
-class TabsProcessorTest extends AbstractProcessorTest
+class TabsProcessorTest extends AbstractProcessorTestCase
 {
     protected function getDataProcessor(): AbstractProcessor
     {

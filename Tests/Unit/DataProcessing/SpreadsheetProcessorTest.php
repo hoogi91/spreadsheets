@@ -10,7 +10,7 @@ use Hoogi91\Spreadsheets\Domain\ValueObject\ExtractionValueObject;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PHPUnit\Framework\MockObject\MockObject;
 
-class SpreadsheetProcessorTest extends AbstractProcessorTest
+class SpreadsheetProcessorTest extends AbstractProcessorTestCase
 {
     protected function getDataProcessor(): AbstractProcessor
     {
