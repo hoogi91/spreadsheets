@@ -22,7 +22,7 @@ class ValueMappingServiceTest extends UnitTestCase
     /**
      * @return array<int, array<int, string|null>>
      */
-    public function valueMappingDataProvider(): array
+    public static function valueMappingDataProvider(): array
     {
         return [
             ['unknown-map', 'value', ''],

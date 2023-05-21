@@ -58,7 +58,7 @@ class TabsProcessorTest extends AbstractProcessorTest
     /**
      * @return array<string, mixed>
      */
-    public function processingDataProvider(): array
+    public static function processingDataProvider(): array
     {
         return [
             'empty value should result in unprocessed input data' => [

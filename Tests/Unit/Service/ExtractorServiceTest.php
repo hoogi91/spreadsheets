@@ -211,7 +211,7 @@ class ExtractorServiceTest extends UnitTestCase
     /**
      * @return array<int, array<string|bool>>
      */
-    public function rangeExtractorDataProvider(): array
+    public static function rangeExtractorDataProvider(): array
     {
         return [
             ['A1:E7', Service\ExtractorService::EXTRACT_DIRECTION_HORIZONTAL],

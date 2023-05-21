@@ -54,7 +54,7 @@ abstract class AbstractProcessorTest extends UnitTestCase
     /**
      * @return array<string, mixed>
      */
-    abstract public function processingDataProvider(): array;
+    abstract public static function processingDataProvider(): array;
 
     /**
      * @param array<string, array<mixed>> $processConfig
@@ -93,14 +93,14 @@ abstract class AbstractProcessorTest extends UnitTestCase
                 ->with($referenceMock)
                 ->willReturn($spreadsheetMock);
 
-            $alternativeExpectations !== null
-                ? Closure::fromCallable($alternativeExpectations)->call($this, $spreadsheetMock)
+            is_callable($alternativeExpectations)
+                ? $alternativeExpectations($spreadsheetMock, $this)
                 : $this->validInputExpectations($spreadsheetMock);
         } else {
             $this->fileRepository->expects(self::never())->method('findFileReferenceByUid');
             $this->readerService->expects(self::never())->method('getSpreadsheet');
-            $alternativeExpectations !== null
-                ? Closure::fromCallable($alternativeExpectations)->call($this)
+            is_callable($alternativeExpectations)
+                ? $alternativeExpectations($spreadsheetMock, $this)
                 : $this->invalidInputExpectations();
         }
 
