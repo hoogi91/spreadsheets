@@ -111,7 +111,7 @@ class DataHandlerHookTest extends UnitTestCase
     /**
      * @return array<string, array<string, int|string|bool|array<mixed>>>
      */
-    public function datamapProvider(): array
+    public static function datamapProvider(): array
     {
         return [
             '[NEW/UPDATED] ID is not mapped or integer' => [
@@ -144,7 +144,7 @@ class DataHandlerHookTest extends UnitTestCase
     /**
      * @return array<string, array<string, mixed>>
      */
-    public function datamapWithFileReferenceProvider(): array
+    public static function datamapWithFileReferenceProvider(): array
     {
         return [
             '[NEW/UPDATED] file reference is not found' => [

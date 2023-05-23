@@ -260,7 +260,7 @@ class DataInputElementTest extends UnitTestCase
     /**
      * @return Traversable<string, array<string, mixed>>
      */
-    public function renderDataProvider(): Traversable
+    public static function renderDataProvider(): Traversable
     {
         $dataBuilder = static fn (int $type) => array_replace_recursive(
             self::DEFAULT_DATA,

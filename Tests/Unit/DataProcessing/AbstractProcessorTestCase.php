@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Tests\Unit\DataProcessing;
 
-use Closure;
 use Hoogi91\Spreadsheets\DataProcessing\AbstractProcessor;
 use Hoogi91\Spreadsheets\Service;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -15,7 +14,7 @@ use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer as CObjRenderer;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-abstract class AbstractProcessorTest extends UnitTestCase
+abstract class AbstractProcessorTestCase extends UnitTestCase
 {
     protected CObjRenderer&MockObject $cObjRendererMock;
 
@@ -54,7 +53,7 @@ abstract class AbstractProcessorTest extends UnitTestCase
     /**
      * @return array<string, mixed>
      */
-    abstract public function processingDataProvider(): array;
+    abstract public static function processingDataProvider(): array;
 
     /**
      * @param array<string, array<mixed>> $processConfig
@@ -93,14 +92,14 @@ abstract class AbstractProcessorTest extends UnitTestCase
                 ->with($referenceMock)
                 ->willReturn($spreadsheetMock);
 
-            $alternativeExpectations !== null
-                ? Closure::fromCallable($alternativeExpectations)->call($this, $spreadsheetMock)
+            is_callable($alternativeExpectations)
+                ? $alternativeExpectations($spreadsheetMock, $this)
                 : $this->validInputExpectations($spreadsheetMock);
         } else {
             $this->fileRepository->expects(self::never())->method('findFileReferenceByUid');
             $this->readerService->expects(self::never())->method('getSpreadsheet');
-            $alternativeExpectations !== null
-                ? Closure::fromCallable($alternativeExpectations)->call($this)
+            is_callable($alternativeExpectations)
+                ? $alternativeExpectations($this)
                 : $this->invalidInputExpectations();
         }
 
