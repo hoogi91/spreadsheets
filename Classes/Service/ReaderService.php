@@ -22,8 +22,8 @@ class ReaderService
         }
 
         return match ($reference->getExtension()) {
-            'xls' => (new Reader\Xls())->load($reference->getForLocalProcessing()),
-            'xlsx' => (new Reader\Xlsx())->load($reference->getForLocalProcessing()),
+            'xls' => (new Reader\Xls())->setReadEmptyCells(false)->load($reference->getForLocalProcessing()),
+            'xlsx' => (new Reader\Xlsx())->setReadEmptyCells(false)->load($reference->getForLocalProcessing()),
             'ods' => (new Reader\Ods())->load($reference->getForLocalProcessing()),
             'xml' => (new Reader\Xml())->load($reference->getForLocalProcessing()),
             'csv' => (new Reader\Csv())->load($reference->getForLocalProcessing()),

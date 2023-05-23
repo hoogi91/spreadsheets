@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Service;
 
-use Hoogi91\Spreadsheets\Utility\ExtensionManagementUtility as ExtUtil;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility as ExtUtil;
 
 class ValueMappingService
 {
