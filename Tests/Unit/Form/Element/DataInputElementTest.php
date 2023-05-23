@@ -17,6 +17,7 @@ use TYPO3\CMS\Backend\Form\NodeFactory;
 use TYPO3\CMS\Core\Database\RelationHandler;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Information\Typo3Version;
+use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -153,7 +154,7 @@ class DataInputElementTest extends UnitTestCase
         GeneralUtility::setSingletonInstance(ResourceFactory::class, $this->resourceFactory);
 
         // setup extension TCA
-        $GLOBALS['TCA']['tt_content']['columns'] = [];
+        $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'] = [];
         include dirname(__DIR__, 4) . '/Configuration/TCA/Overrides/tt_content.php';
     }
 
@@ -232,7 +233,9 @@ class DataInputElementTest extends UnitTestCase
 
         if (isset($expected['valueObject'])) {
             $expectedResult['stylesheetFiles'] = ['EXT:spreadsheets/Resources/Public/Css/SpreadsheetDataInput.css'];
-            $expectedResult['requireJsModules'] = ['TYPO3/CMS/Spreadsheets/SpreadsheetDataInput'];
+            $expectedResult['requireJsModules'][] = JavaScriptModuleInstruction::forRequireJS(
+                'TYPO3/CMS/Spreadsheets/SpreadsheetDataInput'
+            )->instance($expected['inputName'] ?? null);
             self::assertEquals($expectedResult, $renderedData);
         } else {
             // no value object means we should have an empty form element result

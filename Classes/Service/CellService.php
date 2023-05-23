@@ -10,9 +10,9 @@ use PhpOffice\PhpSpreadsheet\RichText\RichText;
 use PhpOffice\PhpSpreadsheet\RichText\Run;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Style\Style;
-use TYPO3\CMS\Core\Context\Context;
+use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Information\Typo3Version;
-use TYPO3\CMS\Core\Site\SiteFinder;
+use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 use const LC_NUMERIC;
@@ -21,30 +21,25 @@ class CellService
 {
     private string $currentLocales;
 
-    public function __construct(private readonly StyleService $styleService, SiteFinder $siteFinder, Context $context)
+    public function __construct(private readonly StyleService $styleService)
     {
-        $this->currentLocales = $GLOBALS['TSFE']->config['config']['locale_all'] ?? '';
-
-        if ($this->currentLocales !== '' || !is_int($GLOBALS['TSFE']->id)) {
-            return;
-        }
-
-        $languageAspect = $context->getAspect('language');
+        /** @var SiteLanguage|null $language */
+        $language = $this->getRequest()->getAttribute('language');
         if ((new Typo3Version())->getMajorVersion() > 11) {
-            $this->currentLocales = $siteFinder->getSiteByPageId($GLOBALS['TSFE']->id)
-                ->getLanguageById($languageAspect->getId())
-                ->getLocale()
-                ->getLanguageCode();
+            $this->currentLocales = $language?->getLocale()->getLanguageCode() ?? '';
 
             return;
         }
 
         // @codeCoverageIgnoreStart
         // This block is for legacy support and will not be tested during test run with coverage
-        $this->currentLocales = $siteFinder->getSiteByPageId($GLOBALS['TSFE']->id)
-            ->getLanguageById($languageAspect->getId())
-            ->getLocale();
+        $this->currentLocales = $language?->getLocale() ?? '';
         // @codeCoverageIgnoreEnd
+    }
+
+    private function getRequest(): ServerRequestInterface
+    {
+        return $GLOBALS['TYPO3_REQUEST'];
     }
 
     public function getFormattedValue(Cell $cell): string

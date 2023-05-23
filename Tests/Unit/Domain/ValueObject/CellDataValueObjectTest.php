@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Hoogi91\Spreadsheets\Tests\Unit\Domain\ValueObject;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\CellDataValueObject;
-use Hoogi91\Spreadsheets\Tests\Unit\TsfeSetupTrait;
+use Hoogi91\Spreadsheets\Tests\Unit\Typo3RequestTrait;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -15,14 +15,14 @@ use const JSON_THROW_ON_ERROR;
 
 class CellDataValueObjectTest extends UnitTestCase
 {
-    use TsfeSetupTrait;
+    use Typo3RequestTrait;
 
     private Worksheet $sheet;
 
     protected function setUp(): void
     {
         parent::setUp();
-        self::setupDefaultTSFE();
+        $this->setTypo3Request();
         $this->sheet = (new Xlsx())->load(dirname(__DIR__, 3) . '/Fixtures/01_fixture.xlsx')->getSheet(0);
     }
 

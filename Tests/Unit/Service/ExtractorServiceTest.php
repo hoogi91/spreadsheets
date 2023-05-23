@@ -10,21 +10,17 @@ use Hoogi91\Spreadsheets\Exception\InvalidDataSourceNameException;
 use Hoogi91\Spreadsheets\Service;
 use Hoogi91\Spreadsheets\Service\ExtractorService;
 use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
-use Hoogi91\Spreadsheets\Tests\Unit\TsfeSetupTrait;
+use Hoogi91\Spreadsheets\Tests\Unit\Typo3RequestTrait;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Http\Message\ServerRequestInterface;
-use TYPO3\CMS\Core\Context\Context;
-use TYPO3\CMS\Core\Core\SystemEnvironmentBuilder;
-use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 class ExtractorServiceTest extends UnitTestCase
 {
     use FileRepositoryMockTrait;
-    use TsfeSetupTrait;
+    use Typo3RequestTrait;
 
     private ExtractorService $extractorService;
 
@@ -38,13 +34,7 @@ class ExtractorServiceTest extends UnitTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        self::setupDefaultTSFE();
-
-        // mock backend request mode
-        $GLOBALS['TYPO3_REQUEST'] = $this->createConfiguredMock(
-            ServerRequestInterface::class,
-            ['getAttribute' => SystemEnvironmentBuilder::REQUESTTYPE_BE]
-        );
+        $this->setTypo3Request();
 
         // setup reader mock instance
         $this->spreadsheet = (new Xlsx())->load(dirname(__DIR__, 2) . '/Fixtures/01_fixture.xlsx');
@@ -53,10 +43,7 @@ class ExtractorServiceTest extends UnitTestCase
 
         $mappingService = $this->createTestProxy(Service\ValueMappingService::class);
         $styleService = $this->createTestProxy(Service\StyleService::class, [$mappingService]);
-        $cellService = $this->createTestProxy(
-            Service\CellService::class,
-            [$styleService, $this->createMock(SiteFinder::class), $this->createMock(Context::class)]
-        );
+        $cellService = $this->createTestProxy(Service\CellService::class, [$styleService]);
         $this->spanService = $this->createTestProxy(Service\SpanService::class);
         $this->extractorService = new Service\ExtractorService(
             $readerService,

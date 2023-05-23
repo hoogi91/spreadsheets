@@ -7,7 +7,7 @@ namespace Hoogi91\Spreadsheets\Tests\Unit\Service;
 use Hoogi91\Spreadsheets\Service\CellService;
 use Hoogi91\Spreadsheets\Service\StyleService;
 use Hoogi91\Spreadsheets\Service\ValueMappingService;
-use Hoogi91\Spreadsheets\Tests\Unit\TsfeSetupTrait;
+use Hoogi91\Spreadsheets\Tests\Unit\Typo3RequestTrait;
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
@@ -17,13 +17,11 @@ use PhpOffice\PhpSpreadsheet\RichText\Run;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PHPUnit\Framework\MockObject\MockObject;
-use TYPO3\CMS\Core\Context\Context;
-use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 class CellServiceTest extends UnitTestCase
 {
-    use TsfeSetupTrait;
+    use Typo3RequestTrait;
 
     private const TEST_FORMATTING_SHEET_INDEX = 1;
 
@@ -36,16 +34,12 @@ class CellServiceTest extends UnitTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        self::setupDefaultTSFE();
+        $this->setTypo3Request();
         $this->spreadsheet = (new Xlsx())->load(dirname(__DIR__, 2) . '/Fixtures/01_fixture.xlsx');
 
         $mappingService = $this->createTestProxy(ValueMappingService::class);
         $styleService = $this->createTestProxy(StyleService::class, [$mappingService]);
-        $this->cellService = new CellService(
-            $styleService,
-            $this->createMock(SiteFinder::class),
-            $this->createMock(Context::class)
-        );
+        $this->cellService = new CellService($styleService);
     }
 
     public function testReadingOfCellValues(): void
