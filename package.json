@@ -20,7 +20,7 @@
     "@babel/plugin-transform-object-assign": "^7.16.7",
     "@babel/plugin-transform-parameters": "^7.21.3",
     "@babel/polyfill": "^7.10.4",
-    "@babel/preset-env": "^7.21.5",
+    "@babel/preset-env": "^7.22.2",
     "babel-loader": "^9.1.2",
     "core-js": "^3.30.2",
     "eslint": "^8.41.0",
