@@ -1,22 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Unit\Service;
 
 use Hoogi91\Spreadsheets\Service\ReaderService;
 use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
-use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-/**
- * Class ReaderServiceTest
- * @package Hoogi91\Spreadsheets\Tests\Unit\Service
- */
 class ReaderServiceTest extends UnitTestCase
 {
     use FileRepositoryMockTrait;
 
-    public function readerTypeDataProvider(): array
+    /**
+     * @return array<int, array<string>>
+     */
+    public static function readerTypeDataProvider(): array
     {
         return [
             ['01_fixture.xlsx', 'xlsx'],
@@ -31,21 +32,18 @@ class ReaderServiceTest extends UnitTestCase
     public function testReaderExceptionOnMissingOriginalFile(): void
     {
         $this->expectException(ReaderException::class);
-        $this->expectExceptionCode(1539959214);
+        $this->expectExceptionCode(1_539_959_214);
         (new ReaderService())->getSpreadsheet($this->getFileReferenceMock('01_fixture.xlsx', 'xlsx', true));
     }
 
     public function testReaderExceptionOnInvalidFileReferenceExtension(): void
     {
         $this->expectException(ReaderException::class);
-        $this->expectExceptionCode(1514909945);
+        $this->expectExceptionCode(1_514_909_945);
         (new ReaderService())->getSpreadsheet($this->getFileReferenceMock('some-unknwon.ext', 'ext'));
     }
 
     /**
-     * @param string $filename
-     * @param string $extension
-     *
      * @dataProvider readerTypeDataProvider
      */
     public function testReaderInstance(string $filename, string $extension): void

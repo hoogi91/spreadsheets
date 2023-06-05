@@ -55,20 +55,20 @@
 				<c:icon identifier="mimetypes-open-document-spreadsheet"/>
 			</span>
 
-            <f:form.hidden name="currentDatabaseValue" class="spreadsheet-input-original" value="{valueObject.dsn}"/>
-            <f:form.hidden name="{inputName}" class="spreadsheet-input-database" value="{valueObject.dsn}"/>
+            <input type="hidden" name="currentDatabaseValue" class="spreadsheet-input-original" value="{valueObject.dsn}"/>
+            <input type="hidden" name="{inputName}" class="spreadsheet-input-database" value="{valueObject.dsn}"/>
 
             <span class="input-group-btn">
-				<f:form.select name="file" class="form-control form-control-adapt spreadsheet-file-select"
+				<select name="file" class="form-control form-control-adapt spreadsheet-file-select"
                                value="{valueObject.fileReference.uid}">
 					<f:for each="{sheetFiles}" key="key" as="item">
-						<f:form.select.option value="{key}">{item.nameWithoutExtension}</f:form.select.option>
+						<option value="{key}">{item.nameWithoutExtension}</option>
 					</f:for>
-				</f:form.select>
+				</select>
 			</span>
 
-            <f:form.textfield name="formattedValue" class="form-control spreadsheet-input-formatted" type="text"
-                              value="" readonly="readonly"/>
+            <input type="text" name="formattedValue" class="form-control spreadsheet-input-formatted"
+                   value="" readonly="readonly"/>
 
             <span class="input-group-btn">
                 <f:if condition="{config.sheetsOnly}">

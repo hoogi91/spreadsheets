@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Functional\ViewHelpers;
 
 use TYPO3\CMS\Core\Resource\FileRepository;
 
 class TitleViewHelperTest extends AbstractViewHelperTestCase
 {
-
     public function testRenderWithoutFile(): void
     {
         self::assertEmpty($this->getView('<test:reader.sheet.title/>')->render());
@@ -19,8 +20,10 @@ class TitleViewHelperTest extends AbstractViewHelperTestCase
      */
     public function testRender(string $expected, int $sheetIndex): void
     {
-        $this->setUpBackendUserFromFixture(1);
-        $this->importDataSet(__DIR__ . '/Fixtures/sys_file_reference.xml');
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/be_users.csv');
+        $this->setUpBackendUser(1);
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/sys_file.csv');
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/sys_file_reference.csv');
         $fileReference = $this->getContainer()->get(FileRepository::class)->findFileReferenceByUid(123);
         self::assertEquals(
             $expected,

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Functional\ViewHelpers;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\DsnValueObject;

@@ -3,22 +3,29 @@ defined('TYPO3') or die();
 
 (static function (string $extKey, string $table, bool $isTabsFeatureEnabled = false) {
     // Adds the content element to the "Type" dropdown
-    \Hoogi91\Spreadsheets\Utility\ExtensionManagementUtility::addItemToCTypeList(
+    \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTcaSelectItem(
+        'tt_content',
+        'CType',
         [
             'LLL:EXT:' . $extKey . '/Resources/Private/Language/locallang.xlf:wizards.spreadsheets_table.title',
             'spreadsheets_table',
             'mimetypes-open-document-spreadsheet',
         ],
-        'after:table'
+        'table',
+        'after'
     );
+
     if ($isTabsFeatureEnabled === true) {
-        \Hoogi91\Spreadsheets\Utility\ExtensionManagementUtility::addItemToCTypeList(
+        \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTcaSelectItem(
+            'tt_content',
+            'CType',
             [
                 'LLL:EXT:' . $extKey . '/Resources/Private/Language/locallang.xlf:wizards.spreadsheets_tabs.title',
                 'spreadsheets_tabs',
                 'mimetypes-open-document-database',
             ],
-            'after:spreadsheets_table'
+            'spreadsheets_table',
+            'after'
         );
     }
 
@@ -28,6 +35,7 @@ defined('TYPO3') or die();
             'config' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getFileFieldTCAConfig(
                 'tx_spreadsheets_assets',
                 [
+                    'foreign_table' => 'sys_file_reference',
                     'appearance' => [
                         'createNewRelationLinkTitle' => 'LLL:EXT:frontend/Resources/Private/Language/Database.xlf:tt_content.asset_references.addFileReference',
                     ],

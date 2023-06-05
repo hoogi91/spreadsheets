@@ -1,48 +1,36 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\ViewHelpers\Reader;
 
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 
-/**
- * Class FileReferenceViewHelper
- * @package Hoogi91\Spreadsheets\ViewHelpers\Reader
- */
 class FileReferenceViewHelper extends AbstractViewHelper
 {
-
-    /**
-     * @var FileRepository
-     */
-    private $fileRepository;
-
-    public function __construct(FileRepository $fileRepository)
+    public function __construct(private readonly FileRepository $fileRepository)
     {
-        $this->fileRepository = $fileRepository;
     }
 
-    /**
-     * Initialize arguments.
-     */
     public function initializeArguments(): void
     {
         parent::initializeArguments();
         $this->registerArgument('uid', 'string', 'File reference uid to resolve', false);
     }
 
-    /**
-     * @return FileReference|null
-     */
     public function render(): ?FileReference
     {
         if (empty($this->arguments['uid'])) {
             $this->arguments['uid'] = $this->renderChildren();
         }
+        if (is_numeric($this->arguments['uid']) === false) {
+            return null;
+        }
 
-        return !empty($this->arguments['uid']) && is_int($this->arguments['uid']) === true
-            ? $this->fileRepository->findFileReferenceByUid($this->arguments['uid'])
-            : null;
+        $fileReference = $this->fileRepository->findFileReferenceByUid((int) $this->arguments['uid']);
+
+        return !is_bool($fileReference) ? $fileReference : null;
     }
 }

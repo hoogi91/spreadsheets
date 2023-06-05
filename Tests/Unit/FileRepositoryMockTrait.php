@@ -1,31 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Unit;
 
-use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Container\ContainerInterface;
 use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\FileRepository;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-/**
- * Trait FileRepositoryMockTrait
- * @package Hoogi91\Spreadsheets\Tests\Unit
- */
 trait FileRepositoryMockTrait
 {
-
     /**
-     * @return FileRepository|MockObject
+     * @return FileRepository&MockObject
      */
     private function getFileRepositoryMock(): MockObject
     {
-        /** @var UnitTestCase $_this */
+        assert($this instanceof UnitTestCase);
         $_this = $this;
-
-        /** @var UnitTestCase $this */
         $filRepositoryMock = $this->getMockBuilder(FileRepository::class)->disableOriginalConstructor()->getMock();
         $filRepositoryMock->method('findFileReferenceByUid')->willReturnCallback(
             static function (int $fileUid) use ($_this) {
@@ -36,6 +31,7 @@ trait FileRepositoryMockTrait
 
                 $mock = $_this->getMockBuilder(FileReference::class)->disableOriginalConstructor()->getMock();
                 $mock->method('getUid')->willReturn($fileUid);
+
                 return $mock;
             }
         );
@@ -44,10 +40,7 @@ trait FileRepositoryMockTrait
     }
 
     /**
-     * @param string $file
-     * @param string $extension
-     * @param bool $missingOriginalFile
-     * @return FileReference|MockObject
+     * @return FileReference&MockObject
      */
     private function getFileReferenceMock(
         string $file,
@@ -62,15 +55,13 @@ trait FileRepositoryMockTrait
         $mock->method('getExtension')->willReturn($extension);
         $mock->method('getOriginalFile')->willReturn($fileMock);
         $mock->method('getForLocalProcessing')->willReturn(dirname(__DIR__) . '/Fixtures/' . $file);
+
         return $mock;
     }
 
-    /**
-     * @return MockObject
-     */
     private function getContainerMock(): MockObject
     {
-        /** @var UnitTestCase $this */
+        assert($this instanceof UnitTestCase);
         $container = $this->getMockBuilder(ContainerInterface::class)->getMock();
         $container->method('has')->willReturn(true);
 

@@ -4,48 +4,43 @@ declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Service;
 
+use PhpOffice\PhpSpreadsheet\Cell\CellAddress;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-/**
- * Class SpanService
- * @package Hoogi91\Spreadsheets\Service
- */
 class SpanService
 {
-
     /**
-     * @var array
+     * @var array<string, array<string>>
      */
-    private static $ignoredColumns = [];
+    private static array $ignoredColumns = [];
 
     /**
-     * @var array
+     * @var array<string, array<int>>
      */
-    private static $ignoredRows = [];
+    private static array $ignoredRows = [];
 
     /**
-     * @var array
+     * @var array<string, array<string>>
      */
-    private static $ignoredCells = [];
+    private static array $ignoredCells = [];
 
     /**
-     * @var array
+     * @var array<string, array<int|string, array<string, int|array<int>>>>
      */
-    private static $mergedCells = [];
+    private static array $mergedCells = [];
 
     /**
-     * @param Worksheet $worksheet
-     * @return array
+     * @return array<string>
      * @throws SpreadsheetException
      */
     public function getIgnoredColumns(Worksheet $worksheet): array
     {
         $sheetHash = $this->getActiveSheetHashCode($worksheet->getParent(), $worksheet);
-        if (isset(static::$ignoredColumns[$sheetHash])) {
-            return static::$ignoredColumns[$sheetHash];
+        if (isset(self::$ignoredColumns[$sheetHash])) {
+            return self::$ignoredColumns[$sheetHash];
         }
 
         // map ignored cells by column
@@ -58,26 +53,23 @@ class SpanService
         // check if unique column values will exceed max. column count and should be ignored
         $maxRowCount = $worksheet->getHighestRow();
         $ignoredColumnsByRow = array_map(
-            static function ($values) use ($maxRowCount) {
-                return count(array_unique($values)) >= $maxRowCount;
-            },
+            static fn ($values) => count(array_unique($values)) >= $maxRowCount,
             $ignoredColumnsByRow
         );
 
         // only return row numbers of rows to ignore
-        return static::$ignoredColumns[$sheetHash] = array_keys(array_filter($ignoredColumnsByRow));
+        return self::$ignoredColumns[$sheetHash] = array_keys(array_filter($ignoredColumnsByRow));
     }
 
     /**
-     * @param Worksheet $worksheet
-     * @return array
+     * @return array<int>
      * @throws SpreadsheetException
      */
     public function getIgnoredRows(Worksheet $worksheet): array
     {
         $sheetHash = $this->getActiveSheetHashCode($worksheet->getParent(), $worksheet);
-        if (isset(static::$ignoredRows[$sheetHash])) {
-            return static::$ignoredRows[$sheetHash];
+        if (isset(self::$ignoredRows[$sheetHash])) {
+            return self::$ignoredRows[$sheetHash];
         }
 
         // map ignored cells by row
@@ -90,25 +82,22 @@ class SpanService
         // check if unique column values will exceed max. column count and should be ignored
         $maxColumnCount = Coordinate::columnIndexFromString($worksheet->getHighestColumn());
         $ignoredRowsByColumn = array_map(
-            static function ($values) use ($maxColumnCount) {
-                return count(array_unique($values)) >= $maxColumnCount;
-            },
+            static fn ($values) => count(array_unique($values)) >= $maxColumnCount,
             $ignoredRowsByColumn
         );
 
         // only return row numbers of rows to ignore
-        return static::$ignoredRows[$sheetHash] = array_keys(array_filter($ignoredRowsByColumn));
+        return self::$ignoredRows[$sheetHash] = array_keys(array_filter($ignoredRowsByColumn));
     }
 
     /**
-     * @param Worksheet $worksheet
-     * @return array
+     * @return array<string>
      */
     public function getIgnoredCells(Worksheet $worksheet): array
     {
         $sheetHash = $this->getActiveSheetHashCode($worksheet->getParent(), $worksheet);
-        if (isset(static::$ignoredCells[$sheetHash])) {
-            return static::$ignoredCells[$sheetHash];
+        if (isset(self::$ignoredCells[$sheetHash])) {
+            return self::$ignoredCells[$sheetHash];
         }
 
         $ignoredCells = [];
@@ -123,19 +112,18 @@ class SpanService
             array_push($ignoredCells, ...$cellsByRange);
         }
 
-        return static::$ignoredCells[$sheetHash] = array_unique($ignoredCells);
+        return self::$ignoredCells[$sheetHash] = array_unique($ignoredCells);
     }
 
     /**
-     * @param Worksheet $worksheet
-     * @return array
+     * @return array<int|string, array<string, int|array<int>>>
      * @throws SpreadsheetException
      */
     public function getMergedCells(Worksheet $worksheet): array
     {
         $sheetHash = $this->getActiveSheetHashCode($worksheet->getParent(), $worksheet);
-        if (isset(static::$mergedCells[$sheetHash])) {
-            return static::$mergedCells[$sheetHash];
+        if (isset(self::$mergedCells[$sheetHash])) {
+            return self::$mergedCells[$sheetHash];
         }
 
         $rowCount = $worksheet->getHighestRow();
@@ -158,14 +146,12 @@ class SpanService
             ];
         }
 
-        return static::$mergedCells[$sheetHash] = $mergedCells;
+        return self::$mergedCells[$sheetHash] = $mergedCells;
     }
 
     /**
-     * @param Worksheet $worksheet
-     * @param array $references
-     *
-     * @return array
+     * @param array<array<int>|CellAddress|string> $references
+     * @return array<int>
      */
     private function getCellStyleIndexesFromReferences(Worksheet $worksheet, array $references): array
     {
@@ -175,16 +161,12 @@ class SpanService
                 $result[] = $worksheet->getCell($cellRef)->getXfIndex();
             }
         }
+
         return array_unique($result);
     }
 
-    /**
-     * @param Spreadsheet $spreadsheet
-     * @param Worksheet $worksheet
-     * @return string
-     */
-    private function getActiveSheetHashCode(Spreadsheet $spreadsheet, Worksheet $worksheet): string
+    private function getActiveSheetHashCode(?Spreadsheet $spreadsheet, Worksheet $worksheet): string
     {
-        return md5($spreadsheet->getID() . $worksheet->getHashCode());
+        return md5($spreadsheet?->getID() . $worksheet->getHashCode());
     }
 }

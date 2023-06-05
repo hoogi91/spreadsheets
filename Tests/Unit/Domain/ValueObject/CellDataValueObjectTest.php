@@ -1,31 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Unit\Domain\ValueObject;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\CellDataValueObject;
-use Hoogi91\Spreadsheets\Tests\Unit\TsfeSetupTrait;
+use Hoogi91\Spreadsheets\Tests\Unit\Typo3RequestTrait;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-/**
- * Class CellDataValueObjectTest
- * @package Hoogi91\Spreadsheets\Tests\Unit\Domain\ValueObject
- */
+use const JSON_THROW_ON_ERROR;
+
 class CellDataValueObjectTest extends UnitTestCase
 {
-    use TsfeSetupTrait;
+    use Typo3RequestTrait;
 
-    /**
-     * @var Worksheet
-     */
-    private $sheet;
+    private Worksheet $sheet;
 
     protected function setUp(): void
     {
         parent::setUp();
-        self::setupDefaultTSFE();
+        $this->setTypo3Request();
         $this->sheet = (new Xlsx())->load(dirname(__DIR__, 3) . '/Fixtures/01_fixture.xlsx')->getSheet(0);
     }
 
@@ -97,11 +94,6 @@ class CellDataValueObjectTest extends UnitTestCase
         self::assertFalse($cellValue->isSubscript());
         self::assertEmpty($cellValue->getHyperlink());
         self::assertEmpty($cellValue->getHyperlinkTitle());
-
-        self::markTestIncomplete(
-            "Currently superscript has a bug in PhpSpreadsheet and can be enabled again after next release >= 1.22.0\n" .
-            "https://github.com/PHPOffice/PhpSpreadsheet/pull/2619"
-        );
         self::assertTrue($cellValue->isSuperscript());
     }
 
@@ -148,6 +140,6 @@ class CellDataValueObjectTest extends UnitTestCase
             ['backendCellClasses' => ['c', 't']]
         );
 
-        self::assertEquals('{"val":"2015","row":2,"col":2,"css":"c-t"}', json_encode($cellValue));
+        self::assertEquals('{"val":"2015","row":2,"col":2,"css":"c-t"}', json_encode($cellValue, JSON_THROW_ON_ERROR));
     }
 }

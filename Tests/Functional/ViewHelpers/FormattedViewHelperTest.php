@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Functional\ViewHelpers;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\CellDataValueObject;
 
 class FormattedViewHelperTest extends AbstractViewHelperTestCase
 {
-
     public function testRenderWithoutCell(): void
     {
         self::assertEmpty($this->getView('<test:cell.value.formatted></test:cell.value.formatted>')->render());
@@ -14,6 +15,8 @@ class FormattedViewHelperTest extends AbstractViewHelperTestCase
 
     /**
      * @dataProvider cellProvider
+     *
+     * @param array<mixed> $cellMock
      */
     public function testRender(string $expected, array $cellMock, string $target = null): void
     {
@@ -28,8 +31,7 @@ class FormattedViewHelperTest extends AbstractViewHelperTestCase
     }
 
     /**
-     * Based on 01_fixture.xlsx cell coordinates
-     * @return array
+     * @return array<int, array<int, string|array<string|bool>>>
      */
     public function cellProvider(): array
     {
@@ -56,18 +58,20 @@ class FormattedViewHelperTest extends AbstractViewHelperTestCase
                     'getHyperlink' => 'http://www.google.de/',
                     'getHyperlinkTitle' => '',
                 ],
-                '_self'
+                '_self',
             ],
             // richtext, superscript, subscript
             [
-                '<span style="color:#000000"><sup>Hoch</sup></span><span style="color:#000000"> Test </span><span style="color:#000000"><sub>Tief</sub></span>',
+                '<span style="color:#000000"><sup>Hoch</sup></span>' .
+                '<span style="color:#000000"> Test </span><span style="color:#000000"><sub>Tief</sub></span>',
                 [
-                    'getRenderedValue' => '<span style="color:#000000"><sup>Hoch</sup></span><span style="color:#000000"> Test </span><span style="color:#000000"><sub>Tief</sub></span>',
+                    'getRenderedValue' => '<span style="color:#000000"><sup>Hoch</sup></span>' .
+                    '<span style="color:#000000"> Test </span><span style="color:#000000"><sub>Tief</sub></span>',
                     'isRichText' => true,
                     'isSuperscript' => false,
                     'isSubscript' => false,
                     'getHyperlink' => '',
-                ]
+                ],
             ],
             // superscript
             [
@@ -78,7 +82,7 @@ class FormattedViewHelperTest extends AbstractViewHelperTestCase
                     'isSuperscript' => true,
                     'isSubscript' => false,
                     'getHyperlink' => '',
-                ]
+                ],
             ],
             // subscript
             [
@@ -89,8 +93,8 @@ class FormattedViewHelperTest extends AbstractViewHelperTestCase
                     'isSuperscript' => false,
                     'isSubscript' => true,
                     'getHyperlink' => '',
-                ]
-            ]
+                ],
+            ],
         ];
     }
 }

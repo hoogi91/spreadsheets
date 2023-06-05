@@ -1,14 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Unit\Domain\ValueObject;
 
 use Hoogi91\Spreadsheets\Domain\ValueObject\StylesheetValueObject;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-/**
- * Class StylesheetValueObjectTest
- * @package Hoogi91\Spreadsheets\Tests\Unit\Domain\ValueObject
- */
+use const PHP_EOL;
+
 class StylesheetValueObjectTest extends UnitTestCase
 {
     private const DEFAULT_STYLES = [
@@ -48,5 +48,7 @@ class StylesheetValueObjectTest extends UnitTestCase
         // get inline css
         $styles = StylesheetValueObject::create(self::DEFAULT_STYLES['.cell-type-b']);
         self::assertEquals('text-align:center', $styles->toInlineCSS());
+        // assert that normal toCSS misses the class/property name
+        self::assertEquals('text-align {}' . PHP_EOL, $styles->toCSS());
     }
 }

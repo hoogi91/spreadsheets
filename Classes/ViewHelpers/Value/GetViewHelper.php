@@ -10,19 +10,16 @@ use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 use TYPO3Fluid\Fluid\Core\ViewHelper\Traits\CompileWithRenderStatic;
 
-/**
- * Class GetViewHelper
- * @package Hoogi91\Spreadsheets\ViewHelpers\Value
- */
 class GetViewHelper extends AbstractViewHelper
 {
     use CompileWithRenderStatic;
 
+    /**
+     * @var bool
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
+     */
     protected $escapeOutput = false;
 
-    /**
-     * Initialize arguments.
-     */
     public function initializeArguments(): void
     {
         parent::initializeArguments();
@@ -30,11 +27,7 @@ class GetViewHelper extends AbstractViewHelper
     }
 
     /**
-     * @param array $arguments
-     * @param Closure $renderChildrenClosure
-     * @param RenderingContextInterface $renderingContext
-     *
-     * @return DsnValueObject|null
+     * @param array<mixed> $arguments
      */
     public static function renderStatic(
         array $arguments,

@@ -14,51 +14,35 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 use TYPO3\CMS\Backend\Form\NodeFactory;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
-/**
- * Class DataInputElement
- * @package Hoogi91\Spreadsheets\Form\Element
- */
 class DataInputElement extends AbstractFormElement
 {
-
     private const DEFAULT_TEMPLATE_PATH = 'EXT:spreadsheets/Resources/Private/Templates/FormElement/DataInput.html';
 
-    /**
-     * @var ReaderService
-     */
-    private $readerService;
+    private readonly ReaderService $readerService;
+
+    private readonly ExtractorService $extractorService;
 
     /**
-     * @var ExtractorService
+     * @var array<string, string>
      */
-    private $extractorService;
+    private array $config;
+
+    private readonly StandaloneView $view;
 
     /**
-     * @var array
-     */
-    private $config;
-
-    /**
-     * @var StandaloneView
-     */
-    private $view;
-
-    /**
-     * DataInputElement constructor.
-     *
-     * @param NodeFactory $nodeFactory
-     * @param array $data
+     * @param array<mixed> $data
      */
     public function __construct(NodeFactory $nodeFactory, array $data)
     {
         parent::__construct($nodeFactory, $data);
         $this->readerService = GeneralUtility::makeInstance(ReaderService::class);
         $this->extractorService = GeneralUtility::makeInstance(ExtractorService::class);
-        $this->config = $this->data['parameterArray']['fieldConf']['config'];
+        $this->config = $this->data['parameterArray']['fieldConf']['config'] ?? [];
 
         $this->view = GeneralUtility::makeInstance(StandaloneView::class);
         $this->view->setTemplatePathAndFilename($this->getTemplatePath());
@@ -66,10 +50,7 @@ class DataInputElement extends AbstractFormElement
     }
 
     /**
-     * This will render a single-line input password field
-     * and a button to toggle password visibility
-     *
-     * @return array As defined in initializeResultArray() of AbstractNode
+     * @return array<mixed> As defined in initializeResultArray() of AbstractNode
      */
     public function render(): array
     {
@@ -79,6 +60,7 @@ class DataInputElement extends AbstractFormElement
         // upload fields hasn't been specified
         if (array_key_exists($this->config['uploadField'], $this->data['processedTca']['columns'] ?? []) === false) {
             $resultArray['html'] = $this->view->assign('missingUploadField', true)->render();
+
             return $resultArray;
         }
 
@@ -86,16 +68,19 @@ class DataInputElement extends AbstractFormElement
         $references = $this->getValidFileReferences($this->config['uploadField']);
         if (empty($references)) {
             $resultArray['html'] = $this->view->assign('nonValidReferences', true)->render();
+
             return $resultArray;
         }
 
         // register additional assets only when input will be rendered
-        $resultArray['requireJsModules'] = ['TYPO3/CMS/Spreadsheets/SpreadsheetDataInput'];
+        $resultArray['requireJsModules'][] = JavaScriptModuleInstruction::forRequireJS(
+            'TYPO3/CMS/Spreadsheets/SpreadsheetDataInput'
+        )->instance($this->data['parameterArray']['itemFormElName'] ?? null);
         $resultArray['stylesheetFiles'] = ['EXT:spreadsheets/Resources/Public/Css/SpreadsheetDataInput.css'];
 
         try {
             $valueObject = DsnValueObject::createFromDSN($this->data['parameterArray']['itemFormElValue'] ?? '');
-        } catch (InvalidDataSourceNameException $exception) {
+        } catch (InvalidDataSourceNameException) {
             $valueObject = '';
         }
 
@@ -111,30 +96,26 @@ class DataInputElement extends AbstractFormElement
 
         // render view and return result array
         $resultArray['html'] = $this->view->render();
+
         return $resultArray;
     }
 
-    /**
-     * @return string
-     */
     private function getTemplatePath(): string
     {
         if (empty($this->config['template'])) {
-            return GeneralUtility::getFileAbsFileName(static::DEFAULT_TEMPLATE_PATH);
+            return GeneralUtility::getFileAbsFileName(self::DEFAULT_TEMPLATE_PATH);
         }
 
         $templatePath = GeneralUtility::getFileAbsFileName($this->config['template']);
         if (is_file($templatePath) === false) {
-            return GeneralUtility::getFileAbsFileName(static::DEFAULT_TEMPLATE_PATH);
+            return GeneralUtility::getFileAbsFileName(self::DEFAULT_TEMPLATE_PATH);
         }
 
         return $templatePath;
     }
 
     /**
-     * @param string $fieldName
-     *
-     * @return FileReference[]
+     * @return array<FileReference>
      */
     private function getValidFileReferences(string $fieldName): array
     {
@@ -150,16 +131,13 @@ class DataInputElement extends AbstractFormElement
         // filter references by allowed types
         return array_filter(
             $references,
-            static function ($reference) {
-                /** @var FileReference $reference */
-                return in_array($reference->getExtension(), ReaderService::ALLOWED_EXTENSIONS, true);
-            }
+            static fn ($reference) => in_array($reference->getExtension(), ReaderService::ALLOWED_EXTENSIONS, true)
         );
     }
 
     /**
-     * @param FileReference[] $references
-     * @return array
+     * @param array<FileReference> $references
+     * @return array<mixed>
      */
     private function getFileReferencesSpreadsheetData(array $references): array
     {
@@ -175,18 +153,19 @@ class DataInputElement extends AbstractFormElement
         // convert whole sheet data content to UTF-8
         array_walk_recursive(
             $sheetData,
-            static function (&$item) {
-                if (is_string($item) && mb_detect_encoding($item, 'utf-8', true) === false) {
-                    $item = utf8_encode($item); // @codeCoverageIgnore
-                }
+            static function (&$item): void {
+                $item = is_string($item) && mb_detect_encoding($item, 'UTF-8', true) === false
+                    ? mb_convert_encoding($item, 'UTF-8', mb_list_encodings())
+                    : $item;
             }
         );
+
         return $sheetData;
     }
 
     /**
-     * @param FileReference[] $references
-     * @return Spreadsheet[]
+     * @param array<FileReference> $references
+     * @return array<Spreadsheet>
      */
     private function getSpreadsheetsByFileReferences(array $references): array
     {
@@ -194,7 +173,7 @@ class DataInputElement extends AbstractFormElement
         foreach ($references as $reference) {
             try {
                 $spreadsheets[$reference->getUid()] = $this->readerService->getSpreadsheet($reference);
-            } catch (ReaderException $e) {
+            } catch (ReaderException) {
                 // ignore reading non-existing or invalid file reference
             }
         }
@@ -203,8 +182,7 @@ class DataInputElement extends AbstractFormElement
     }
 
     /**
-     * @param Spreadsheet $spreadsheet
-     * @return array
+     * @return array<mixed>
      */
     private function getWorksheetDataFromSpreadsheet(Spreadsheet $spreadsheet): array
     {
@@ -216,11 +194,11 @@ class DataInputElement extends AbstractFormElement
                     'name' => $worksheet->getTitle(),
                     'cells' => $this->extractorService->rangeToCellArray($worksheet, $worksheetRange),
                 ];
-            } catch (SpreadsheetException $e) { // @codeCoverageIgnoreStart
+            } catch (SpreadsheetException) {
                 // ignore sheet when an exception occurs
-                // @codeCoverageIgnoreEnd
             }
         }
+
         return $sheetData;
     }
 }

@@ -1,27 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Unit\Service;
 
 use Hoogi91\Spreadsheets\Service\SpanService;
-use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-/**
- * Class SpanServiceTest
- * @package Hoogi91\Spreadsheets\Tests\Unit\Service
- */
 class SpanServiceTest extends UnitTestCase
 {
-    /**
-     * @var SpanService
-     */
-    private $spanService;
+    private SpanService $spanService;
 
-    /**
-     * @var Spreadsheet
-     */
-    private $spreadsheet;
+    private Spreadsheet $spreadsheet;
 
     protected function setUp(): void
     {
@@ -74,7 +66,7 @@ class SpanServiceTest extends UnitTestCase
         $worksheet = $this->spreadsheet->getSheet(0);
         $mergedCells = $this->spanService->getMergedCells($worksheet);
 
-        foreach ($mergedCells as $key => $config) {
+        foreach ($mergedCells as $config) {
             self::assertArrayHasKey('additionalStyleIndexes', $config);
         }
 
@@ -103,9 +95,15 @@ class SpanServiceTest extends UnitTestCase
         self::assertSame($mergedCells, $this->spanService->getMergedCells($worksheet));
     }
 
+    /**
+     * @param array<mixed> $array
+     *
+     * @return array<mixed>
+     */
     private static function sort(array $array): array
     {
         sort($array);
+
         return $array;
     }
 }

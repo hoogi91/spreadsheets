@@ -8,49 +8,34 @@ use PhpOffice\PhpSpreadsheet\Reader;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use TYPO3\CMS\Core\Resource\FileReference;
 
-/**
- * Class ReaderService
- * @package Hoogi91\Spreadsheets\Service
- */
 class ReaderService
 {
-
-    public const ALLOWED_EXTENSIONS = ['xls', 'xlsx', 'ods', 'xml', 'csv', 'html'];
+    final public const ALLOWED_EXTENSIONS = ['xls', 'xlsx', 'ods', 'xml', 'csv', 'html'];
 
     /**
-     * @param FileReference $reference
-     *
-     * @return Spreadsheet
      * @throws Reader\Exception
      */
-    public function getSpreadsheet(FileReference $reference): Spreadsheet
+    public function getSpreadsheet(FileReference|bool $reference): Spreadsheet
     {
-        if ($reference->getOriginalFile()->exists() === false) {
-            throw new Reader\Exception('Reference original file doesn\'t exists!', 1539959214);
+        if (is_bool($reference) || $reference->getOriginalFile()->exists() === false) {
+            throw new Reader\Exception('Reference original file doesn\'t exists!', 1_539_959_214);
         }
 
-        switch ($reference->getExtension()) {
-            case 'xls':
-                return (new Reader\Xls())->load($reference->getForLocalProcessing());
-            case 'xlsx':
-                return (new Reader\Xlsx())->load($reference->getForLocalProcessing());
-            case 'ods':
-                return (new Reader\Ods())->load($reference->getForLocalProcessing());
-            case 'xml':
-                return (new Reader\Xml())->load($reference->getForLocalProcessing());
-            case 'csv':
-                return (new Reader\Csv())->load($reference->getForLocalProcessing());
-            case 'html':
-                return (new Reader\Html())->load($reference->getForLocalProcessing());
-        }
-
-        throw new Reader\Exception(
-            sprintf(
-                'Reference has not allowed file extension "%s"! Allowed Extensions are "%s"',
-                $reference->getExtension(),
-                implode(',', static::ALLOWED_EXTENSIONS)
+        return match ($reference->getExtension()) {
+            'xls' => (new Reader\Xls())->setReadEmptyCells(false)->load($reference->getForLocalProcessing()),
+            'xlsx' => (new Reader\Xlsx())->setReadEmptyCells(false)->load($reference->getForLocalProcessing()),
+            'ods' => (new Reader\Ods())->load($reference->getForLocalProcessing()),
+            'xml' => (new Reader\Xml())->load($reference->getForLocalProcessing()),
+            'csv' => (new Reader\Csv())->load($reference->getForLocalProcessing()),
+            'html' => (new Reader\Html())->load($reference->getForLocalProcessing()),
+            default => throw new Reader\Exception(
+                sprintf(
+                    'Reference has not allowed file extension "%s"! Allowed Extensions are "%s"',
+                    $reference->getExtension(),
+                    implode(',', self::ALLOWED_EXTENSIONS)
+                ),
+                1_514_909_945
             ),
-            1514909945
-        );
+        };
     }
 }

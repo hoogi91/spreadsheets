@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Unit\DataProcessing;
 
 use Hoogi91\Spreadsheets\DataProcessing\AbstractProcessor;
@@ -8,13 +10,8 @@ use Hoogi91\Spreadsheets\Domain\ValueObject\ExtractionValueObject;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PHPUnit\Framework\MockObject\MockObject;
 
-/**
- * Class SpreadsheetProcessorTest
- * @package Hoogi91\Spreadsheets\Tests\Unit\DataProcessing
- */
-class SpreadsheetProcessorTest extends AbstractProcessorTest
+class SpreadsheetProcessorTest extends AbstractProcessorTestCase
 {
-
     protected function getDataProcessor(): AbstractProcessor
     {
         return new SpreadsheetProcessor(
@@ -27,8 +24,7 @@ class SpreadsheetProcessorTest extends AbstractProcessorTest
     }
 
     /**
-     * @param MockObject|Spreadsheet $spreadsheetMock
-     * @return void
+     * @param MockObject&Spreadsheet $spreadsheetMock
      */
     protected function validInputExpectations(MockObject $spreadsheetMock): void
     {
@@ -40,12 +36,11 @@ class SpreadsheetProcessorTest extends AbstractProcessorTest
     }
 
     /**
-     * @param MockObject|Spreadsheet $spreadsheetMock
-     * @return void
+     * @param MockObject&Spreadsheet $spreadsheetMock
      */
-    protected function validInputExpectationsOnlyWithBody(MockObject $spreadsheetMock): void
+    protected static function validInputExpectationsOnlyWithBody(MockObject $spreadsheetMock, self $self): void
     {
-        $this->extractorService->expects(self::once())
+        $self->extractorService->expects(self::once())
             ->method('getDataByDsnValueObject')
             ->willReturn(
                 ExtractionValueObject::create(
@@ -60,12 +55,11 @@ class SpreadsheetProcessorTest extends AbstractProcessorTest
     }
 
     /**
-     * @param MockObject|Spreadsheet $spreadsheetMock
-     * @return void
+     * @param MockObject&Spreadsheet $spreadsheetMock
      */
-    protected function validInputExpectationsWithEmptyBody(MockObject $spreadsheetMock): void
+    protected static function validInputExpectationsWithEmptyBody(MockObject $spreadsheetMock, self $self): void
     {
-        $this->extractorService->expects(self::once())
+        $self->extractorService->expects(self::once())
             ->method('getDataByDsnValueObject')
             ->willReturn(ExtractionValueObject::create($spreadsheetMock, []));
     }
@@ -75,7 +69,10 @@ class SpreadsheetProcessorTest extends AbstractProcessorTest
         $this->extractorService->expects(self::never())->method('getDataByDsnValueObject');
     }
 
-    public function processingDataProvider(): array
+    /**
+     * @return array<string, mixed>
+     */
+    public static function processingDataProvider(): array
     {
         return [
             'empty value should result in unprocessed input data' => [
@@ -101,13 +98,13 @@ class SpreadsheetProcessorTest extends AbstractProcessorTest
                         'headData' => ['head-data-mocked'],
                         'footData' => [],
                         'firstColumnIsHeader' => false,
-                    ]
+                    ],
                 ],
             ],
             'default named variable and page renderer has been called' => [
                 'processConfig' => [
                     'value' => 'file:123|2!A1:B2',
-                    'options.' => ['additionalStyles' => '.test{color: "#fff"}',]
+                    'options.' => ['additionalStyles' => '.test{color: "#fff"}',],
                 ],
                 'processedData' => [],
                 'expectedResult' => [
@@ -117,7 +114,7 @@ class SpreadsheetProcessorTest extends AbstractProcessorTest
                         'headData' => ['head-data-mocked'],
                         'footData' => [],
                         'firstColumnIsHeader' => false,
-                    ]
+                    ],
                 ],
             ],
             'top head data is only extracted from body if we do not have extracted head data' => [
@@ -130,7 +127,7 @@ class SpreadsheetProcessorTest extends AbstractProcessorTest
                         'headData' => ['head-data-mocked'],
                         'footData' => [],
                         'firstColumnIsHeader' => false,
-                    ]
+                    ],
                 ],
             ],
             'left head data is not set if we do have extracted head data' => [
@@ -143,7 +140,7 @@ class SpreadsheetProcessorTest extends AbstractProcessorTest
                         'headData' => ['head-data-mocked'],
                         'footData' => [],
                         'firstColumnIsHeader' => false,
-                    ]
+                    ],
                 ],
             ],
             'top head and foot data can be extracted from body data' => [
@@ -156,9 +153,9 @@ class SpreadsheetProcessorTest extends AbstractProcessorTest
                         'headData' => [['body-data-mocked-row-1']],
                         'footData' => [['body-data-mocked-row-3']],
                         'firstColumnIsHeader' => false,
-                    ]
+                    ],
                 ],
-                'alternativeExpectation' => [$this, 'validInputExpectationsOnlyWithBody']
+                'alternativeExpectation' => self::validInputExpectationsOnlyWithBody(...),
             ],
             'left head data is set because we do not have extracted head data' => [
                 'processConfig' => ['value' => 'file:123|2!A1:B2'],
@@ -174,9 +171,9 @@ class SpreadsheetProcessorTest extends AbstractProcessorTest
                         'headData' => [],
                         'footData' => [],
                         'firstColumnIsHeader' => true,
-                    ]
+                    ],
                 ],
-                'alternativeExpectation' => [$this, 'validInputExpectationsOnlyWithBody']
+                'alternativeExpectation' => self::validInputExpectationsOnlyWithBody(...),
             ],
             'head and foot data are not filled incorrectly when no data is given' => [
                 'processConfig' => ['value' => 'file:123|2!A1:B2'],
@@ -188,9 +185,9 @@ class SpreadsheetProcessorTest extends AbstractProcessorTest
                         'headData' => [],
                         'footData' => [],
                         'firstColumnIsHeader' => false,
-                    ]
+                    ],
                 ],
-                'alternativeExpectation' => [$this, 'validInputExpectationsWithEmptyBody']
+                'alternativeExpectation' => self::validInputExpectationsWithEmptyBody(...),
             ],
         ];
     }

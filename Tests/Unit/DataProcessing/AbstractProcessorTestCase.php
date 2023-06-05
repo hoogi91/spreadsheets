@@ -1,11 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hoogi91\Spreadsheets\Tests\Unit\DataProcessing;
 
-use Closure;
 use Hoogi91\Spreadsheets\DataProcessing\AbstractProcessor;
 use Hoogi91\Spreadsheets\Service;
-use Hoogi91\Spreadsheets\Tests\Unit\ArrayAssertTrait;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PHPUnit\Framework\MockObject\MockObject;
 use TYPO3\CMS\Core\Page\PageRenderer;
@@ -14,44 +14,19 @@ use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer as CObjRenderer;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-/**
- * Class AbstractProcessorTest
- * @package Hoogi91\Spreadsheets\Tests\Unit\DataProcessing
- */
-abstract class AbstractProcessorTest extends UnitTestCase
+abstract class AbstractProcessorTestCase extends UnitTestCase
 {
+    protected CObjRenderer&MockObject $cObjRendererMock;
 
-    use ArrayAssertTrait;
+    protected PageRenderer&MockObject $pageRendererMock;
 
-    /**
-     * @var CObjRenderer|MockObject
-     */
-    protected $cObjRendererMock;
+    protected Service\ReaderService&MockObject $readerService;
 
-    /**
-     * @var PageRenderer|MockObject
-     */
-    protected $pageRendererMock;
+    protected Service\ExtractorService&MockObject $extractorService;
 
-    /**
-     * @var Service\ReaderService|MockObject
-     */
-    protected $readerService;
+    protected Service\StyleService&MockObject $styleService;
 
-    /**
-     * @var Service\ExtractorService|MockObject
-     */
-    protected $extractorService;
-
-    /**
-     * @var Service\StyleService|MockObject
-     */
-    protected $styleService;
-
-    /**
-     * @var FileRepository|MockObject
-     */
-    protected $fileRepository;
+    protected FileRepository&MockObject $fileRepository;
 
     protected function setUp(): void
     {
@@ -61,9 +36,7 @@ abstract class AbstractProcessorTest extends UnitTestCase
         $this->pageRendererMock = $this->getMockBuilder(PageRenderer::class)->disableOriginalConstructor()->getMock();
         $this->cObjRendererMock = $this->getMockBuilder(CObjRenderer::class)->disableOriginalConstructor()->getMock();
         $this->cObjRendererMock->method('stdWrapValue')->willReturnCallback(
-            static function ($key, array $config, $defaultValue = '') {
-                return $config[$key] ?? $defaultValue;
-            }
+            static fn ($key, array $config, $defaultValue = '') => $config[$key] ?? $defaultValue
         );
         $this->readerService = $this->createMock(Service\ReaderService::class);
         $this->extractorService = $this->createMock(Service\ExtractorService::class);
@@ -77,12 +50,15 @@ abstract class AbstractProcessorTest extends UnitTestCase
 
     abstract protected function invalidInputExpectations(): void;
 
-    abstract public function processingDataProvider(): array;
+    /**
+     * @return array<string, mixed>
+     */
+    abstract public static function processingDataProvider(): array;
 
     /**
-     * @param array $processConfig
-     * @param array $expectedResult
-     * @param callable|null $alternativeExpectations
+     * @param array<string, array<mixed>> $processConfig
+     * @param array<mixed> $processedData
+     * @param array<mixed> $expectedResult
      *
      * @dataProvider processingDataProvider
      */
@@ -104,7 +80,7 @@ abstract class AbstractProcessorTest extends UnitTestCase
             );
         }
 
-        if ([] !== $expectedResult) {
+        if ($expectedResult !== []) {
             $referenceMock = $this->createMock(FileReference::class);
             $this->fileRepository->expects(self::once())
                 ->method('findFileReferenceByUid')
@@ -116,14 +92,14 @@ abstract class AbstractProcessorTest extends UnitTestCase
                 ->with($referenceMock)
                 ->willReturn($spreadsheetMock);
 
-            $alternativeExpectations !== null
-                ? Closure::fromCallable($alternativeExpectations)->call($this, $spreadsheetMock)
+            is_callable($alternativeExpectations)
+                ? $alternativeExpectations($spreadsheetMock, $this)
                 : $this->validInputExpectations($spreadsheetMock);
         } else {
             $this->fileRepository->expects(self::never())->method('findFileReferenceByUid');
             $this->readerService->expects(self::never())->method('getSpreadsheet');
-            $alternativeExpectations !== null
-                ? Closure::fromCallable($alternativeExpectations)->call($this)
+            is_callable($alternativeExpectations)
+                ? $alternativeExpectations($this)
                 : $this->invalidInputExpectations();
         }
 
