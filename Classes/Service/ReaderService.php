@@ -29,11 +29,24 @@ class ReaderService
             throw new Reader\Exception('Reference original file doesn\'t exists!', 1539959214);
         }
 
+        $extConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+            \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+        );
+        $disableReadingEmptyCells = $extConf->get('spreadsheets', 'disable_reading_empty_cells') === '1';
+
         switch ($reference->getExtension()) {
             case 'xls':
-                return (new Reader\Xls())->load($reference->getForLocalProcessing());
+                $reader = $disableReadingEmptyCells
+                    ? (new Reader\Xls())->setReadEmptyCells(false)
+                    : new Reader\Xls();
+
+                return $reader->load($reference->getForLocalProcessing());
             case 'xlsx':
-                return (new Reader\Xlsx())->load($reference->getForLocalProcessing());
+                $reader = $disableReadingEmptyCells
+                    ? (new Reader\Xlsx())->setReadEmptyCells(false)
+                    : new Reader\Xlsx();
+
+                return $reader->load($reference->getForLocalProcessing());
             case 'ods':
                 return (new Reader\Ods())->load($reference->getForLocalProcessing());
             case 'xml':
