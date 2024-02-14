@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "896936d749239d51694f1c599f73600f",
+    "content-hash": "2c082d2e79dd1807d91d94527e7badb0",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -7494,16 +7494,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.10.57",
+            "version": "1.10.58",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "1627b1d03446904aaa77593f370c5201d2ecc34e"
+                "reference": "a23518379ec4defd9e47cbf81019526861623ec2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/1627b1d03446904aaa77593f370c5201d2ecc34e",
-                "reference": "1627b1d03446904aaa77593f370c5201d2ecc34e",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/a23518379ec4defd9e47cbf81019526861623ec2",
+                "reference": "a23518379ec4defd9e47cbf81019526861623ec2",
                 "shasum": ""
             },
             "require": {
@@ -7552,7 +7552,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-01-24T11:51:34+00:00"
+            "time": "2024-02-12T20:02:57+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -7978,16 +7978,16 @@
         },
         {
             "name": "rector/rector",
-            "version": "0.19.7",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rectorphp/rector.git",
-                "reference": "53f16f413e74e92059981801ba82576064b3181a"
+                "reference": "362258a1f6369fc88d02d469a5478d220f78b0e6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rectorphp/rector/zipball/53f16f413e74e92059981801ba82576064b3181a",
-                "reference": "53f16f413e74e92059981801ba82576064b3181a",
+                "url": "https://api.github.com/repos/rectorphp/rector/zipball/362258a1f6369fc88d02d469a5478d220f78b0e6",
+                "reference": "362258a1f6369fc88d02d469a5478d220f78b0e6",
                 "shasum": ""
             },
             "require": {
@@ -8022,7 +8022,7 @@
             ],
             "support": {
                 "issues": "https://github.com/rectorphp/rector/issues",
-                "source": "https://github.com/rectorphp/rector/tree/0.19.7"
+                "source": "https://github.com/rectorphp/rector/tree/1.0.0"
             },
             "funding": [
                 {
@@ -8030,7 +8030,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-02-04T23:23:09+00:00"
+            "time": "2024-02-06T13:38:07+00:00"
         },
         {
             "name": "roave/security-advisories",
