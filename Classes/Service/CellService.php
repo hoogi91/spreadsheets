@@ -129,7 +129,7 @@ class CellService
             return $value;
         }
 
-        /** @var null|bool|float|int|RichText|string $value */
+        /** @var bool|float|int|RichText|string|null $value */
         return NumberFormat::toFormattedString($value, NumberFormat::FORMAT_GENERAL);
     }
 }
