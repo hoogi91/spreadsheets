@@ -150,7 +150,7 @@ class SpanService
     }
 
     /**
-     * @param array<array<int>|CellAddress|string> $references
+     * @param array<array{0: int, 1: int}|CellAddress|string> $references
      * @return array<int>
      */
     private function getCellStyleIndexesFromReferences(Worksheet $worksheet, array $references): array

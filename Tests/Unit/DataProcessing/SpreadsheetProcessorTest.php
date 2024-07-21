@@ -155,7 +155,7 @@ class SpreadsheetProcessorTest extends AbstractProcessorTestCase
                         'firstColumnIsHeader' => false,
                     ],
                 ],
-                'alternativeExpectation' => self::validInputExpectationsOnlyWithBody(...),
+                'alternativeExpectations' => self::validInputExpectationsOnlyWithBody(...),
             ],
             'left head data is set because we do not have extracted head data' => [
                 'processConfig' => ['value' => 'file:123|2!A1:B2'],
@@ -173,7 +173,7 @@ class SpreadsheetProcessorTest extends AbstractProcessorTestCase
                         'firstColumnIsHeader' => true,
                     ],
                 ],
-                'alternativeExpectation' => self::validInputExpectationsOnlyWithBody(...),
+                'alternativeExpectations' => self::validInputExpectationsOnlyWithBody(...),
             ],
             'head and foot data are not filled incorrectly when no data is given' => [
                 'processConfig' => ['value' => 'file:123|2!A1:B2'],
@@ -187,7 +187,7 @@ class SpreadsheetProcessorTest extends AbstractProcessorTestCase
                         'firstColumnIsHeader' => false,
                     ],
                 ],
-                'alternativeExpectation' => self::validInputExpectationsWithEmptyBody(...),
+                'alternativeExpectations' => self::validInputExpectationsWithEmptyBody(...),
             ],
         ];
     }

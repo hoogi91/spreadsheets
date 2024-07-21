@@ -126,9 +126,10 @@ class CellService
                 setlocale(LC_NUMERIC, $currentLocale);
             }
 
-            return (string)$value;
+            return $value;
         }
 
-        return (string)NumberFormat::toFormattedString($value, NumberFormat::FORMAT_GENERAL);
+        /** @var bool|float|int|RichText|string|null $value */
+        return NumberFormat::toFormattedString($value, NumberFormat::FORMAT_GENERAL);
     }
 }

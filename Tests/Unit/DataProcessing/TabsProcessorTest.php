@@ -29,13 +29,7 @@ class TabsProcessorTest extends AbstractProcessorTestCase
     protected function validInputExpectations(MockObject $spreadsheetMock): void
     {
         // mock worksheet will be returned
-        $worksheetMock = $this->createConfiguredMock(
-            Worksheet::class,
-            [
-                'getTitle' => 'Worksheet #1',
-                'getHashCode' => '263df821f3760dc1ec4e',
-            ]
-        );
+        $worksheetMock = new Worksheet(null, 'Worksheet #1');
         $spreadsheetMock->expects(self::once())->method('getAllSheets')->willReturn([$worksheetMock]);
 
         // check if extract gets called
@@ -80,7 +74,7 @@ class TabsProcessorTest extends AbstractProcessorTestCase
                 'expectedResult' => [
                     'someOtherVar' => [
                         // key is file uid and hash code
-                        '123263df821f3760dc1ec4e' => [
+                        '123b8367b83d9b7fa3124b32922f50ad2fc' => [
                             'sheetTitle' => 'Worksheet #1',
                             'bodyData' => ['body-data-mocked'],
                             'headData' => ['head-data-mocked'],
@@ -97,7 +91,7 @@ class TabsProcessorTest extends AbstractProcessorTestCase
                 'expectedResult' => [
                     'spreadsheets' => [
                         // key is file uid and hash code
-                        '123263df821f3760dc1ec4e' => [
+                        '123b8367b83d9b7fa3124b32922f50ad2fc' => [
                             'sheetTitle' => 'Worksheet #1',
                             'bodyData' => ['body-data-mocked'],
                             'headData' => ['head-data-mocked'],
