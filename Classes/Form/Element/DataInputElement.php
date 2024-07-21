@@ -46,7 +46,7 @@ class DataInputElement extends AbstractFormElement
 
         $this->view = GeneralUtility::makeInstance(StandaloneView::class);
         $this->view->setTemplatePathAndFilename($this->getTemplatePath());
-        $this->view->assign('inputSize', (int)$this->config['size'] ?: 0);
+        $this->view->assign('inputSize', (int)($this->config['size'] ?? 0));
     }
 
     /**
