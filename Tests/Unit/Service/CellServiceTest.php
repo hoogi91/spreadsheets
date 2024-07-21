@@ -112,9 +112,7 @@ class CellServiceTest extends UnitTestCase
         $mockedCell->method('getValue')->willReturn('MockValue');
 
         // build chain for style index search
-        $worksheetMock = $this->getMockBuilder(Worksheet::class)->disableOriginalConstructor()->getMock();
-        $worksheetMock->method('getParent')->willReturn($this->spreadsheet);
-
+        $worksheetMock = new Worksheet($this->spreadsheet, 'Worksheet');
         $mockedCell->method('getWorksheet')->willReturn($worksheetMock);
 
         self::assertEquals('MockValue', $this->cellService->getFormattedValue($mockedCell));

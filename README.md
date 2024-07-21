@@ -1,10 +1,10 @@
 # TYPO3 Extension ``spreadsheets``
 
-[![Version](https://img.shields.io/github/v/tag/hoogi91/spreadsheets?label=stable&style=for-the-badge)](https://packagist.org/packages/hoogi91/spreadsheets)
+[![Version](https://img.shields.io/github/v/tag/hoogi91/spreadsheets?sort=semver&label=stable&style=for-the-badge)](https://packagist.org/packages/hoogi91/spreadsheets)
 [![Tests](https://img.shields.io/github/actions/workflow/status/hoogi91/spreadsheets/phpunit.yml?label=tests&style=for-the-badge)](https://github.com/hoogi91/spreadsheets/actions/workflows/phpunit.yml)
 [![Coverage](https://img.shields.io/codecov/c/github/hoogi91/spreadsheets?style=for-the-badge)](https://codecov.io/gh/hoogi91/spreadsheets)
 [![License](https://img.shields.io/github/license/hoogi91/spreadsheets?style=for-the-badge)](https://github.com/hoogi91/spreadsheets/blob/develop/LICENSE)
-[![Documentation](https://img.shields.io/github/v/tag/hoogi91/spreadsheets?color=ffe907&label=docs&style=for-the-badge)](https://docs.typo3.org/p/hoogi91/spreadsheets/main/en-us/)
+[![Documentation](https://img.shields.io/github/v/tag/hoogi91/spreadsheets?sort=semver&color=ffe907&label=docs&style=for-the-badge)](https://docs.typo3.org/p/hoogi91/spreadsheets/main/en-us/)
 
 > composer req hoogi91/spreadsheets
 
