@@ -1,9 +1,10 @@
-const ESLintPlugin = require("eslint-webpack-plugin");
-const TerserPlugin = require('terser-webpack-plugin');
-const path = require('path');
+import TerserPlugin from "terser-webpack-plugin";
+import path from "path";
+import * as url from 'url';
 
-module.exports = (env, argv) => ({
-    plugins: [new ESLintPlugin()],
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
+
+export default (env, argv) => ({
     optimization: {
         minimizer: [
             new TerserPlugin({

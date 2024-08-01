@@ -1,4 +1,4 @@
-import {colHeaderToIndex} from "./helper";
+import {colHeaderToIndex} from "./helper.js";
 
 export default class DSN {
     constructor(value) {
