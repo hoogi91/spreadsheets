@@ -2,13 +2,14 @@
   "name": "asset-build",
   "version": "1.0.0",
   "description": "",
+  "type":"module",
   "scripts": {
     "build": "webpack build --mode production",
     "build-watch": "webpack watch --mode production",
     "build-dev": "webpack build --mode development",
     "build-dev-watch": "webpack watch --mode development",
-    "lint": "eslint --ext .js Resources/Private/Assets/JavaScript/",
-    "lint-fix": "eslint --fix --ext .js Resources/Private/Assets/JavaScript/",
+    "lint": "eslint Resources/Private/Assets/JavaScript/",
+    "lint-fix": "eslint --fix Resources/Private/Assets/JavaScript/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -34,5 +35,11 @@
     "Firefox ESR",
     "not ie <= 11",
     "not dead"
-  ]
+  ],
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.8.0",
+    "eslint-formatter-unix": "^8.40.0",
+    "globals": "^15.9.0"
+  }
 }
