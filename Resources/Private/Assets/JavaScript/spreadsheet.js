@@ -1,4 +1,4 @@
-import DSN from './dsn';
+import DSN from './dsn.js';
 
 export default class Spreadsheet {
     constructor(dsn, data) {

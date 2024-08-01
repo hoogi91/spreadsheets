@@ -1,4 +1,4 @@
-import {calculateCellIndexes, cellRepresentation, throttle, unselectEverything} from "./helper";
+import {calculateCellIndexes, cellRepresentation, throttle, unselectEverything} from "./helper.js";
 
 export default class Selector {
     constructor(tableWrapper) {

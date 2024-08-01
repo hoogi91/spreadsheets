@@ -1,5 +1,5 @@
-import DSN from "./dsn";
-import {colHeaderByIndex} from "./helper";
+import DSN from "./dsn.js";
+import {colHeaderByIndex} from "./helper.js";
 
 export default class Renderer {
     constructor(sheetWrapper, tableWrapper) {
