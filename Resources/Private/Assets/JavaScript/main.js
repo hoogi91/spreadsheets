@@ -1,7 +1,7 @@
-import DSN from './dsn';
-import Renderer from './renderer';
-import Spreadsheet from './spreadsheet';
-import Selector from "./selector";
+import DSN from './dsn.js';
+import Renderer from './renderer.js';
+import Spreadsheet from './spreadsheet.js';
+import Selector from "./selector.js";
 import DocumentService from 'DocumentService';
 
 class SpreadsheetDataInput {
