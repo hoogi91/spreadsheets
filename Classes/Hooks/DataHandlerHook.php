@@ -2,6 +2,7 @@
 
 namespace Hoogi91\Spreadsheets\Hooks;
 
+use Hoogi91\Spreadsheets\Domain\ValueObject\DsnValueObject;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Resource\FileReference;
@@ -20,9 +21,35 @@ class DataHandlerHook
      */
     private $fileRepository;
 
+    /**
+     * @var array<string, array<string, array<string, array<string>>>>
+     */
+    private $activationTypes = [];
+
     public function __construct(FileRepository $fileRepository)
     {
         $this->fileRepository = $fileRepository;
+        foreach ($GLOBALS['TCA'] as $table => $tca) {
+            $table = (string)$table;
+            foreach ($tca['columns'] ?? [] as $column => $conf) {
+                if (isset($conf['config']['renderType'], $conf['config']['uploadField'])
+                    && $conf['config']['renderType'] === 'spreadsheetInput'
+                ) {
+                    $this->activationTypes[$table]['*'][(string)$conf['config']['uploadField']][] = $column;
+                }
+            }
+
+            foreach ($GLOBALS['TCA'][$table]['types'] as $CType => $type) {
+                $CType = (string)$CType;
+                foreach ($type['columnsOverrides'] as $column => $conf) {
+                    if (isset($conf['config']['renderType'], $conf['config']['uploadField'])
+                        && $conf['config']['renderType'] === 'spreadsheetInput'
+                    ) {
+                        $this->activationTypes[$table][$CType][(string)$conf['config']['uploadField']][] = $column;
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -43,53 +70,105 @@ class DataHandlerHook
         array $fieldArray,
         DataHandler $dataHandler
     ): void {
-        // skip processing for unknown uid, wrong table, status or not updated assets
+        // skip processing for not found uid or irrelevant status
         $uid = $dataHandler->substNEWwithIDs[$id] ?? (is_int($id) ? $id : null);
-        if ($uid === null
-            || $table !== 'tt_content'
-            || !array_key_exists('tx_spreadsheets_assets', $fieldArray)
-            || !in_array($status, ['new', 'update'], true)) {
+        if ($uid === null || !is_string($table) || !in_array($status, ['new', 'update'], true)) {
             return;
         }
 
-        // skip if not spreadsheet table or bodytext is already filled
-        $CType = $fieldArray['CType'] ?? $this->getBackendRecordField($uid, 'CType');
-        if (!in_array($CType, ['spreadsheets_table', 'spreadsheets_tabs'], true)) {
+        // ignore if handler should not process for table and/or CType
+        $CType = $fieldArray['CType'] ?? $this->getBackendRecordField($uid, $table, 'CType');
+        if (!isset($this->activationTypes[$table]['*']) && !isset($this->activationTypes[$table][$CType])) {
             return;
         }
 
-        // truncate bodytext after update if assets have been removed
-        if ($fieldArray['tx_spreadsheets_assets'] === 0) {
-            if ($status === 'update') {
-                $dataHandler->updateDB('tt_content', $uid, ['bodytext' => '']);
+        $activationConfig = $this->activationTypes[$table][$CType] ?? $this->activationTypes[$table]['*'];
+        foreach ($activationConfig as $uploadField => $renderFields) {
+            // truncate render fields after update if assets have been removed
+            if ($fieldArray[$uploadField] === 0) {
+                if ($status === 'update') {
+                    $dataHandler->updateDB($table, $uid, array_fill_keys($renderFields, ''));
+                }
+
+                continue;
             }
-            return;
-        }
 
-        /** @var FileReference[] $relations */
-        $relations = $this->fileRepository->findByRelation('tt_content', 'tx_spreadsheets_assets', $uid);
+            // if upload fields was filled we get it's relations and start to update all render fields if required
+            /** @var array<FileReference> $relations */
+            $relations = $this->fileRepository->findByRelation($table, $uploadField, $uid);
+            foreach ($renderFields as $renderField) {
+                $this->setSpreadsheetValue($uid, $table, $status, $renderField, $relations, $dataHandler);
+            }
+        }
+    }
+
+    /**
+     * @param int $uid UID of chart record
+     * @param string $table Table to update
+     * @param string $status Status of current record update
+     * @param string $field Field to update spreadsheet value
+     * @param array<FileReference> $relations File relations found
+     * @param DataHandler $dataHandler Data handler instance
+     */
+    private function setSpreadsheetValue(
+        int $uid,
+        string $table,
+        string $status,
+        string $field,
+        array $relations,
+        DataHandler $dataHandler
+    ): void {
         if (empty($relations)) {
             return;
         }
 
-        // update bodytext to default file selection
-        if (empty($this->getBackendRecordField($uid, 'bodytext')) === true) {
-            $dataHandler->updateDB('tt_content', $uid, ['bodytext' => 'spreadsheet://' . $relations[0]->getUid()]);
+        // if backend record field is currently empty we pre-select with first relation
+        $fieldValue = $this->getBackendRecordField($uid, $table, $field);
+        if (empty($fieldValue) === true) {
+            $dataHandler->updateDB($table, $uid, [$field => 'spreadsheet://' . $relations[0]->getUid()]);
+        } elseif ($status === 'new' && is_string($fieldValue)) {
+            $dsn = $this->getTranslatedSpreadsheetDsn(
+                DsnValueObject::createFromDSN($fieldValue),
+                $relations
+            );
+            if ($dsn !== null) {
+                $dataHandler->updateDB($table, $uid, [$field => $dsn]);
+            }
         }
+    }
+
+    /**
+     * @param DsnValueObject $dsn Original DSN
+     * @param array<FileReference> $references File relations found
+     */
+    private function getTranslatedSpreadsheetDsn(DsnValueObject $dsn, array $references): ?string
+    {
+        foreach ($references as $reference) {
+            if ($reference->getReferenceProperty('l10n_parent') === $dsn->getFileReference()) {
+                return str_replace(
+                    'spreadsheet://' . $dsn->getFileReference(),
+                    'spreadsheet://' . $reference->getUid(),
+                    $dsn->getDsn()
+                );
+            }
+        }
+
+        return null;
     }
 
     /**
      * Get backend record field but load entry once
      *
-     * @param int $uid UID of tt_content record
+     * @param int $uid UID of record
+     * @param string $table Table to get record from
      * @param string $field Field to extract
      *
      * @return mixed|null
      */
-    private function getBackendRecordField(int $uid, string $field)
+    private function getBackendRecordField(int $uid, string $table, string $field)
     {
         if (!isset($this->records[$uid])) {
-            $this->records[$uid] = BackendUtility::getRecord('tt_content', $uid); // @codeCoverageIgnore
+            $this->records[$uid] = BackendUtility::getRecord($table, $uid); // @codeCoverageIgnore
         }
         return $this->records[$uid][$field] ?? null;
     }
