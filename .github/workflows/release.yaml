@@ -8,9 +8,9 @@ on:
         default: 'patch'
         type: choice
         options:
-        - major
-        - minor
-        - patch
+          - major
+          - minor
+          - patch
       latest-release:
         description: 'Is latest release?'
         required: false
@@ -37,7 +37,7 @@ jobs:
           version: ${{ steps.previoustag.outputs.tag }}
       - id: bump-version
         run: |
-          VERSION=${{ env[format('steps.semvers.outputs.{0}', inputs.type)] }}
+          VERSION=${{ steps.semvers.outputs[inputs.type] }}
           sed -i -E "s/'[0-9]+.[0-9]+.[0-9]+'/'$VERSION'/g" ext_emconf.php
           sed -i -E "s/[0-9]+.[0-9]+.[0-9]+/$VERSION/g" Documentation/Settings.cfg
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
@@ -52,7 +52,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     environment: 'github'
-    needs: [bump-version]
+    needs: [ bump-version ]
     steps:
       - run: gh release edit ${{ steps.bump-version.outputs.version }} --draft=false
         env:
