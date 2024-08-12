@@ -45,7 +45,7 @@ jobs:
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: https://github.com/hoogi91/spreadsheets/releases/tag/${{ steps.bump-version.outputs.version }}
-      - run: gh release create ${{ steps.bump-version.outputs.version }} --generate-notes --draft=true --latest=${{ inputs.latest-release }}
+      - run: gh release create ${{ steps.bump-version.outputs.version }} --generate-notes --draft --target=${{ github.sha }} --latest=${{ inputs.latest-release }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -54,7 +54,7 @@ jobs:
     environment: 'github'
     needs: [ bump-version ]
     steps:
-      - run: gh release edit ${{ steps.bump-version.outputs.version }} --draft=false
+      - run: gh release edit ${{ steps.bump-version.outputs.version }} --draft=false --latest=${{ inputs.latest-release }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v4
