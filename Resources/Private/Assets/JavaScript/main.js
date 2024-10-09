@@ -2,7 +2,7 @@ import DSN from './dsn.js';
 import Renderer from './renderer.js';
 import Spreadsheet from './spreadsheet.js';
 import Selector from "./selector.js";
-import DocumentService from 'DocumentService';
+import DocumentService from '@typo3/core/document-service.js'; 
 
 class SpreadsheetDataInput {
     constructor(element) {
