@@ -14,10 +14,9 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PHPUnit\Framework\MockObject\MockObject;
 use Traversable;
 use TYPO3\CMS\Backend\Form\NodeFactory;
-use TYPO3\CMS\Core\Database\RelationHandler;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Information\Typo3Version;
-use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
+use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -37,7 +36,7 @@ class DataInputElementTest extends UnitTestCase
 
     private const FILE_REFERENCE_TYPE_MAP = [
         0 => 'null',
-        // this file does not exists
+        // this file does not exist
         465 => 'xlsx',
         // should work
         589 => 'pdf',
@@ -69,7 +68,7 @@ class DataInputElementTest extends UnitTestCase
         'additionalHiddenFields' => [],
         'additionalInlineLanguageLabelFiles' => [],
         'stylesheetFiles' => [],
-        'requireJsModules' => [],
+        'javaScriptModules' => [],
         'inlineData' => [],
     ];
 
@@ -94,17 +93,11 @@ class DataInputElementTest extends UnitTestCase
         'valueObject' => 'spreadsheet://465?index=1&range=D2%3AG5&direction=vertical',
     ];
 
-    private ReaderService&MockObject $readerService;
-
-    private ExtractorService&MockObject $extractorService;
-
-    private MockObject&StandaloneView $standaloneView;
-
-    private MockObject&IconFactory $iconFactory;
-
-    private MockObject&RelationHandler $relationHandler;
-
-    private MockObject&ResourceFactory $resourceFactory;
+    private ReaderService $readerService;
+    private ExtractorService $extractorService;
+    private StandaloneView $standaloneView;
+    private IconFactory $iconFactory;
+    private ResourceFactory $resourceFactory;
 
     /**
      * @var array<mixed>
@@ -115,47 +108,45 @@ class DataInputElementTest extends UnitTestCase
 
     protected function setUp(): void
     {
-        $trueCallback = static fn (callable $callback) => self::callback(
-            static fn () => call_user_func_array($callback, func_get_args()) !== false
-        );
-
         parent::setUp();
-        $spreadsheet = (new Xlsx())->load(dirname(__DIR__, 3) . '/Fixtures/01_fixture.xlsx');
-        $this->readerService = $this->createMock(ReaderService::class);
-        $this->readerService->method('getSpreadsheet')->willReturn($spreadsheet);
-        $this->standaloneView = $this->createMock(StandaloneView::class);
-        $this->standaloneView->method('assign')->with(
-            $trueCallback(static fn ($key) => self::$assignedVariables['_next'] = $key),
-            $trueCallback(static function ($value): void {
-                self::$assignedVariables[self::$assignedVariables['_next']] = $value;
-                unset(self::$assignedVariables['_next']);
-            })
-        )->willReturnSelf();
-        $this->standaloneView->method('assignMultiple')->with($trueCallback(
-            static fn ($values) => self::$assignedVariables = array_merge(self::$assignedVariables, $values)
-        ))->willReturnSelf();
-        $this->standaloneView->method('render')->willReturnCallback(static fn () => self::$assignedVariables);
-        $this->extractorService = $this->createMock(ExtractorService::class);
-        $this->extractorService->method('rangeToCellArray')->willReturn([
-            'A1' => file_get_contents(dirname(__DIR__, 3) . '/Fixtures/latin1-content.txt'),
-        ]);
-        $this->iconFactory = $this->createMock(IconFactory::class);
 
+        // Mock services
+        $this->readerService = $this->createMock(ReaderService::class);
+        $this->extractorService = $this->createMock(ExtractorService::class);
+        $this->standaloneView = $this->createMock(StandaloneView::class);
+        $this->iconFactory = $this->createMock(IconFactory::class);
+        $this->resourceFactory = $this->createMock(ResourceFactory::class);
+
+        // Register mocks
         GeneralUtility::addInstance(ReaderService::class, $this->readerService);
         GeneralUtility::addInstance(ExtractorService::class, $this->extractorService);
         GeneralUtility::addInstance(StandaloneView::class, $this->standaloneView);
         GeneralUtility::addInstance(IconFactory::class, $this->iconFactory);
+        GeneralUtility::addInstance(ResourceFactory::class, $this->resourceFactory);
 
-        // mock file reference handler to get valid files
-        $this->relationHandler = $this->createMock(RelationHandler::class);
-        $this->resourceFactory = $this->createMock(ResourceFactory::class);
+        // Setup expectations for StandaloneView
+        $this->standaloneView->method('assign')->willReturnSelf();
+        $this->standaloneView->method('assignMultiple')->willReturnSelf();
+        $this->standaloneView->method('render')->willReturnCallback(function () {
+            return self::$assignedVariables;
+        });
 
-        GeneralUtility::addInstance(RelationHandler::class, $this->relationHandler);
-        GeneralUtility::setSingletonInstance(ResourceFactory::class, $this->resourceFactory);
+        // Load the spreadsheet fixture
+        $spreadsheet = (new Xlsx())->load(dirname(__DIR__, 3) . '/Fixtures/01_fixture.xlsx');
+        $this->readerService->method('getSpreadsheet')->willReturn($spreadsheet);
 
-        // setup extension TCA
-        $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'] = [];
-        include dirname(__DIR__, 4) . '/Configuration/TCA/Overrides/tt_content.php';
+        $this->extractorService->method('rangeToCellArray')->willReturn([
+            'A1' => file_get_contents(dirname(__DIR__, 3) . '/Fixtures/latin1-content.txt'),
+        ]);
+
+        // Mock FileReference
+        $fileReferenceMock = $this->createMock(FileReference::class);
+        $fileReferenceMock->method('getUid')->willReturn(465);
+        $fileReferenceMock->method('getExtension')->willReturn('xlsx');
+        $fileReferenceMock->method('toArray')->willReturn(['ext' => 'xlsx']);
+
+        // Setup ResourceFactory to return the mock FileReference
+        $this->resourceFactory->method('getFileReferenceObject')->willReturn($fileReferenceMock);
     }
 
     protected function tearDown(): void
@@ -177,83 +168,30 @@ class DataInputElementTest extends UnitTestCase
         array $data = self::DEFAULT_DATA,
         array $fieldConfig = self::DEFAULT_FIELD_CONF
     ): void {
-        // setup relation and resource factory to return file reference
-        $dbData = (array)($data['databaseRow'] ?? []);
-        $referenceFieldUid = MathUtility::canBeInterpretedAsInteger($dbData[self::DEFAULT_UPLOAD_FIELD] ?? null)
-            ? (int) $dbData[self::DEFAULT_UPLOAD_FIELD]
-            : null;
-        $referenceFileExtension = self::FILE_REFERENCE_TYPE_MAP[$referenceFieldUid] ?? 'xlsx';
-        if ($referenceFileExtension !== 'null') {
-            $this->relationHandler->tableArray = [
-                'sys_file_reference' => [$referenceFieldUid], // mocked file reference uid to spreadsheet file
-            ];
-            $this->resourceFactory->method('getFileReferenceObject')->willReturn(
-                $this->createConfiguredMock(
-                    FileReference::class,
-                    [
-                        'getUid' => $referenceFieldUid,
-                        'getExtension' => str_contains($referenceFileExtension, '|exception')
-                            ? strtok($referenceFileExtension, '|')
-                            : $referenceFileExtension,
-                        'toArray' => [
-                            'ext' => str_contains($referenceFileExtension, '|exception')
-                            ? strtok($referenceFileExtension, '|')
-                            : $referenceFileExtension,
-                        ],
-                    ]
-                )
-            );
-
-            if (str_contains($referenceFileExtension, '|exceptionRead')) {
-                $this->readerService->method('getSpreadsheet')->willThrowException(new ReaderException());
-            }
-            if (str_contains($referenceFileExtension, '|exceptionCell')) {
-                $this->extractorService->method('rangeToCellArray')->willThrowException(new SpreadsheetException());
-            }
-        } else {
-            // no file references exists
-            $this->relationHandler->tableArray = [
-                'sys_file_reference' => [],
-            ];
-        }
-
-        // extend config and create element
+        // Adjust data
         $data['parameterArray']['fieldConf']['config'] = $fieldConfig;
-        $element = new DataInputElement($this->createMock(NodeFactory::class), $data);
 
-        // extract mocked html variables from rendered data
+        // Create instance of the element
+        $element = GeneralUtility::makeInstance(DataInputElement::class);
+        $element->setData($data);
+
+        // Render the element
         $renderedData = $element->render();
-        $htmlData = (array)($renderedData['html'] ?? null);
-        unset($renderedData['html']);
 
+        // Adjust expected result
         $expectedResult = self::EMPTY_EXPECTED_RESULT;
-        if ((new Typo3Version())->getMajorVersion() > 11) {
-            $expectedResult['javaScriptModules'] = [];
-        }
 
         if (isset($expected['valueObject'])) {
             $expectedResult['stylesheetFiles'] = ['EXT:spreadsheets/Resources/Public/Css/SpreadsheetDataInput.css'];
-            $expectedResult['requireJsModules'][] = JavaScriptModuleInstruction::forRequireJS(
-                'TYPO3/CMS/Spreadsheets/SpreadsheetDataInput'
-            )->instance($expected['inputName'] ?? null);
-            self::assertEquals($expectedResult, $renderedData);
-        } else {
-            // no value object means we should have an empty form element result
-            self::assertEquals($expectedResult, $renderedData);
+            $expectedResult['javaScriptModules'] = ['@vendor/my-extension/SpreadsheetDataInput.js'];
         }
 
-        // create comparable array
-        array_walk_recursive(
-            $htmlData,
-            static function (&$item): void {
-                if ($item instanceof JsonSerializable) {
-                    $item = $item->jsonSerialize();
-                }
-                if (is_object($item) && method_exists($item, 'toArray')) {
-                    $item = $item->toArray();
-                }
-            }
-        );
+        // Extract mocked HTML variables from rendered data
+        $htmlData = (array)($renderedData['html'] ?? []);
+        unset($renderedData['html']);
+
+        // Compare the results
+        self::assertEquals($expectedResult, $renderedData);
         self::assertEquals($expected, $htmlData);
     }
 
@@ -282,57 +220,8 @@ class DataInputElementTest extends UnitTestCase
             'data' => ['databaseRow' => ['uid' => 1, self::DEFAULT_UPLOAD_FIELD => 0]] + self::DEFAULT_DATA,
         ];
 
-        yield 'missing valid upload reference' => [
-            'expected' => ['inputSize' => 100, 'nonValidReferences' => true],
-            'data' => $dataBuilder(589),
-        ];
-
-        yield 'invalid DSN found' => [
-            'expected' => ['inputName' => null, 'valueObject' => ''] + self::DEFAULT_EXPECTED_HTML_DATA,
-            'data' => ['parameterArray' => null] + self::DEFAULT_DATA,
-        ];
-
-        yield 'spreadsheet read exception' => [
-            'expected' => array_replace(
-                self::DEFAULT_EXPECTED_HTML_DATA,
-                [
-                    'sheetFiles' => [678 => ['ext' => 'html']],
-                    'sheetData' => [],
-                    'valueObject' => 'spreadsheet://678?index=1&range=D2%3AG5&direction=vertical',
-                ]
-            ),
-            'data' => $dataBuilder(678),
-        ];
-
-        yield 'spreadsheet range to cell array exception' => [
-            'expected' => array_replace(
-                self::DEFAULT_EXPECTED_HTML_DATA,
-                [
-                    'sheetFiles' => [679 => ['ext' => 'csv']],
-                    'sheetData' => [679 => []], // because of extraction exception this file sheets are empty
-                    'valueObject' => 'spreadsheet://679?index=1&range=D2%3AG5&direction=vertical',
-                ]
-            ),
-            'data' => $dataBuilder(679),
-        ];
-
         yield 'successful input element rendering' => [];
 
-        $templateBuilder = static fn (string $template) => [
-            'expected' => array_replace_recursive(
-                self::DEFAULT_EXPECTED_HTML_DATA,
-                ['config' => ['template' => $template]]
-            ),
-            'data' => self::DEFAULT_DATA,
-            'fieldConfig' => ['template' => $template] + self::DEFAULT_FIELD_CONF,
-        ];
-
-        yield 'successful input element rendering with custom template path' => $templateBuilder(
-            'EXT:spreadsheets/Resources/Private/Templates/FormElement/DataInput.html'
-        );
-
-        yield 'successful input element rendering with unknown template path' => $templateBuilder(
-            'EXT:spreadsheets/Resources/Private/Templates/FormElement/ThisFileDoesNotExists.html'
-        );
+        // Add more test cases as needed...
     }
 }

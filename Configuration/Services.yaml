@@ -21,3 +21,9 @@ services:
 
   Hoogi91\Spreadsheets\Service\ReaderService:
     public: true
+
+  Hoogi91\Spreadsheets\Form\Element\DataInputElement:
+    arguments:
+      $readerService: '@Hoogi91\Spreadsheets\Service\ReaderService'
+      $extractorService: '@Hoogi91\Spreadsheets\Service\ExtractorService'
+      $view: '@TYPO3\CMS\Fluid\View\StandaloneView'

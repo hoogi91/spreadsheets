@@ -19,16 +19,6 @@ defined('TYPO3') or die();
         $featureConf['spreadsheets.tabsContentElement'] = $extConf->get('spreadsheets', 'ce_tabs') === '1';
     }
 
-    // add content element to insert tables in content element wizard
-    \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPageTSConfig(
-        '<INCLUDE_TYPOSCRIPT: source="FILE:EXT:' . $extKey . '/Configuration/PageTSconfig/NewContentElementWizard.typoscript">'
-    );
-
-    // register template for backend preview rendering
-    \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPageTSConfig(
-        '<INCLUDE_TYPOSCRIPT: source="FILE:EXT:' . $extKey . '/Configuration/PageTSconfig/BackendPreview.typoscript">'
-    );
-
     // add field type to form engine
     $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1513268927167] = [
         'nodeName' => 'spreadsheetInput',

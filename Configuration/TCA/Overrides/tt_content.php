@@ -29,28 +29,29 @@ defined('TYPO3') or die();
         );
     }
 
-    // add own assets upload field
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns($table, [
         'tx_spreadsheets_assets' => [
-            'config' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getFileFieldTCAConfig(
-                'tx_spreadsheets_assets',
-                [
-                    'foreign_table' => 'sys_file_reference',
-                    'appearance' => [
-                        'createNewRelationLinkTitle' => 'LLL:EXT:frontend/Resources/Private/Language/Database.xlf:tt_content.asset_references.addFileReference',
-                    ],
-                    'overrideChildTca' => [
-                        'types' => [
-                            '0' => [
-                                'showitem' => '--palette--;;filePalette',
-                            ],
+            'exclude' => 1,
+            'label' => 'LLL:EXT:' . $extKey . '/Resources/Private/Language/locallang.xlf:tx_spreadsheets_assets.label',
+            'config' => [
+                'type' => 'file',
+                'appearance' => [
+                    'createNewRelationLinkTitle' => 'LLL:EXT:frontend/Resources/Private/Language/Database.xlf:tt_content.asset_references.addFileReference',
+                ],
+                'overrideChildTca' => [
+                    'types' => [
+                        \TYPO3\CMS\Core\Resource\File::FILETYPE_APPLICATION => [
+                            'showitem' => '--palette--;;filePalette',
                         ],
                     ],
                 ],
-                implode(',', \Hoogi91\Spreadsheets\Service\ReaderService::ALLOWED_EXTENSIONS)
-            ),
+                'allowed' => implode(',', \Hoogi91\Spreadsheets\Service\ReaderService::ALLOWED_EXTENSIONS),
+                'maxitems' => 1,  // Adjust this based on how many items can be uploaded
+            ],
         ],
         'tx_spreadsheets_ignore_styles' => [
+            'exclude' => 1,
+            'label' => 'LLL:EXT:' . $extKey . '/Resources/Private/Language/locallang.xlf:tca.tx_spreadsheets_ignore_styles.label',
             'config' => [
                 'type' => 'check',
                 'items' => [
