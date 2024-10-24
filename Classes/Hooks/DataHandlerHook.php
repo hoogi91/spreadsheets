@@ -40,7 +40,7 @@ class DataHandlerHook
 
             foreach ($GLOBALS['TCA'][$table]['types'] as $CType => $type) {
                 $CType = (string)$CType;
-                foreach ($type['columnsOverrides'] as $column => $conf) {
+                foreach ($type['columnsOverrides'] ?? [] as $column => $conf) {
                     if (
                         isset($conf['config']['renderType'], $conf['config']['uploadField'])
                         && $conf['config']['renderType'] === 'spreadsheetInput'
@@ -81,7 +81,7 @@ class DataHandlerHook
         $activationConfig = $this->activationTypes[$table][$CType] ?? $this->activationTypes[$table]['*'];
         foreach ($activationConfig as $uploadField => $renderFields) {
             // truncate render fields after update if assets have been removed
-            if ($fieldArray[$uploadField] === 0) {
+            if (($fieldArray[$uploadField] ?? 1) === 0) {
                 if ($status === 'update') {
                     $this->connectionPool
                         ->getConnectionForTable($table)
