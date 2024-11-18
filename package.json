@@ -36,7 +36,7 @@
     "not dead"
   ],
   "devDependencies": {
-    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.14.0",
     "eslint-formatter-unix": "^8.40.0",
     "globals": "^15.12.0"
