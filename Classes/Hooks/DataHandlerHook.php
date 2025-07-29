@@ -27,7 +27,7 @@ class DataHandlerHook
         private readonly FileRepository $fileRepository,
         private readonly ConnectionPool $connectionPool
     ) {
-        foreach ($GLOBALS['TCA'] as $table => $tca) {
+        foreach ($GLOBALS['TCA'] ?? [] as $table => $tca) {
             $table = (string)$table;
             foreach ($tca['columns'] ?? [] as $column => $conf) {
                 if (
@@ -38,9 +38,9 @@ class DataHandlerHook
                 }
             }
 
-            foreach ($GLOBALS['TCA'][$table]['types'] as $CType => $type) {
+            foreach ($GLOBALS['TCA'][$table]['types'] ?? [] as $CType => $type) {
                 $CType = (string)$CType;
-                foreach ($type['columnsOverrides'] as $column => $conf) {
+                foreach ($type['columnsOverrides'] ?? [] as $column => $conf) {
                     if (
                         isset($conf['config']['renderType'], $conf['config']['uploadField'])
                         && $conf['config']['renderType'] === 'spreadsheetInput'
@@ -78,10 +78,10 @@ class DataHandlerHook
             return;
         }
 
-        $activationConfig = $this->activationTypes[$table][$CType] ?? $this->activationTypes[$table]['*'];
+        $activationConfig = $this->activationTypes[$table][$CType] ?? $this->activationTypes[$table]['*'] ?? [];
         foreach ($activationConfig as $uploadField => $renderFields) {
             // truncate render fields after update if assets have been removed
-            if ($fieldArray[$uploadField] === 0) {
+            if (($fieldArray[$uploadField] ?? null) === 0) {
                 if ($status === 'update') {
                     $this->connectionPool
                         ->getConnectionForTable($table)

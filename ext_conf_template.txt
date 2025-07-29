@@ -1,2 +1,5 @@
 # cat=basic/enable; type=boolean; label=Spreadsheet Tabs Content Element
 ce_tabs = 0
+
+# cat=basic/enable; type=boolean; label=Read empty cells from spreadsheets: https://phpoffice.github.io/PhpSpreadsheet/classes/PhpOffice-PhpSpreadsheet-Reader-BaseReader.html#method_setReadEmptyCells
+read_empty_cells = 0

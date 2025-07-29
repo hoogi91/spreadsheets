@@ -26,7 +26,11 @@ class CellService
         /** @var SiteLanguage|null $language */
         $language = $this->getRequest()->getAttribute('language');
         if ((new Typo3Version())->getMajorVersion() > 11) {
-            $this->currentLocales = $language?->getLocale()->getLanguageCode() ?? '';
+            $this->currentLocales = implode(',', array_filter([
+                $language?->getLocale()->posixFormatted() ?? '',
+                $language?->getLocale()->getName() ?? '',
+                $language?->getLocale()->getLanguageCode() ?? '',
+            ]));
 
             return;
         }
