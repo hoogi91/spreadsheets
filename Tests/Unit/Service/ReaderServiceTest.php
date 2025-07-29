@@ -35,14 +35,16 @@ class ReaderServiceTest extends UnitTestCase
     {
         $this->expectException(ReaderException::class);
         $this->expectExceptionCode(1_539_959_214);
-        (new ReaderService(self::getExtensionConfig()))->getSpreadsheet($this->getFileReferenceMock('01_fixture.xlsx', 'xlsx', true));
+        (new ReaderService(self::getExtensionConfig()))
+            ->getSpreadsheet($this->getFileReferenceMock('01_fixture.xlsx', 'xlsx', true));
     }
 
     public function testReaderExceptionOnInvalidFileReferenceExtension(): void
     {
         $this->expectException(ReaderException::class);
         $this->expectExceptionCode(1_514_909_945);
-        (new ReaderService(self::getExtensionConfig()))->getSpreadsheet($this->getFileReferenceMock('some-unknwon.ext', 'ext'));
+        (new ReaderService(self::getExtensionConfig()))
+            ->getSpreadsheet($this->getFileReferenceMock('some-unknwon.ext', 'ext'));
     }
 
     /**
@@ -51,7 +53,8 @@ class ReaderServiceTest extends UnitTestCase
     public function testReaderInstance(string $filename, string $extension): void
     {
         // assert if reader service is successfully initialized and returns spreadsheet
-        $spreadsheet = (new ReaderService(self::getExtensionConfig()))->getSpreadsheet($this->getFileReferenceMock($filename, $extension));
+        $spreadsheet = (new ReaderService(self::getExtensionConfig()))
+            ->getSpreadsheet($this->getFileReferenceMock($filename, $extension));
         self::assertInstanceOf(Worksheet::class, $spreadsheet->getSheet(0));
 
         foreach ($spreadsheet->getAllSheets() as $index => $sheet) {
