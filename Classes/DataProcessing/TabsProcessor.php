@@ -19,7 +19,8 @@ class TabsProcessor extends AbstractProcessor
     {
         $sheetData = [];
         foreach ($spreadsheet->getAllSheets() as $worksheet) {
-            $sheetIdentifier = $dsn->getFileReference() . $worksheet->getHashCode();
+            $sheetIdentifier = $dsn->getFileReference();
+            $sheetIdentifier .= method_exists($worksheet, 'getHashInt') ? $worksheet->getHashInt() : $worksheet->getHashCode();
             $sheetData[$sheetIdentifier] = [
                 'sheetTitle' => $worksheet->getTitle(),
                 'bodyData' => $this->getExtractorService()->getBodyData($worksheet, true),
