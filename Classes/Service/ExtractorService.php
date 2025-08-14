@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace Hoogi91\Spreadsheets\Service;
 
-use Hoogi91\Spreadsheets\Domain\ValueObject;
+
 use Iterator;
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
-use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
-use PhpOffice\PhpSpreadsheet\Reader\Exception as SpreadsheetReaderException;
 use PhpOffice\PhpSpreadsheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Column;
 use PhpOffice\PhpSpreadsheet\Worksheet\Row;
+use Hoogi91\Spreadsheets\Domain\ValueObject;
+use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
+use PhpOffice\PhpSpreadsheet\Reader\Exception as SpreadsheetReaderException;
 use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
-use TYPO3\CMS\Core\Resource\FileRepository;
+use TYPO3\CMS\Core\Resource\ResourceFactory;
 
 class ExtractorService
 {
@@ -28,7 +29,7 @@ class ExtractorService
         private readonly SpanService $spanService,
         private readonly RangeService $rangeService,
         private readonly ValueMappingService $mappingService,
-        private readonly FileRepository $fileRepository
+        private readonly ResourceFactory $resourceFactory
     ) {
     }
 
@@ -41,7 +42,7 @@ class ExtractorService
         bool $returnCellRef = false
     ): ValueObject\ExtractionValueObject {
         $spreadsheet = $this->readerService->getSpreadsheet(
-            $this->fileRepository->findFileReferenceByUid($dsnValue->getFileReference())
+            $this->resourceFactory->getFileReferenceObject($dsnValue->getFileReference())
         );
 
         try {
@@ -65,7 +66,7 @@ class ExtractorService
             );
 
             return ValueObject\ExtractionValueObject::create($spreadsheet, $cellData);
-        } catch (SpreadsheetException) {
+        }  catch (SpreadsheetException) {
             return ValueObject\ExtractionValueObject::create($spreadsheet, []);
         }
     }

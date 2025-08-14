@@ -12,9 +12,8 @@ use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
-use TYPO3\CMS\Backend\Form\NodeFactory;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
+use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
@@ -23,48 +22,54 @@ class DataInputElement extends AbstractFormElement
 {
     private const DEFAULT_TEMPLATE_PATH = 'EXT:spreadsheets/Resources/Private/Templates/FormElement/DataInput.html';
 
-    private readonly ReaderService $readerService;
-
-    private readonly ExtractorService $extractorService;
+    private ReaderService $readerService;
+    private ExtractorService $extractorService;
+    private StandaloneView $view;
 
     /**
      * @var array<string, string>
      */
-    private array $config;
+    private array $config = [];
 
-    private readonly StandaloneView $view;
-
-    /**
-     * @param array<mixed> $data
-     */
-    public function __construct(NodeFactory $nodeFactory, array $data)
-    {
-        parent::__construct($nodeFactory, $data);
-        $this->readerService = GeneralUtility::makeInstance(ReaderService::class);
-        $this->extractorService = GeneralUtility::makeInstance(ExtractorService::class);
-        $this->config = $this->data['parameterArray']['fieldConf']['config'] ?? [];
-
-        $this->view = GeneralUtility::makeInstance(StandaloneView::class);
-        $this->view->setTemplatePathAndFilename($this->getTemplatePath());
-        $this->view->assign('inputSize', (int)($this->config['size'] ?? 0));
+    public function __construct(
+        ReaderService $readerService,
+        ExtractorService $extractorService,
+        StandaloneView $view
+    ) {
+        $this->readerService = $readerService;
+        $this->extractorService = $extractorService;
+        $this->view = $view;
     }
-
+    public function setData(array $data): void
+    {
+        $this->data = $data;
+    }
     /**
-     * @return array<mixed> As defined in initializeResultArray() of AbstractNode
+     * @return array<mixed> As defined in initializeResultArray() of AbstractFormElement
      */
     public function render(): array
     {
-        // get initialize result array from parent abstract node
+        // Access the $data array
+        $data = $this->data;
+
+        // Initialize the result array
         $resultArray = $this->initializeResultArray();
 
-        // upload fields hasn't been specified
-        if (array_key_exists($this->config['uploadField'], $this->data['processedTca']['columns'] ?? []) === false) {
+        // Initialize configuration
+        $this->config = $data['parameterArray']['fieldConf']['config'] ?? [];
+
+        // Set the template path
+        $this->view->setTemplatePathAndFilename($this->getTemplatePath());
+        $this->view->assign('inputSize', (int)($this->config['size'] ?? 0));
+
+        // Check if upload field is specified
+        if (!isset($this->config['uploadField']) || !array_key_exists($this->config['uploadField'], $data['processedTca']['columns'] ?? [])) {
             $resultArray['html'] = $this->view->assign('missingUploadField', true)->render();
 
             return $resultArray;
         }
 
-        // return alert if non valid file references were uploaded
+        // Get valid file references
         $references = $this->getValidFileReferences($this->config['uploadField']);
         if (empty($references)) {
             $resultArray['html'] = $this->view->assign('nonValidReferences', true)->render();
@@ -72,21 +77,21 @@ class DataInputElement extends AbstractFormElement
             return $resultArray;
         }
 
-        // register additional assets only when input will be rendered
-        $resultArray['requireJsModules'][] = JavaScriptModuleInstruction::forRequireJS(
-            'TYPO3/CMS/Spreadsheets/SpreadsheetDataInput'
-        )->instance($this->data['parameterArray']['itemFormElName'] ?? null);
-        $resultArray['stylesheetFiles'] = ['EXT:spreadsheets/Resources/Public/Css/SpreadsheetDataInput.css'];
+        // Register additional assets only when input will be rendered
+        /** @var PageRenderer $pageRenderer */
+        $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
+        $pageRenderer->loadJavaScriptModule('@hoogi91/spreadsheets/SpreadsheetDataInput.js');
+        $pageRenderer->addCssFile('EXT:spreadsheets/Resources/Public/Css/SpreadsheetDataInput.css');
 
         try {
-            $valueObject = DsnValueObject::createFromDSN($this->data['parameterArray']['itemFormElValue'] ?? '');
+            $valueObject = DsnValueObject::createFromDSN($data['parameterArray']['itemFormElValue'] ?? '');
         } catch (InvalidDataSourceNameException) {
             $valueObject = '';
         }
 
         $this->view->assignMultiple(
             [
-                'inputName' => $this->data['parameterArray']['itemFormElName'] ?? null,
+                'inputName' => $data['parameterArray']['itemFormElName'] ?? null,
                 'config' => $this->config,
                 'sheetFiles' => $references,
                 'sheetData' => $this->getFileReferencesSpreadsheetData($references),
@@ -94,7 +99,7 @@ class DataInputElement extends AbstractFormElement
             ]
         );
 
-        // render view and return result array
+        // Render view and return result array
         $resultArray['html'] = $this->view->render();
 
         return $resultArray;
@@ -107,7 +112,7 @@ class DataInputElement extends AbstractFormElement
         }
 
         $templatePath = GeneralUtility::getFileAbsFileName($this->config['template']);
-        if (is_file($templatePath) === false) {
+        if (!is_file($templatePath)) {
             return GeneralUtility::getFileAbsFileName(self::DEFAULT_TEMPLATE_PATH);
         }
 
@@ -128,7 +133,7 @@ class DataInputElement extends AbstractFormElement
             return [];
         }
 
-        // filter references by allowed types
+        // Filter references by allowed types
         return array_filter(
             $references,
             static fn ($reference) => in_array($reference->getExtension(), ReaderService::ALLOWED_EXTENSIONS, true)
@@ -141,16 +146,16 @@ class DataInputElement extends AbstractFormElement
      */
     private function getFileReferencesSpreadsheetData(array $references): array
     {
-        // read all spreadsheet from valid file references and filter out invalid references
+        // Read all spreadsheets from valid file references and filter out invalid references
         $spreadsheets = $this->getSpreadsheetsByFileReferences($references);
 
-        // get data from file references
+        // Get data from file references
         $sheetData = [];
         foreach ($spreadsheets as $fileUid => $spreadsheet) {
             $sheetData[$fileUid] = $this->getWorksheetDataFromSpreadsheet($spreadsheet);
         }
 
-        // convert whole sheet data content to UTF-8
+        // Convert whole sheet data content to UTF-8
         array_walk_recursive(
             $sheetData,
             static function (&$item): void {
@@ -174,7 +179,7 @@ class DataInputElement extends AbstractFormElement
             try {
                 $spreadsheets[$reference->getUid()] = $this->readerService->getSpreadsheet($reference);
             } catch (ReaderException) {
-                // ignore reading non-existing or invalid file reference
+                // Ignore reading non-existing or invalid file reference
             }
         }
 
@@ -195,7 +200,7 @@ class DataInputElement extends AbstractFormElement
                     'cells' => $this->extractorService->rangeToCellArray($worksheet, $worksheetRange),
                 ];
             } catch (SpreadsheetException) {
-                // ignore sheet when an exception occurs
+                // Ignore sheet when an exception occurs
             }
         }
 
