@@ -27,26 +27,38 @@ class ReaderService
         }
 
         $shouldReadEmptyCells = $this->extensionConfiguration->get('spreadsheets', 'read_empty_cells') === '1';
+        $filePath = $reference->getForLocalProcessing(false);
 
-        return match ($reference->getExtension()) {
+        $spreadsheet = match ($reference->getExtension()) {
             'xls' => (new Reader\Xls())->setReadEmptyCells($shouldReadEmptyCells)->load(
-                $reference->getForLocalProcessing(false)
+                $filePath
             ),
             'xlsx' => (new Reader\Xlsx())->setReadEmptyCells($shouldReadEmptyCells)->load(
-                $reference->getForLocalProcessing(false)
+                $filePath
             ),
-            'ods' => (new Reader\Ods())->load($reference->getForLocalProcessing(false)),
-            'xml' => (new Reader\Xml())->load($reference->getForLocalProcessing(false)),
-            'csv' => (new Reader\Csv())->load($reference->getForLocalProcessing(false)),
-            'html' => (new Reader\Html())->load($reference->getForLocalProcessing(false)),
-            default => throw new Reader\Exception(
-                sprintf(
-                    'Reference has not allowed file extension "%s"! Allowed Extensions are "%s"',
-                    $reference->getExtension(),
-                    implode(',', self::ALLOWED_EXTENSIONS)
-                ),
-                1_514_909_945
-            ),
+            'ods' => (new Reader\Ods())->load($filePath),
+            'xml' => (new Reader\Xml())->load($filePath),
+            'csv' => (new Reader\Csv())->load($filePath),
+            'html' => (new Reader\Html())->load($filePath),
+            default => (function () use ($filePath, $reference) {
+                if (is_file($filePath)) {
+                    unlink($filePath);
+                }
+                throw new Reader\Exception(
+                    sprintf(
+                        'Reference has not allowed file extension "%s"! Allowed Extensions are "%s"',
+                        $reference->getExtension(),
+                        implode(',', self::ALLOWED_EXTENSIONS)
+                    ),
+                    1_514_909_945
+                );
+            })(),
         };
+        
+        if (is_file($filePath)){
+            unlink($filePath);
+        }
+
+        return $spreadsheet;
     }
 }
