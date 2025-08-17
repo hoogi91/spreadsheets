@@ -29,8 +29,6 @@ class CellServiceTest extends UnitTestCase
 
     protected CellService $cellService;
 
-    protected bool $resetSingletonInstances = true;
-
     protected function setUp(): void
     {
         parent::setUp();
