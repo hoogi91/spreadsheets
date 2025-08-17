@@ -39,7 +39,7 @@
     "slevomat/coding-standard": "^8.8",
     "squizlabs/php_codesniffer": "^3.5",
     "typo3/minimal": "^11.5 || ^12.4",
-    "typo3/testing-framework": "^7.1.1 || ^8.0",
+    "typo3/testing-framework": "^6.16.10 || ^7.1.1 || ^8.0",
     "vimeo/psalm": "^5.1"
   },
   "autoload": {
