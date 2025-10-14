@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Hoogi91\Spreadsheets\Tests\Unit\Service;
 
 use Hoogi91\Spreadsheets\Service\ReaderService;
-use Hoogi91\Spreadsheets\Tests\Unit\ExtConfigTrait;
 use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
 use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -70,6 +69,7 @@ class ReaderServiceTest extends UnitTestCase
             );
         }
     }
+
     /**
      * @return ExtensionConfiguration&MockObject
      */

@@ -20,10 +20,6 @@ parameters:
 			message: '#Parameter \#2 \$namespaces of class TYPO3\\CMS\\Fluid\\Core\\ViewHelper\\ViewHelperResolver constructor expects#'
 			path: Tests/Functional/ViewHelpers/AbstractViewHelperTestCase.php
 			count: 1
-		-
-			message: '#Call to an undefined method PHPUnit\\Framework\\MockObject\\Generator\\Generator#'
-			path: Tests/Unit/ExtConfigTrait.php
-			count: 1
 
 includes:
     - .Build/vendor/bnf/phpstan-psr-container/extension.neon

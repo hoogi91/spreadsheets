@@ -31,7 +31,11 @@ class TabsProcessorTest extends AbstractProcessorTestCase
         // mock worksheet will be returned
         $worksheetMock = $this->createMock(Worksheet::class);
         $worksheetMock->method('getTitle')->willReturn('Worksheet #1');
-        $worksheetMock->method(method_exists(Worksheet::class, 'getHashInt') ? 'getHashInt' : 'getHashCode')->willReturn(2047);
+        $worksheetMock->method(
+            method_exists(Worksheet::class, 'getHashInt')
+                ? 'getHashInt'
+                : 'getHashCode'
+        )->willReturn(2_047);
         $spreadsheetMock->expects(self::once())->method('getAllSheets')->willReturn([$worksheetMock]);
 
         // check if extract gets called
