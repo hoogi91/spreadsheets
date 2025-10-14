@@ -21,6 +21,10 @@ class FileReferenceViewHelperTest extends AbstractViewHelperTestCase
     {
         $view = $this->getView('<test:reader.fileReference uid="{uid}"/>', ['uid' => $fileReferenceUid]);
         if ($expectFileReference === true) {
+            if (method_exists(\TYPO3\CMS\Core\Database\Connection::class, 'createSchemaManager') === false) {
+                $this->markTestSkipped('Testing framework can not handle data import without this method which is missing below TYPO3 v12.');
+            }
+
             $this->importCSVDataSet(__DIR__ . '/Fixtures/be_users.csv');
             $this->setUpBackendUser(1);
             $this->importCSVDataSet(__DIR__ . '/Fixtures/sys_file.csv');
