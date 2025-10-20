@@ -8,6 +8,8 @@ use Hoogi91\Spreadsheets\Service\ReaderService;
 use Hoogi91\Spreadsheets\Tests\Unit\FileRepositoryMockTrait;
 use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PHPUnit\Framework\MockObject\MockObject;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 class ReaderServiceTest extends UnitTestCase
@@ -33,14 +35,16 @@ class ReaderServiceTest extends UnitTestCase
     {
         $this->expectException(ReaderException::class);
         $this->expectExceptionCode(1_539_959_214);
-        (new ReaderService())->getSpreadsheet($this->getFileReferenceMock('01_fixture.xlsx', 'xlsx', true));
+        (new ReaderService($this->getExtensionConfig()))
+            ->getSpreadsheet($this->getFileReferenceMock('01_fixture.xlsx', 'xlsx', true));
     }
 
     public function testReaderExceptionOnInvalidFileReferenceExtension(): void
     {
         $this->expectException(ReaderException::class);
         $this->expectExceptionCode(1_514_909_945);
-        (new ReaderService())->getSpreadsheet($this->getFileReferenceMock('some-unknwon.ext', 'ext'));
+        (new ReaderService($this->getExtensionConfig()))
+            ->getSpreadsheet($this->getFileReferenceMock('some-unknwon.ext', 'ext'));
     }
 
     /**
@@ -49,7 +53,8 @@ class ReaderServiceTest extends UnitTestCase
     public function testReaderInstance(string $filename, string $extension): void
     {
         // assert if reader service is successfully initialized and returns spreadsheet
-        $spreadsheet = (new ReaderService())->getSpreadsheet($this->getFileReferenceMock($filename, $extension));
+        $spreadsheet = (new ReaderService($this->getExtensionConfig()))
+            ->getSpreadsheet($this->getFileReferenceMock($filename, $extension));
         self::assertInstanceOf(Worksheet::class, $spreadsheet->getSheet(0));
 
         foreach ($spreadsheet->getAllSheets() as $index => $sheet) {
@@ -63,5 +68,21 @@ class ReaderServiceTest extends UnitTestCase
                 )
             );
         }
+    }
+
+    /**
+     * @return ExtensionConfiguration&MockObject
+     */
+    private function getExtensionConfig(bool $tabsEnabled = false, bool $readEmptyCells = false): MockObject
+    {
+        $mock = $this->createMock(ExtensionConfiguration::class);
+        $mock->method('get')->willReturnMap(
+            [
+                ['ce_tabs', $tabsEnabled],
+                ['read_empty_cells', $readEmptyCells],
+            ]
+        );
+
+        return $mock;
     }
 }

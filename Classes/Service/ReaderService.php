@@ -6,11 +6,16 @@ namespace Hoogi91\Spreadsheets\Service;
 
 use PhpOffice\PhpSpreadsheet\Reader;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Resource\FileReference;
 
 class ReaderService
 {
     final public const ALLOWED_EXTENSIONS = ['xls', 'xlsx', 'ods', 'xml', 'csv', 'html'];
+
+    public function __construct(private readonly ExtensionConfiguration $extensionConfiguration)
+    {
+    }
 
     /**
      * @throws Reader\Exception
@@ -21,13 +26,19 @@ class ReaderService
             throw new Reader\Exception('Reference original file doesn\'t exists!', 1_539_959_214);
         }
 
+        $shouldReadEmptyCells = $this->extensionConfiguration->get('spreadsheets', 'read_empty_cells') === '1';
+
         return match ($reference->getExtension()) {
-            'xls' => (new Reader\Xls())->setReadEmptyCells(false)->load($reference->getForLocalProcessing()),
-            'xlsx' => (new Reader\Xlsx())->setReadEmptyCells(false)->load($reference->getForLocalProcessing()),
-            'ods' => (new Reader\Ods())->load($reference->getForLocalProcessing()),
-            'xml' => (new Reader\Xml())->load($reference->getForLocalProcessing()),
-            'csv' => (new Reader\Csv())->load($reference->getForLocalProcessing()),
-            'html' => (new Reader\Html())->load($reference->getForLocalProcessing()),
+            'xls' => (new Reader\Xls())->setReadEmptyCells($shouldReadEmptyCells)->load(
+                $reference->getForLocalProcessing(false)
+            ),
+            'xlsx' => (new Reader\Xlsx())->setReadEmptyCells($shouldReadEmptyCells)->load(
+                $reference->getForLocalProcessing(false)
+            ),
+            'ods' => (new Reader\Ods())->load($reference->getForLocalProcessing(false)),
+            'xml' => (new Reader\Xml())->load($reference->getForLocalProcessing(false)),
+            'csv' => (new Reader\Csv())->load($reference->getForLocalProcessing(false)),
+            'html' => (new Reader\Html())->load($reference->getForLocalProcessing(false)),
             default => throw new Reader\Exception(
                 sprintf(
                     'Reference has not allowed file extension "%s"! Allowed Extensions are "%s"',

@@ -38,7 +38,7 @@ class ExtractorServiceTest extends UnitTestCase
 
         // setup reader mock instance
         $this->spreadsheet = (new Xlsx())->load(dirname(__DIR__, 2) . '/Fixtures/01_fixture.xlsx');
-        $readerService = $this->getMockBuilder(Service\ReaderService::class)->getMock();
+        $readerService = $this->createMock(Service\ReaderService::class);
         $readerService->method('getSpreadsheet')->willReturn($this->spreadsheet);
 
         $mappingService = $this->createTestProxy(Service\ValueMappingService::class);

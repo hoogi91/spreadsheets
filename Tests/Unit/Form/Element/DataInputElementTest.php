@@ -111,8 +111,6 @@ class DataInputElementTest extends UnitTestCase
      */
     private static array $assignedVariables = [];
 
-    protected bool $resetSingletonInstances = true;
-
     protected function setUp(): void
     {
         $trueCallback = static fn (callable $callback) => self::callback(
