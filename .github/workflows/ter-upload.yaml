@@ -1,0 +1,16 @@
+name: "TYPO3 TER Upload"
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  ter-upload:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: tomasnorre/typo3-upload-ter@v2
+        with:
+          api-token: ${{ secrets.TYPO3_API_TOKEN }}
