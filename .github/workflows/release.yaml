@@ -67,12 +67,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      # Fetch and checkout the newly created tag
-      - name: Fetch and checkout tag
-        run: |
-          git fetch --tags --force
-          git checkout ${{ needs.bump-version.outputs.version }}
-          echo "GITHUB_REF=refs/tags/${{ needs.bump-version.outputs.version }}" >> $GITHUB_ENV
+      # Checkout the newly created tag
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ needs.bump-version.outputs.version }}
+          fetch-depth: 0
       
       - uses: tomasnorre/typo3-upload-ter@v2
         with:
