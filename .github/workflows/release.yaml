@@ -66,6 +66,14 @@ jobs:
       - run: gh release edit ${{ needs.bump-version.outputs.version }} --draft=false --latest=${{ inputs.latest-release }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      # Fetch the latest changes including the new tag
+      - name: Fetch latest changes
+        run: |
+          git fetch --tags --force
+          git checkout master
+          git pull origin master
+      
       - uses: tomasnorre/typo3-upload-ter@v2
         with:
           api-token: ${{ secrets.TYPO3_API_TOKEN }}
