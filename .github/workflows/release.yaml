@@ -11,6 +11,10 @@ on:
           - major
           - minor
           - patch
+      version:
+        description: 'Override version (optional)'
+        required: false
+        type: string
       latest-release:
         description: 'Is latest release?'
         required: false
@@ -37,7 +41,7 @@ jobs:
           version: ${{ steps.previoustag.outputs.tag }}
       - id: bump-version
         run: |
-          VERSION=${{ steps.semvers.outputs[inputs.type] }}
+          VERSION=${{ inputs.version || steps.semvers.outputs[inputs.type] }}
           sed -i -E "s/'[0-9]+.[0-9]+.[0-9]+'/'$VERSION'/g" ext_emconf.php
           sed -i -E "s/[0-9]+.[0-9]+.[0-9]+/$VERSION/g" Documentation/Settings.cfg
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
