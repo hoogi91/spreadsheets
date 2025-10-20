@@ -67,12 +67,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      # Fetch the latest changes including the new tag
-      - name: Fetch latest changes
+      # Fetch and checkout the newly created tag
+      - name: Fetch and checkout tag
         run: |
           git fetch --tags --force
-          git checkout master
-          git pull origin master
+          git checkout ${{ needs.bump-version.outputs.version }}
       
       - uses: tomasnorre/typo3-upload-ter@v2
         with:
