@@ -26,6 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      version: ${{ steps.bump-version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -60,7 +62,7 @@ jobs:
     environment: 'github'
     needs: [ bump-version ]
     steps:
-      - run: gh release edit ${{ steps.bump-version.outputs.version }} --draft=false --latest=${{ inputs.latest-release }}
+      - run: gh release edit ${{ needs.bump-version.outputs.version }} --draft=false --latest=${{ inputs.latest-release }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v4
