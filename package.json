@@ -24,7 +24,7 @@
     "@babel/preset-env": "^7.29.2",
     "babel-loader": "^10.1.1",
     "core-js": "^3.49.0",
-    "eslint": "^9.39.2",
+    "eslint": "^10.2.0",
     "terser-webpack-plugin": "^5.4.0",
     "webpack": "^5.106.1",
     "webpack-cli": "^7.0.2"
