@@ -167,6 +167,7 @@ class SpanService
 
     private function getActiveSheetHashCode(?Spreadsheet $spreadsheet, Worksheet $worksheet): string
     {
-        return md5($spreadsheet?->getID() . $worksheet->getHashCode());
+//        return md5($spreadsheet?->getID() . $worksheet->getHashInt());
+        return (string)spl_object_id($worksheet);
     }
 }
