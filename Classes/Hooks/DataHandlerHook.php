@@ -81,7 +81,7 @@ class DataHandlerHook
         $activationConfig = $this->activationTypes[$table][$CType] ?? $this->activationTypes[$table]['*'] ?? [];
         foreach ($activationConfig as $uploadField => $renderFields) {
             // truncate render fields after update if assets have been removed
-            if (($fieldArray[$uploadField] ?? null) === 0) {
+            if (isset($fieldArray[$uploadField]) && $fieldArray[$uploadField] === 0) {
                 if ($status === 'update') {
                     $this->connectionPool
                         ->getConnectionForTable($table)
